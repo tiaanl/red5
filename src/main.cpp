@@ -1,6 +1,7 @@
 #include <SDL.h>
 
 #include "resource/lfd.h"
+#include "resource/film.h"
 
 constexpr uint32_t g_source_screen_width = 320;
 constexpr uint32_t g_source_screen_height = 200;
@@ -140,11 +141,15 @@ int main(int argc, char* argv[]) {
 
   lfd::File lfd_file{};
   lfd::load_file(
-      R"(C:\Program Files (x86)\Steam\steamapps\common\STAR WARS X-Wing\classic\RESOURCE\MAINMENU.LFD)",
+      R"(C:\Program Files (x86)\Steam\steamapps\common\STAR WARS X-Wing\classic\RESOURCE\AWARDS.LFD)",
       &global_allocator, &lfd_file);
 
-  lfd::print_headers(&lfd_file);
+//  lfd::print_headers(&lfd_file);
 
+  auto film_resource = lfd::get_resource(&lfd_file, "FILM", "award2_f");
+  film::load(film_resource);
+
+#if 0
   Color palette[256] = {};
 
   Data PLTTlogoname = lfd::get_resource(&lfd_file, "PLTT", "mainback");
@@ -170,14 +175,11 @@ int main(int argc, char* argv[]) {
   LOAD_TEXTURE(maindoor);
   LOAD_TEXTURE(maintitl);
 
+#endif  // 0
+
   lfd::free_file(&lfd_file);
 
-  // Create a palette surface
-  SDL_Surface* palette_surface =
-      SDL_CreateRGBSurfaceWithFormatFrom(palette, 256, 1, 24, 256 * 3, SDL_PIXELFORMAT_RGB24);
-  SDL_Texture* palette_texture = SDL_CreateTextureFromSurface(renderer, palette_surface);
-  SDL_FreeSurface(palette_surface);
-
+#if 0
   bool running = true;
   while (running) {
     SDL_Event event;
@@ -192,6 +194,7 @@ int main(int argc, char* argv[]) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
+#if 0
 #define RENDER_TEXTURE(Name)                                                                       \
   SDL_Rect dst_##Name = {img_##Name.left * g_screen_zoom, img_##Name.top * g_screen_zoom,          \
                          img_##Name.width * g_screen_zoom, img_##Name.height * g_screen_zoom};     \
@@ -202,9 +205,11 @@ int main(int argc, char* argv[]) {
     RENDER_TEXTURE(maindoor);
     RENDER_TEXTURE(mainmenu);
     RENDER_TEXTURE(maintitl);
+#endif  // 0
 
     SDL_RenderPresent(renderer);
   }
+#endif  // 0
 
   SDL_DestroyWindow(window);
   SDL_Quit();

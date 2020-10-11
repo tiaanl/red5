@@ -6,12 +6,15 @@ find_package(SDL2 CONFIG REQUIRED)
 
 set(SOURCE_FILES
     src/main.cpp
-    src/utils/memory.cpp
-    src/utils/memory.h
+    src/resource/anim.cpp
     src/resource/film.cpp
     src/resource/film.h
     src/resource/lfd.cpp
     src/resource/lfd.h
+    src/utils/memory.cpp
+    src/utils/memory.h
+    src/utils/stream.cpp
+    src/utils/stream.h
     )
 
 add_executable(red5 ${SOURCE_FILES})
