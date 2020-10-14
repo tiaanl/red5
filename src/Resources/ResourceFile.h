@@ -45,7 +45,7 @@ class ResourceFile {
 public:
   ResourceFile(const nu::FilePath& path) : m_path{path} {}
 
-  nu::DynamicArray<ResourceEntry> loadEntries();
+  nu::DynamicArray<ResourceEntry> loadEntries() const;
   void saveEntries(const nu::DynamicArray<ResourceEntry>& entries);
 
 private:

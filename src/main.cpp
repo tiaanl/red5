@@ -1,5 +1,7 @@
 #include <Resources/ResourceFile.h>
 #include <nucleus/Filter.h>
+#include <nucleus/Streams/ArrayInputStream.h>
+#include <resource/film.h>
 
 int main(int argc, char* argv[]) {
   auto resourcePath = nu::FilePath(
@@ -15,14 +17,21 @@ int main(int argc, char* argv[]) {
 
   // LOG(Info) << resourceFiles;
 
-  auto awards = nu::filter(resourceFiles, [](const nu::FilePath& path) {
-    return path.getPath().contains("AWARDS");
-  })[0];
+  auto resourceFilePath = nu::filter(
+      resourceFiles, [](const nu::FilePath& path) { return path.getPath().contains("AWARDS"); })[0];
 
-  auto entries = ResourceFile{awards}.loadEntries();
+  ResourceFile resourceFile = ResourceFile{resourceFilePath};
+  auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
-    LOG(Info) << entry.name() << " -> " << entry.data().size();
+    if (entry.type() != ResourceType::Film) {
+      continue;
+    }
+
+    LOG(Info) << entry;
+
+    nu::ArrayInputStream stream{nu::ArrayView<U8>{entry.data()}};
+    film::load(&stream);
   }
 
   return 0;

@@ -1,6 +1,8 @@
 #ifndef RESOURCE_FILM_H_
 #define RESOURCE_FILM_H_
 
+#include <nucleus/Streams/InputStream.h>
+
 #include <stdint.h>
 
 #include "lfd.h"
@@ -26,7 +28,7 @@ enum class OpCode : uint16_t {
   Transition = 0x12,   // Method of clearing the screen and loading the new `View`.
   Unknown12 = 0x13,    // Unknown.
   Loop = 0x14,         // Appears to stop sounds internally set to repeat.
-  Unknown = 0x17,      // Unknown.
+  Unknown17 = 0x17,      // Unknown.
   Preload = 0x18,      // Possibly defines file the sound is located in.
   Sound = 0x19,        // Determines playback controls.
   Stereo = 0x1C,       // Determines stereo playback controls.
@@ -62,7 +64,7 @@ struct Header {
   uint16_t number_of_blocks;
 };
 
-bool load(Data data);
+bool load(nu::InputStream* stream);
 
 }  // namespace film
 

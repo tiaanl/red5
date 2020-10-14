@@ -1,14 +1,11 @@
 #include "resource/film.h"
 
-#include <assert.h>
-#include <stdio.h>
-
-#include "utils/stream.h"
+#include <nucleus/Logging.h>
 
 namespace film {
 
-const char* op_code_to_string(OpCode op_code) {
-  switch (op_code) {
+const char* opCodeToString(OpCode opCode) {
+  switch (opCode) {
     case OpCode::End:
       return "End";
 
@@ -63,7 +60,7 @@ const char* op_code_to_string(OpCode op_code) {
     case OpCode::Loop:
       return "Loop";
 
-    case OpCode::Unknown:
+    case OpCode::Unknown17:
       return "Unknown";
 
     case OpCode::Preload:
@@ -79,8 +76,8 @@ const char* op_code_to_string(OpCode op_code) {
   return "Unknown";
 }
 
-const char* block_type_to_string(BlockType block_type) {
-  switch (block_type) {
+const char* blockTypeToString(BlockType blockType) {
+  switch (blockType) {
     case BlockType::Anim:
       return "Anim";
 
@@ -107,93 +104,156 @@ const char* block_type_to_string(BlockType block_type) {
   }
 }
 
-void read_chunk(InputStream* stream) {
-  auto op_code = OpCode(read_u16(stream));
+void readChunk(nu::InputStream* stream, U32 chunkIndex) {
+  auto opCode = OpCode(stream->readU16());
 
-  printf("    Chunk :: op_code: %d (%s)\n", (uint16_t)op_code, op_code_to_string(op_code));
+  LOG(Info) << "    Chunk (" << chunkIndex << ") :: opCode: " << (U16)opCode << " ("
+            << opCodeToString(opCode) << ")";
 
-  switch (op_code) {
+  switch (opCode) {
     case OpCode::End:
       break;
 
     case OpCode::Time:
-      printf("      variable: %d\n", read_u16(stream));
+      LOG(Info) << "      frameNum:    " << stream->readU16();
       break;
 
     case OpCode::Move:
-      printf("      variable: %d\n", read_u16(stream));
+      LOG(Info) << "      ??:          " << stream->readU16();
+      break;
+
+    case OpCode::Speed:
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
       break;
 
     case OpCode::Layer:
-      printf("      variable: %d\n", read_u16(stream));
-      printf("      variable: %d\n", read_u16(stream));
+      LOG(Info) << "      layer:       " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readI16();
+      break;
+
+    case OpCode::Frame:
+      DCHECK(false);
       break;
 
     case OpCode::Animation:
-      printf("      variable: %d\n", read_u16(stream));
-      printf("      variable: %d\n", read_u16(stream));
-      printf("      variable: %d\n", read_u16(stream));
-      printf("      variable: %d\n", read_u16(stream));
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      // LOG(Info) << "      ??:          " << stream->readU16();
+      break;
+
+    case OpCode::Event:
+      DCHECK(false);
+      break;
+
+    case OpCode::Region:
+      DCHECK(false);
+      break;
+
+    case OpCode::Window:
+      DCHECK(false);
+      break;
+
+    case OpCode::Shift:
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
+      LOG(Info) << "      ??:          " << stream->readU16();
       break;
 
     case OpCode::Display:
-      printf("      variable: %d\n", read_u16(stream));
+      LOG(Info) << "      ??:          " << stream->readU16();
+      break;
+
+    case OpCode::Orientation:
+      DCHECK(false);
+      break;
+
+    case OpCode::Use:
+      DCHECK(false);
       break;
 
     case OpCode::Unknown11:
       break;
 
-    default:
-      assert(false);
+    case OpCode::Transition:
+      DCHECK(false);
+      break;
+
+    case OpCode::Unknown12:
+      DCHECK(false);
+      break;
+
+    case OpCode::Loop:
+      DCHECK(false);
+      break;
+
+    case OpCode::Unknown17:
+      DCHECK(false);
+      break;
+
+    case OpCode::Preload:
+      DCHECK(false);
+      break;
+
+    case OpCode::Sound:
+      DCHECK(false);
+      break;
+
+    case OpCode::Stereo:
+      DCHECK(false);
+      break;
   }
 }
 
-void read_block(InputStream* stream) {
-  auto type = read_u32(stream);
+void readBlock(nu::InputStream* stream, U32 index) {
+  auto type = stream->readU32();
 
   char name[9] = {};
-  read(stream, name, 8);
+  stream->read(name, 8);
 
-  auto length = read_u32(stream);
-  auto type_index = read_u16(stream);
+  auto length = stream->readU32();
+  auto typeIndex = stream->readU16();
 
   if (BlockType(type) == BlockType::End) {
-    printf("  Block :: type: %s, name: %s, length: %d, type_index: %d\n",
-           block_type_to_string((BlockType)type), name, length, type_index);
+    LOG(Info) << "  Block (" << index << ") :: type: " << blockTypeToString((BlockType)type)
+              << ", name: " << name << ", length: " << length << ", typeIndex: " << typeIndex;
     return;
   }
 
-  auto number_of_chunks = read_u16(stream);
-  auto chunk_data_size = read_u16(stream);
+  auto numberOfChunks = stream->readU16();
+  auto chunkDataSize = stream->readU16();
 
-  printf(
-      "  Block :: type: %s, name: %s, length: %d, type_index: %d, number_of_chunks: %d, "
-      "chunk_data_size: %d\n",
-      block_type_to_string((BlockType)type), name, length, type_index, number_of_chunks,
-      chunk_data_size);
+  LOG(Info) << "  Block :: type: " << blockTypeToString((BlockType)type) << ", name: " << name
+            << ", length: " << length << ", typeIndex: " << typeIndex
+            << ", numberOfChunks: " << numberOfChunks << ", chunkDataSize: " << chunkDataSize;
 
-  uint8_t* before = stream->current;
+  MemSize before = stream->getPosition();
 
-  for (size_t c = 0; c < number_of_chunks && c < 20; ++c) {
-    read_chunk(stream);
+  for (U32 c = 0; c < numberOfChunks; ++c) {
+    readChunk(stream, c);
   }
 
-  printf("    bytes advanced: %lld\n", stream->current - before);
-  // advance(stream, chunk_data_length);
+  MemSize bytesRead = stream->getPosition() - before;
+  DCHECK(bytesRead == chunkDataSize)
+      << "Incorrect amount of bytes read (" << bytesRead << " of " << chunkDataSize << ")";
 }
 
-bool load(Data data) {
-  auto stream = stream_from_data(data);
+bool load(nu::InputStream* stream) {
+  auto reserved = stream->readU16();
+  auto numberOfFrames = stream->readU16();
+  auto numberOfBlocks = stream->readU16() + 1;  // 0 indexed.
 
-  auto reserved = read_u16(&stream);
-  auto number_of_frames = read_u16(&stream);
-  auto number_of_blocks = read_u16(&stream) + 1;  // 0 indexed.
+  LOG(Info) << "Film :: reserved: " << reserved << ", numberOfFrames: " << numberOfFrames
+            << ", numberOfBlocks: " << numberOfBlocks;
 
-  printf("Film :: reserved: %d, number_of_frames: %d, number_of_blocks: %d\n", reserved,
-         number_of_frames, number_of_blocks);
-
-  for (size_t i = 0; i < number_of_blocks; ++i) {
-    read_block(&stream);
+  for (U16 b = 0; b < numberOfBlocks; ++b) {
+    readBlock(stream, b);
   }
 
   return true;

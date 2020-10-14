@@ -45,7 +45,7 @@ ResourceType toResourceType(U8* buf) {
 
 }  // namespace
 
-nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() {
+nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
   LOG(Info) << "Loading entries from resource file: " << m_path;
 
   nu::FileInputStream stream{m_path};
