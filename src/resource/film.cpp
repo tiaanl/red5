@@ -48,6 +48,9 @@ const char* opCodeToString(OpCode opCode) {
     case OpCode::Use:
       return "Use";
 
+    case OpCode::Unknown10:
+      return "Unknown10";
+
     case OpCode::Unknown11:
       return "Unknown11";
 
@@ -104,35 +107,62 @@ const char* blockTypeToString(BlockType blockType) {
   }
 }
 
-void readChunk(nu::InputStream* stream, U32 chunkIndex) {
+U32 getChunkSize(OpCode opCode) {
+  switch (opCode) {
+    case OpCode::Time:
+      return sizeof(TimeChunk);
+
+    case OpCode::Move:
+      return sizeof(MoveChunk);
+
+    case OpCode::Speed:
+      return sizeof(SpeedChunk);
+
+    case OpCode::Layer:
+      return sizeof(LayerChunk);
+
+    case OpCode::Animation:
+      return sizeof(AnimationChunk);
+
+    case OpCode::Shift:
+      return sizeof(ShiftChunk);
+
+    case OpCode::Unknown10:
+      return sizeof(Unknown10Chunk);
+
+    case OpCode::Transition:
+      return sizeof(TransitionChunk);
+
+    default:
+      DCHECK(false);
+      return 0;
+  }
+}
+
+void readChunk(nu::InputStream* stream, U32 chunkIndex, nu::DynamicArray<Chunk>* chunks) {
   auto opCode = OpCode(stream->readU16());
 
-  LOG(Info) << "    Chunk (" << chunkIndex << ") :: opCode: " << (U16)opCode << " ("
-            << opCodeToString(opCode) << ")";
+  // LOG(Info) << "    Chunk (" << chunkIndex << ") :: opCode: " << (U16)opCode << " ("
+  //           << opCodeToString(opCode) << ")";
 
   switch (opCode) {
     case OpCode::End:
       break;
 
     case OpCode::Time:
-      LOG(Info) << "      frameNum:    " << stream->readU16();
+      chunks->emplaceBack(opCode).element().time = {stream->readU16()};
       break;
 
     case OpCode::Move:
-      LOG(Info) << "      ??:          " << stream->readU16();
+      chunks->emplaceBack(opCode).element().move = {stream->readU16()};
       break;
 
     case OpCode::Speed:
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
+      chunks->emplaceBack(opCode).element().speed = {stream->readU16()};
       break;
 
     case OpCode::Layer:
-      LOG(Info) << "      layer:       " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readI16();
+      chunks->emplaceBack(opCode).element().layer = {stream->readU16(), stream->readU16()};
       break;
 
     case OpCode::Frame:
@@ -140,10 +170,8 @@ void readChunk(nu::InputStream* stream, U32 chunkIndex) {
       break;
 
     case OpCode::Animation:
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      // LOG(Info) << "      ??:          " << stream->readU16();
+      chunks->emplaceBack(opCode).element().animation = {stream->readU16(), stream->readU16(),
+                                                         stream->readU16()};
       break;
 
     case OpCode::Event:
@@ -159,15 +187,13 @@ void readChunk(nu::InputStream* stream, U32 chunkIndex) {
       break;
 
     case OpCode::Shift:
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
-      LOG(Info) << "      ??:          " << stream->readU16();
+      chunks->emplaceBack(opCode).element().shift = {stream->readU16(), stream->readU16(),
+                                                     stream->readU16(), stream->readU16(),
+                                                     stream->readU16()};
       break;
 
     case OpCode::Display:
-      LOG(Info) << "      ??:          " << stream->readU16();
+      DCHECK(false);
       break;
 
     case OpCode::Orientation:
@@ -178,11 +204,19 @@ void readChunk(nu::InputStream* stream, U32 chunkIndex) {
       DCHECK(false);
       break;
 
+    case OpCode::Unknown10:
+      chunks->emplaceBack(opCode).element().unknown10 = {
+          stream->readU16(), stream->readU16(), stream->readU16(), stream->readU16(),
+          stream->readU16(), stream->readU16(), stream->readU16()};
+      break;
+
     case OpCode::Unknown11:
       break;
 
     case OpCode::Transition:
-      DCHECK(false);
+      chunks->emplaceBack(opCode).element().transition = {
+          stream->readU16(), stream->readU16(), stream->readU16(), stream->readU16(),
+          stream->readU16(), stream->readU16(), stream->readU16(), stream->readU16()};
       break;
 
     case OpCode::Unknown12:
@@ -211,7 +245,7 @@ void readChunk(nu::InputStream* stream, U32 chunkIndex) {
   }
 }
 
-void readBlock(nu::InputStream* stream, U32 index) {
+void readBlock(nu::InputStream* stream, U32 index, nu::DynamicArray<Block>* blocks) {
   auto type = stream->readU32();
 
   char name[9] = {};
@@ -221,22 +255,28 @@ void readBlock(nu::InputStream* stream, U32 index) {
   auto typeIndex = stream->readU16();
 
   if (BlockType(type) == BlockType::End) {
-    LOG(Info) << "  Block (" << index << ") :: type: " << blockTypeToString((BlockType)type)
-              << ", name: " << name << ", length: " << length << ", typeIndex: " << typeIndex;
+    // LOG(Info) << "  Block (" << index << ") :: type: " << blockTypeToString((BlockType)type)
+    //           << ", name: " << name << ", length: " << length << ", typeIndex: " << typeIndex;
+
+    blocks->emplaceBack(static_cast<BlockType>(type), typeIndex,
+                        nu::StringView{name, std::min(std::strlen(name), 8ull)});
     return;
   }
 
   auto numberOfChunks = stream->readU16();
   auto chunkDataSize = stream->readU16();
 
-  LOG(Info) << "  Block :: type: " << blockTypeToString((BlockType)type) << ", name: " << name
-            << ", length: " << length << ", typeIndex: " << typeIndex
-            << ", numberOfChunks: " << numberOfChunks << ", chunkDataSize: " << chunkDataSize;
+  // LOG(Info) << "  Block :: type: " << blockTypeToString((BlockType)type) << ", name: " << name
+  //           << ", length: " << length << ", typeIndex: " << typeIndex
+  //           << ", numberOfChunks: " << numberOfChunks << ", chunkDataSize: " << chunkDataSize;
 
   MemSize before = stream->getPosition();
 
+  auto ir = blocks->emplaceBack(static_cast<BlockType>(type), typeIndex,
+                                nu::StringView{name, std::min(std::strlen(name), 8ull)});
+
   for (U32 c = 0; c < numberOfChunks; ++c) {
-    readChunk(stream, c);
+    readChunk(stream, c, &ir.element().chunks);
   }
 
   MemSize bytesRead = stream->getPosition() - before;
@@ -244,19 +284,123 @@ void readBlock(nu::InputStream* stream, U32 index) {
       << "Incorrect amount of bytes read (" << bytesRead << " of " << chunkDataSize << ")";
 }
 
-bool load(nu::InputStream* stream) {
-  auto reserved = stream->readU16();
+nu::ScopedPtr<Film> read(nu::InputStream* stream) {
+  stream->skip(sizeof(U16));  // reserved
   auto numberOfFrames = stream->readU16();
-  auto numberOfBlocks = stream->readU16() + 1;  // 0 indexed.
+  U16 numberOfBlocks = stream->readU16() + 1u;  // 0 indexed.
 
-  LOG(Info) << "Film :: reserved: " << reserved << ", numberOfFrames: " << numberOfFrames
-            << ", numberOfBlocks: " << numberOfBlocks;
+  // LOG(Info) << "Film :: reserved: " << reserved << ", numberOfFrames: " << numberOfFrames
+  //           << ", numberOfBlocks: " << numberOfBlocks;
+
+  auto result = nu::makeScopedPtr<Film>();
+  result->numberOfFrames = numberOfFrames;
 
   for (U16 b = 0; b < numberOfBlocks; ++b) {
-    readBlock(stream, b);
+    readBlock(stream, b, &result->blocks);
   }
 
-  return true;
+  return result;
+}
+
+void writeChunk(nu::OutputStream* stream, const Chunk& chunk) {
+  stream->writeU16(static_cast<U16>(chunk.opCode));
+
+  switch (chunk.opCode) {
+    case OpCode::Time:
+      stream->writeU16(chunk.time.p1);
+      break;
+
+    case OpCode::Move:
+      stream->writeU16(chunk.move.p1);
+      break;
+
+    case OpCode::Speed:
+      stream->writeU16(chunk.speed.p1);
+      break;
+
+    case OpCode::Layer:
+      stream->writeU16(chunk.layer.layer);
+      stream->writeU16(chunk.layer.p1);
+      break;
+
+    case OpCode::Animation:
+      stream->writeU16(chunk.animation.p1);
+      stream->writeU16(chunk.animation.p2);
+      stream->writeU16(chunk.animation.p3);
+      break;
+
+    case OpCode::Shift:
+      stream->writeU16(chunk.shift.p1);
+      stream->writeU16(chunk.shift.p2);
+      stream->writeU16(chunk.shift.p3);
+      stream->writeU16(chunk.shift.p4);
+      stream->writeU16(chunk.shift.p5);
+      break;
+
+    case OpCode::Unknown10:
+      stream->writeU16(chunk.unknown10.p1);
+      stream->writeU16(chunk.unknown10.p2);
+      stream->writeU16(chunk.unknown10.p3);
+      stream->writeU16(chunk.unknown10.p4);
+      stream->writeU16(chunk.unknown10.p5);
+      stream->writeU16(chunk.unknown10.p6);
+      stream->writeU16(chunk.unknown10.p7);
+      break;
+
+    case OpCode::Transition:
+      stream->writeU16(chunk.transition.p1);
+      stream->writeU16(chunk.transition.p2);
+      stream->writeU16(chunk.transition.p3);
+      stream->writeU16(chunk.transition.p4);
+      stream->writeU16(chunk.transition.p5);
+      stream->writeU16(chunk.transition.p6);
+      stream->writeU16(chunk.transition.p7);
+      stream->writeU16(chunk.transition.p8);
+      break;
+
+    default:
+      DCHECK(false);
+      break;
+  }
+}
+
+void writeBlock(nu::OutputStream* stream, const Block& block) {
+  stream->writeU32(static_cast<U32>(block.type));
+
+  U8 nameStr[8] = {};
+  std::memcpy(nameStr, block.name.data(), std::min(sizeof(nameStr), block.name.length()));
+  stream->write(nameStr, sizeof(nameStr));
+
+  U32 chunkDataSize = 0;
+  for (auto& chunk : block.chunks) {
+    chunkDataSize += sizeof(U16) + getChunkSize(chunk.opCode);
+  }
+  // length
+  stream->writeU32(chunkDataSize + 18 + (block.chunks.isEmpty() ? 0 : 4));
+
+  stream->writeU16(block.typeIndex);
+
+  // If there are no chunks, then we don't write any data for it.
+  if (block.chunks.isEmpty()) {
+    return;
+  }
+
+  stream->writeU16(static_cast<U16>(block.chunks.size()));
+  stream->writeU16(chunkDataSize);
+
+  for (auto& chunk : block.chunks) {
+    writeChunk(stream, chunk);
+  }
+}
+
+void write(nu::OutputStream* stream, const Film& film) {
+  stream->writeU16(4);  // reserved
+  stream->writeU16(film.numberOfFrames);
+  stream->writeU16(static_cast<U16>(film.blocks.size() - 1u));
+
+  for (auto& block : film.blocks) {
+    writeBlock(stream, block);
+  }
 }
 
 }  // namespace film

@@ -6,6 +6,8 @@
 #include <nucleus/Text/StaticString.h>
 
 enum class ResourceType : U32 {
+  ResourceMap,
+  Palette,
   Image,
   Animation,
   Film,
@@ -26,7 +28,7 @@ public:
     return m_name.view();
   }
 
-  const nu::DynamicArray<U8>& data() {
+  const nu::DynamicArray<U8>& data() const {
     return m_data;
   }
 
@@ -43,7 +45,7 @@ private:
 
 class ResourceFile {
 public:
-  ResourceFile(const nu::FilePath& path) : m_path{path} {}
+  ResourceFile(nu::FilePath path) : m_path{std::move(path)} {}
 
   nu::DynamicArray<ResourceEntry> loadEntries() const;
   void saveEntries(const nu::DynamicArray<ResourceEntry>& entries);

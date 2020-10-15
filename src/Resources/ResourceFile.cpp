@@ -1,11 +1,13 @@
 #include "Resources/ResourceFile.h"
 
 #include <nucleus/Streams/FileInputStream.h>
-#include <nucleus/Text/StringView.h>
+#include <nucleus/Streams/FileOutputStream.h>
 
 namespace {
 
 const U8 g_resourceTypes[][4] = {
+    {'R', 'M', 'A', 'P'},
+    {'P', 'L', 'T', 'T'},
     {'D', 'E', 'L', 'T'},
     {'A', 'N', 'I', 'M'},
     {'F', 'I', 'L', 'M'},
@@ -43,10 +45,14 @@ ResourceType toResourceType(U8* buf) {
   return ResourceType::Unknown;
 }
 
+const U8* resourceTypeToBuffer(ResourceType resourceType) {
+  return g_resourceTypes[static_cast<U32>(resourceType)];
+}
+
 }  // namespace
 
 nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
-  LOG(Info) << "Loading entries from resource file: " << m_path;
+  // LOG(Info) << "Loading entries from resource file: " << m_path;
 
   nu::FileInputStream stream{m_path};
 
@@ -84,4 +90,25 @@ nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
   return entries;
 }
 
-void ResourceFile::saveEntries(const nu::DynamicArray<ResourceEntry>& entries) {}
+void writeHeader(nu::OutputStream* stream, ResourceType resourceType, nu::StringView name, MemSize size) {
+  stream->write(resourceTypeToBuffer(resourceType), 4);
+  U8 nameBuf[8] = {};
+  std::memcpy(nameBuf, name.data(), std::min(name.length(), sizeof(nameBuf)));
+  stream->write(nameBuf, sizeof(nameBuf));
+  stream->writeU32(static_cast<U32>(size));
+}
+
+void ResourceFile::saveEntries(const nu::DynamicArray<ResourceEntry>& entries) {
+  nu::FileOutputStream stream{m_path};
+
+  writeHeader(&stream, ResourceType::ResourceMap, "resource", entries.size() * 16);
+
+  for (auto& entry : entries) {
+    writeHeader(&stream, entry.type(), entry.name(), entry.data().size());
+  }
+
+  for (auto& entry : entries) {
+    writeHeader(&stream, entry.type(), entry.name(), entry.data().size());
+    stream.write(entry.data().data(), entry.data().size());
+  }
+}
