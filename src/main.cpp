@@ -17,19 +17,26 @@ int main(int argc, char* argv[]) {
       nu::ArrayInputStream s{entry.data().view()};
       auto film = film::read(&s);
 
-//      film->blocks[5].chunks[0].layer.p1 = 0;
-//      film->blocks[5].chunks[0].layer.p2 = 0;
+      nu::DynamicArray<film::Chunk> chunks;
+      chunks.emplaceBack(film::OpCode::Time).element().vars = {0};
+      chunks.emplaceBack(film::OpCode::Event).element().vars = {20};
+      chunks.emplaceBack(film::OpCode::Display).element().vars = {1};
+      chunks.emplaceBack(film::OpCode::Layer).element().vars = {50};
+      chunks.emplaceBack(film::OpCode::Time).element().vars = {52};
+      chunks.emplaceBack(film::OpCode::Display).element().vars = {0};
+      chunks.emplaceBack(film::OpCode::End);
+      film->blocks[5].chunks = std::move(chunks);
 
-//      nu::DynamicBufferOutputStream o;
-//      film::write(&o, *film);
-//      entry.data(o.buffer());
+      nu::DynamicBufferOutputStream o;
+      film::write(&o, *film);
+      entry.data(o.buffer());
     }
   }
 
-//  const nu::FilePath& outPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO.LFD)"};
-//  LOG(Info) << "outPath: " << outPath;
-//  ResourceFile logo2File{outPath};
-//  logo2File.saveEntries(entries);
+  const nu::FilePath& outPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO.LFD)"};
+  LOG(Info) << "outPath: " << outPath;
+  ResourceFile logo2File{outPath};
+  logo2File.saveEntries(entries);
 
   return 0;
 }
