@@ -2,15 +2,16 @@
 
 #include <nucleus/Streams/FileInputStream.h>
 #include <nucleus/Streams/FileOutputStream.h>
+#include <nucleus/Text/StringView.h>
 
 namespace {
 
 const U8 g_resourceTypes[][4] = {
-    {'R', 'M', 'A', 'P'},
-    {'P', 'L', 'T', 'T'},
-    {'D', 'E', 'L', 'T'},
-    {'A', 'N', 'I', 'M'},
-    {'F', 'I', 'L', 'M'},
+    {'R', 'M', 'A', 'P'},  // ResourceMap
+    {'P', 'L', 'T', 'T'},  // Palette
+    {'D', 'E', 'L', 'T'},  // Image
+    {'A', 'N', 'I', 'M'},  // Animation
+    {'F', 'I', 'L', 'M'},  // Film
 };
 
 struct Header {
@@ -50,6 +51,11 @@ const U8* resourceTypeToBuffer(ResourceType resourceType) {
 }
 
 }  // namespace
+
+std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
+  os << nu::StringView{(const char*)resourceTypeToBuffer(resourceType), 4};
+  return os;
+}
 
 nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
   // LOG(Info) << "Loading entries from resource file: " << m_path;

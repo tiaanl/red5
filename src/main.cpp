@@ -1,42 +1,39 @@
+#if 1
 #include <Resources/ResourceFile.h>
-#include <nucleus/Streams/FileInputStream.h>
+#include <nucleus/Streams/ArrayInputStream.h>
+#include <nucleus/Streams/DynamicBufferOutputStream.h>
+#include <resource/film.h>
 
 int main(int argc, char* argv[]) {
-  const nu::FilePath& inPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO.LFD)"};
+  const nu::FilePath& inPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO2.LFD)"};
   LOG(Info) << "inPath: " << inPath;
   ResourceFile logoFile{inPath};
   auto entries = logoFile.loadEntries();
 
-  const nu::FilePath& outPath = nu::FilePath{ R"(C:\xwing\RESOURCE\LOGO2.LFD)" };
-  LOG(Info) << "outPath: " << outPath;
-  ResourceFile logo2File{outPath};
-  logo2File.saveEntries(entries);
+  for (auto& entry : entries) {
+    LOG(Info) << entry.type() << " - " << entry.name();
 
-  nu::FileInputStream check1{inPath};
-  nu::DynamicArray<U8> check1Buffer;
-  check1Buffer.resize(check1.getSize());
-  check1.read(check1Buffer.data(), check1Buffer.size());
+    if (entry.type() == ResourceType::Film && entry.name() == "logo_s") {
+      nu::ArrayInputStream s{entry.data().view()};
+      auto film = film::read(&s);
 
-  nu::FileInputStream check2{outPath};
-  nu::DynamicArray<U8> check2Buffer;
-  check2Buffer.resize(check2.getSize());
-  check2.read(check2Buffer.data(), check2Buffer.size());
+//      film->blocks[5].chunks[0].layer.p1 = 0;
+//      film->blocks[5].chunks[0].layer.p2 = 0;
 
-  U8* left = check1Buffer.data();
-  U8* right = check2Buffer.data();
-  for (auto i = 0u; i < check1Buffer.size(); ++i) {
-    if (left[i] == right[i]) {
-      continue;
+//      nu::DynamicBufferOutputStream o;
+//      film::write(&o, *film);
+//      entry.data(o.buffer());
     }
-
-    LOG(Error) << "bytes not the same at pos: " << i << " (" << (I32)left[i] << " vs "
-               << (I32)right[i] << ")";
-    break;
   }
 
+//  const nu::FilePath& outPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO.LFD)"};
+//  LOG(Info) << "outPath: " << outPath;
+//  ResourceFile logo2File{outPath};
+//  logo2File.saveEntries(entries);
 
   return 0;
 }
+#endif  // 0
 
 #if 0
 #include <Resources/ResourceFile.h>
@@ -61,7 +58,8 @@ int main(int argc, char* argv[]) {
   //      resourceFiles, [](const nu::FilePath& path) { return path.getPath().contains("LOGO");
   //      })[0];
   for (auto& resourceFilePath : resourceFiles) {
-    if (!resourceFilePath.getPath().contains("LFD")) {
+    if (!resourceFilePath.getPath().contains("LFD") ||
+        !resourceFilePath.getPath().contains("BOX")) {
       continue;
     }
 

@@ -15,6 +15,8 @@ enum class ResourceType : U32 {
   Unknown,
 };
 
+std::ostream& operator<<(std::ostream& os, ResourceType resourceType);
+
 class ResourceEntry {
 public:
   ResourceEntry(ResourceType type, nu::StringView name, nu::DynamicArray<U8> data)
@@ -30,6 +32,10 @@ public:
 
   const nu::DynamicArray<U8>& data() const {
     return m_data;
+  }
+
+  void data(nu::DynamicArray<U8> data) {
+    m_data = std::move(data);
   }
 
   friend std::ostream& operator<<(std::ostream& os, const ResourceEntry& resourceEntry) {

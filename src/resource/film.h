@@ -40,7 +40,6 @@ enum class OpCode : U16 {
   Display = 0x0D,      // Show or hide the resource.
   Orientation = 0x0E,  // Flip the X/Y display of the resource.
   Use = 0x0F,          // Marker to activate the palette.
-  Unknown10 = 0x10,    // Unknown
   Unknown11 = 0x11,    // Unknown.
   Transition = 0x12,   // Method of clearing the screen and loading the new `View`.
   Unknown12 = 0x13,    // Unknown.
@@ -61,71 +60,9 @@ enum class BlockType : U32 {
   Voic = 0x43494F56,  // Commands for `Blas` and `Voic` resources.
 };
 
-struct TimeChunk {
-  U16 p1;
-};
-
-struct MoveChunk {
-  U16 p1;
-};
-
-struct SpeedChunk {
-  U16 p1;
-};
-
-struct LayerChunk {
-  U16 layer;
-  U16 p1;
-};
-
-struct AnimationChunk {
-  U16 p1;
-  U16 p2;
-  U16 p3;
-};
-
-struct ShiftChunk {
-  U16 p1;
-  U16 p2;
-  U16 p3;
-  U16 p4;
-  U16 p5;
-};
-
-struct Unknown10Chunk {
-  U16 p1;
-  U16 p2;
-  U16 p3;
-  U16 p4;
-  U16 p5;
-  U16 p6;
-  U16 p7;
-};
-
-struct TransitionChunk {
-  U16 p1;
-  U16 p2;
-  U16 p3;
-  U16 p4;
-  U16 p5;
-  U16 p6;
-  U16 p7;
-  U16 p8;
-};
-
 struct Chunk {
   OpCode opCode;
-
-  union {
-    TimeChunk time;
-    MoveChunk move;
-    SpeedChunk speed;
-    LayerChunk layer;
-    AnimationChunk animation;
-    ShiftChunk shift;
-    Unknown10Chunk unknown10;
-    TransitionChunk transition;
-  };
+  nu::DynamicArray<U16> vars;
 };
 
 struct Block {
@@ -139,6 +76,8 @@ struct Film {
   U32 numberOfFrames;
   nu::DynamicArray<Block> blocks;
 };
+
+const char* opCodeToString(OpCode opCode);
 
 nu::ScopedPtr<Film> read(nu::InputStream* stream);
 void write(nu::OutputStream* stream, const Film& film);
