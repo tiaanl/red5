@@ -43,14 +43,12 @@ public:
   void render(SDL_Color* pixels);
 
 private:
-  ResourceEntry* findResource(ResourceType resourceType, std::string_view name);
-
   void processFilm();
   void processViewBlock(const Film::Block& block);
   void processPaletteBlock(const Film::Block& block);
   void processImageBlock(const Film::Block& block);
 
-  std::vector<ResourceEntry> m_resources;
+  std::vector<ResourceEntry> m_entries;
   std::unique_ptr<Film> m_film;
   U16 m_width = 320;
   U16 m_height = 200;

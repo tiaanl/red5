@@ -78,12 +78,12 @@ void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
-    m_resources.emplace_back(std::move(entry));
+    m_entries.emplace_back(std::move(entry));
   }
 }
 
 bool Scene::loadFilm(std::string_view name) {
-  auto film = loadResource<Film>(m_resources, ResourceType::Film, name);
+  auto film = loadResource<Film>(m_entries, ResourceType::Film, name);
 
   m_film.swap(film);
 
@@ -102,38 +102,29 @@ void Scene::render(SDL_Color* pixels) {
   }
 }
 
-ResourceEntry* Scene::findResource(ResourceType resourceType, std::string_view name) {
-  auto it =
-      std::find_if(std::begin(m_resources), std::end(m_resources), [&](const ResourceEntry& entry) {
-        return entry.type() == resourceType &&
-               entry.name() == nu::StringView{name.data(), name.size()};
-      });
-
-  if (it == std::end(m_resources)) {
-    return nullptr;
-  }
-
-  return &*it;
-}
-
 void Scene::processFilm() {
   for (auto& block : m_film->blocks()) {
     // LOG(Info) << "Block: " << blockTypeToString(block.type);
     switch (block.type) {
-      case BlockType::View:
+      case BlockType::View: {
         processViewBlock(block);
         break;
+      }
 
-      case BlockType::Pltt:
+      case BlockType::Pltt: {
         processPaletteBlock(block);
         break;
+      }
 
-      case BlockType::Delt:
+      case BlockType::Delt: {
         processImageBlock(block);
+        break;
+      }
 
-      default:
+      default: {
         // assert(false);
         break;
+      }
     }
   }
 }
@@ -167,7 +158,7 @@ void Scene::processViewBlock(const Film::Block& block) {
 }
 
 void Scene::processPaletteBlock(const Film::Block& block) {
-  auto palette = loadResource<Palette>(m_resources, ResourceType::Palette, block.name);
+  auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, block.name);
   if (!palette) {
     LOG(Warning) << "Palette not found: " << block.name;
     return;
@@ -182,10 +173,11 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 }
 
 void Scene::processImageBlock(const Film::Block& block) {
-  auto image = loadResource<Image>(m_resources, ResourceType::Image, block.name);
+  auto image = loadResource<Image>(m_entries, ResourceType::Image, block.name);
   if (!image) {
     LOG(Warning) << "Image not found: " << block.name;
     return;
   }
+
   m_props.emplace_back(std::make_unique<ImageSceneProp>(std::move(image)));
 }
