@@ -50,7 +50,7 @@ const char* resourceTypeToString(ResourceType resourceType) {
       return "Voice";
 
     default:
-      assert(false);  // Invalid resource type.
+      // assert(false);  // Invalid resource type.
       return nullptr;
   }
 }

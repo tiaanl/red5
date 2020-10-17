@@ -8,99 +8,6 @@
 
 namespace {
 
-const char* blockTypeToString(BlockType blockType) {
-  const char* resourceTypeStr = resourceTypeToString(static_cast<ResourceType>(blockType));
-  if (resourceTypeStr != nullptr) {
-    return resourceTypeStr;
-  }
-
-  switch (blockType) {
-    case BlockType::Cust:
-      return "Custom";
-
-    case BlockType::View:
-      return "View";
-
-    case BlockType::End:
-      return "End";
-
-    default:
-      return nullptr;
-  }
-}
-
-const char* opCodeToString(OpCode opCode) {
-  switch (opCode) {
-    case OpCode::End:
-      return "End";
-
-    case OpCode::Time:
-      return "Time";
-
-    case OpCode::Move:
-      return "Move";
-
-    case OpCode::Speed:
-      return "Speed";
-
-    case OpCode::Layer:
-      return "Layer";
-
-    case OpCode::Frame:
-      return "Frame";
-
-    case OpCode::Animation:
-      return "Animation";
-
-    case OpCode::Event:
-      return "Event";
-
-    case OpCode::Region:
-      return "Region";
-
-    case OpCode::Window:
-      return "Window";
-
-    case OpCode::Shift:
-      return "Shift";
-
-    case OpCode::Display:
-      return "Display";
-
-    case OpCode::Orientation:
-      return "Orientation";
-
-    case OpCode::Use:
-      return "Use";
-
-    case OpCode::Unknown11:
-      return "Unknown11";
-
-    case OpCode::Transition:
-      return "Transition";
-
-    case OpCode::Unknown12:
-      return "Unknown12";
-
-    case OpCode::Loop:
-      return "Loop";
-
-    case OpCode::Unknown17:
-      return "Unknown";
-
-    case OpCode::Preload:
-      return "Preload";
-
-    case OpCode::Sound:
-      return "Sound";
-
-    case OpCode::Stereo:
-      return "Stereo";
-  }
-
-  return "Unknown";
-}
-
 Film::Chunk readChunk(nu::InputStream* stream) {
   auto dataSize = stream->readU16();
   auto opCode = static_cast<OpCode>(stream->readU16());
@@ -226,6 +133,99 @@ void writeBlock(nu::OutputStream* stream, const Film::Block& block) {
 }
 
 }  // namespace
+
+const char* opCodeToString(OpCode opCode) {
+  switch (opCode) {
+    case OpCode::End:
+      return "End";
+
+    case OpCode::Time:
+      return "Time";
+
+    case OpCode::Move:
+      return "Move";
+
+    case OpCode::Speed:
+      return "Speed";
+
+    case OpCode::Layer:
+      return "Layer";
+
+    case OpCode::Frame:
+      return "Frame";
+
+    case OpCode::Animation:
+      return "Animation";
+
+    case OpCode::Event:
+      return "Event";
+
+    case OpCode::Region:
+      return "Region";
+
+    case OpCode::Window:
+      return "Window";
+
+    case OpCode::Shift:
+      return "Shift";
+
+    case OpCode::Display:
+      return "Display";
+
+    case OpCode::Orientation:
+      return "Orientation";
+
+    case OpCode::Use:
+      return "Use";
+
+    case OpCode::Unknown11:
+      return "Unknown11";
+
+    case OpCode::Transition:
+      return "Transition";
+
+    case OpCode::Unknown12:
+      return "Unknown12";
+
+    case OpCode::Loop:
+      return "Loop";
+
+    case OpCode::Unknown17:
+      return "Unknown";
+
+    case OpCode::Preload:
+      return "Preload";
+
+    case OpCode::Sound:
+      return "Sound";
+
+    case OpCode::Stereo:
+      return "Stereo";
+  }
+
+  return "Unknown";
+}
+
+const char* blockTypeToString(BlockType blockType) {
+  const char* resourceTypeStr = resourceTypeToString(static_cast<ResourceType>(blockType));
+  if (resourceTypeStr != nullptr) {
+    return resourceTypeStr;
+  }
+
+  switch (blockType) {
+    case BlockType::Cust:
+      return "Custom";
+
+    case BlockType::View:
+      return "View";
+
+    case BlockType::End:
+      return "End";
+
+    default:
+      return nullptr;
+  }
+}
 
 void Film::read(nu::InputStream* stream) {
   m_blocks.clear();

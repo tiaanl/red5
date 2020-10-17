@@ -5,45 +5,11 @@
 #include <lfd/resource_file.h>
 #include <nucleus/Streams/ArrayInputStream.h>
 
+#include "scene.h"
+
 constexpr U16 g_screenScale = 4;
 constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
-
-struct Color {
-  U8 red;
-  U8 green;
-  U8 blue;
-  U8 alpha;
-};
-
-using ImagePalette = Color[256];
-
-void drawImage(const Image& image, const ImagePalette& palette, Color* pixels) {
-  // LOG(Info) << "Drawing image at (" << image.left() << ", " << image.top() << ")";
-  for (auto& line : image.lines()) {
-    MemSize pos = line.top * g_screenWidth + line.left;
-    for (auto index : line.indices) {
-      pixels[pos++] = palette[index];
-    }
-  }
-}
-
-std::unique_ptr<Image> loadImage(const nu::DynamicArray<ResourceEntry>& entries,
-                                 nu::StringView name) {
-  auto result = std::make_unique<Image>();
-
-  auto imageResource =
-      std::find_if(std::begin(entries), std::end(entries), [&name](const ResourceEntry& entry) {
-        return entry.type() == ResourceType::Image && entry.name() == name;
-      });
-  if (imageResource != std::end(entries)) {
-    nu::ArrayInputStream stream{
-        nu::ArrayView{imageResource->data().data(), imageResource->data().size()}};
-    result->read(&stream);
-  }
-
-  return result;
-}
 
 int main(int argc, char* argv[]) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -60,27 +26,11 @@ int main(int argc, char* argv[]) {
   SDL_Texture* screen = SDL_CreateTexture(
       renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
 
-  ResourceFile awards{nu::FilePath{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"}};
-  auto entries = awards.loadEntries();
-
-  auto mainmenu = loadImage(entries, "mainmenu");
-  auto maindoor = loadImage(entries, "maindoor");
-  auto maintitl = loadImage(entries, "maintitl");
-
-  ImagePalette palette = {};
-
-  for (auto& entry : entries) {
-    if (entry.type() == ResourceType::Palette && entry.name() == "mainback") {
-      nu::ArrayInputStream stream{nu::ArrayView{entry.data().data(), entry.data().size()}};
-      Palette p;
-      p.read(&stream);
-
-      U8 i = p.firstIndex();
-      for (auto& c : p.colors()) {
-        palette[i++] = Color{c.red, c.green, c.blue, 255};
-      }
-    }
-  }
+  Scene scene;
+//  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"}});
+//  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\REGISTER.LFD)"}});
+  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\AWARDS.LFD)"}});
+  scene.loadFilm("award1_f");
 
   SDL_ShowWindow(window);
 
@@ -100,12 +50,10 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
 #if 1
-    Color* pixels;
+    SDL_Color* pixels;
     I32 pitch;
     if (SDL_LockTexture(screen, nullptr, (void**)&pixels, &pitch) == 0) {
-      drawImage(*mainmenu, palette, pixels);
-      drawImage(*maindoor, palette, pixels);
-      drawImage(*maintitl, palette, pixels);
+      scene.render(pixels);
 
       SDL_UnlockTexture(screen);
       SDL_RenderCopy(renderer, screen, nullptr, nullptr);

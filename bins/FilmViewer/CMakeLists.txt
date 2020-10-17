@@ -3,8 +3,8 @@ find_package(SDL2 CONFIG REQUIRED)
 
 set(FilmViewer_SOURCE_FILES
     src/film_viewer.cpp
-    src/window.h
-    src/window.cpp
+    src/scene.h
+    src/scene.cpp
     )
 
 nucleus_add_executable(FilmViewer ${FilmViewer_SOURCE_FILES})

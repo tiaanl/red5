@@ -63,6 +63,14 @@ public:
     std::vector<Chunk> chunks;
   };
 
+  U32 frameCount() const {
+    return m_frameCount;
+  }
+
+  const std::vector<Block>& blocks() const {
+    return m_blocks;
+  }
+
   void read(nu::InputStream* stream);
   void write(nu::OutputStream* stream);
 
@@ -70,3 +78,6 @@ private:
   U32 m_frameCount;
   std::vector<Block> m_blocks;
 };
+
+const char* opCodeToString(OpCode opCode);
+const char* blockTypeToString(BlockType blockType);
