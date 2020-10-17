@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "lfd/resource_type.h"
+#include "resource.h"
 
 namespace nu {
 class InputStream;
@@ -49,7 +50,7 @@ enum class BlockType : U32 {
   End = 0x00444E45,
 };
 
-class Film {
+class Film : public Resource {
 public:
   struct Chunk {
     OpCode opCode;
@@ -63,6 +64,8 @@ public:
     std::vector<Chunk> chunks;
   };
 
+  ~Film() override;
+
   U32 frameCount() const {
     return m_frameCount;
   }
@@ -71,7 +74,7 @@ public:
     return m_blocks;
   }
 
-  void read(nu::InputStream* stream);
+  void read(nu::InputStream* stream, MemSize size);
   void write(nu::OutputStream* stream);
 
 private:

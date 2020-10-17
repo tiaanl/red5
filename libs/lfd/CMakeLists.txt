@@ -3,14 +3,17 @@ project(lfd)
 include(${nucleus_SOURCE_DIR}/cmake/Utils.cmake)
 
 set(lfd_HEADER_FILES
+    include/lfd/animation.h
     include/lfd/film.h
     include/lfd/image.h
     include/lfd/palette.h
+    include/lfd/resource.h
     include/lfd/resource_file.h
     include/lfd/resource_type.h
     )
 
 set(lfd_SOURCE_FILES
+    src/animation.cpp
     src/film.cpp
     src/image.cpp
     src/palette.cpp

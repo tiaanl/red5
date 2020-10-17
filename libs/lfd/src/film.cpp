@@ -227,7 +227,9 @@ const char* blockTypeToString(BlockType blockType) {
   }
 }
 
-void Film::read(nu::InputStream* stream) {
+Film::~Film() = default;
+
+void Film::read(nu::InputStream* stream, MemSize size) {
   m_blocks.clear();
 
   stream->skip(sizeof(U16));  // reserved

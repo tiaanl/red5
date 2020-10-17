@@ -4,18 +4,22 @@
 
 #include <vector>
 
+#include "resource.h"
+
 namespace nu {
 class InputStream;
 class OutputStream;
 }  // namespace nu
 
-class Image {
+class Image : public Resource {
 public:
   struct Line {
     U16 left;
     U16 top;
     std::vector<U8> indices;
   };
+
+  ~Image() override;
 
   U16 left() const {
     return m_left;
@@ -37,8 +41,8 @@ public:
     return m_lines;
   }
 
-  void read(nu::InputStream* stream);
-  void write(nu::OutputStream* stream);
+  void read(nu::InputStream* stream, MemSize size) override;
+  void write(nu::OutputStream* stream) override;
 
 private:
   U16 m_left;

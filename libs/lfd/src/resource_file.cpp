@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
   return os;
 }
 
-nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
+std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   // LOG(Info) << "Loading entries from resource file: " << m_path;
 
   nu::FileInputStream stream{m_path};
@@ -44,7 +44,7 @@ nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
   // Skip the header block.
   stream.setPosition(stream.getPosition() + mainHeader.size);
 
-  nu::DynamicArray<ResourceEntry> entries;
+  std::vector<ResourceEntry> entries;
   entries.reserve(entryCount);
 
   for (MemSize i = 0; i < entryCount; ++i) {
@@ -63,7 +63,7 @@ nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
       }
     }
     nu::StringView nameStr{reinterpret_cast<Char*>(header.name), nameLength};
-    entries.emplaceBack(header.type, nameStr, std::move(data));
+    entries.emplace_back(header.type, nameStr, std::move(data));
   }
 
   return entries;

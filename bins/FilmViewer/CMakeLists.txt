@@ -5,6 +5,8 @@ set(FilmViewer_SOURCE_FILES
     src/film_viewer.cpp
     src/scene.h
     src/scene.cpp
+    src/props.h
+    src/props.cpp
     )
 
 nucleus_add_executable(FilmViewer ${FilmViewer_SOURCE_FILES})

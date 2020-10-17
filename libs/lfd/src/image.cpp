@@ -21,7 +21,7 @@ Line readLine(nu::InputStream* stream) {
   U16 lineLength = dataSize >> 1u;
 
 #if TRACE_READ
-  LOG(Info) << "=== dataSize: " << dataSize << ", left: " << result.left << ", top: " << result.top
+  LOG(Info) << "Line :: dataSize: " << dataSize << ", left: " << result.left << ", top: " << result.top
             << ", isCompressed: " << isCompressed << ", lineLength: " << lineLength;
 #endif
 
@@ -63,7 +63,11 @@ Line readLine(nu::InputStream* stream) {
 
 }  // namespace
 
-void Image::read(nu::InputStream* stream) {
+Image::~Image() = default;
+
+void Image::read(nu::InputStream* stream, MemSize size) {
+  auto startPosition = stream->getPosition();
+
   m_left = stream->readU16();
   m_top = stream->readU16();
   m_right = stream->readU16();
@@ -74,10 +78,14 @@ void Image::read(nu::InputStream* stream) {
             << ", bottom: " << m_bottom;
 #endif
 
-  auto max = stream->getSize();
-  while (stream->getPosition() < max) {
+  while (stream->getPosition() - startPosition < size) {
     m_lines.emplace_back(readLine(stream));
   }
+
+//  auto bytesRead = stream->getPosition() - startPosition;
+//  if (bytesRead != size) {
+//    LOG(Fatal) << "Image resource not fully read.  (" << bytesRead << " out of " << size << ")";
+//  }
 }
 
 void Image::write(nu::OutputStream* stream) {

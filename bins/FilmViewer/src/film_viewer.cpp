@@ -3,7 +3,6 @@
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
-#include <nucleus/Streams/ArrayInputStream.h>
 
 #include "scene.h"
 
@@ -27,12 +26,15 @@ int main(int argc, char* argv[]) {
       renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
 
   Scene scene;
-//  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"}});
-//  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\REGISTER.LFD)"}});
+  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"}});
+  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\REGISTER.LFD)"}});
   scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\AWARDS.LFD)"}});
-  scene.loadFilm("award1_f");
+  scene.loadFilm("pilot");
+//  scene.loadFilm("mainmenu");
 
   SDL_ShowWindow(window);
+
+  U32 lastTicks = SDL_GetTicks();
 
   bool running = true;
   while (running) {
@@ -50,9 +52,14 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
 #if 1
+    auto now = SDL_GetTicks();
+    scene.update(now - lastTicks);
+    lastTicks = now;
+
     SDL_Color* pixels;
     I32 pitch;
     if (SDL_LockTexture(screen, nullptr, (void**)&pixels, &pitch) == 0) {
+      std::memset(pixels, 255, pitch * g_screenHeight);
       scene.render(pixels);
 
       SDL_UnlockTexture(screen);

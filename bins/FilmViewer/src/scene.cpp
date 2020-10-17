@@ -1,76 +1,8 @@
 #include "scene.h"
 
-#include <lfd/image.h>
 #include <lfd/palette.h>
-#include <nucleus/Streams/ArrayInputStream.h>
 
 #include <cassert>
-
-namespace {
-
-const ResourceEntry* findResource(const std::vector<ResourceEntry>& entries,
-                                  ResourceType resourceType, std::string_view name) {
-  auto it = std::find_if(std::begin(entries), std::end(entries), [&](const ResourceEntry& entry) {
-    return entry.type() == resourceType && entry.name() == nu::StringView{name.data(), name.size()};
-  });
-
-  if (it == std::end(entries)) {
-    return nullptr;
-  }
-
-  return &*it;
-}
-
-template <typename T>
-std::unique_ptr<T> loadResource(const std::vector<ResourceEntry>& entries,
-                                ResourceType resourceType, std::string_view name) {
-  auto* resource = findResource(entries, resourceType, name);
-  if (!resource) {
-    return {};
-  }
-
-  nu::ArrayInputStream stream{nu::ArrayView{resource->data().data(), resource->data().size()}};
-
-  auto result = std::make_unique<T>();
-  result->read(&stream);
-
-  return result;
-}
-
-std::unique_ptr<Image> loadImage(const nu::DynamicArray<ResourceEntry>& entries,
-                                 nu::StringView name) {
-  auto result = std::make_unique<Image>();
-
-  auto imageResource =
-      std::find_if(std::begin(entries), std::end(entries), [&name](const ResourceEntry& entry) {
-        return entry.type() == ResourceType::Image && entry.name() == name;
-      });
-  if (imageResource != std::end(entries)) {
-    nu::ArrayInputStream stream{
-        nu::ArrayView{imageResource->data().data(), imageResource->data().size()}};
-    result->read(&stream);
-  }
-
-  return result;
-}
-
-void drawImage(const Image& image, SDL_Color* palette, SDL_Color* pixels, U16 screenWidth) {
-  // LOG(Info) << "Drawing image at (" << image.left() << ", " << image.top() << ")";
-  for (auto& line : image.lines()) {
-    MemSize pos = line.top * screenWidth + line.left;
-    for (auto index : line.indices) {
-      pixels[pos++] = palette[index];
-    }
-  }
-}
-
-}  // namespace
-
-ImageSceneProp::ImageSceneProp(std::unique_ptr<Image> image) : m_image{std::move(image)} {}
-
-void ImageSceneProp::render(const RenderState& renderState) {
-  drawImage(*m_image, renderState.palette, renderState.pixels, renderState.screenWidth);
-}
 
 Scene::Scene() : m_palette{} {}
 
@@ -78,6 +10,7 @@ void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
+    // LOG(Info) << entry;
     m_entries.emplace_back(std::move(entry));
   }
 }
@@ -92,10 +25,28 @@ bool Scene::loadFilm(std::string_view name) {
   return true;
 }
 
+void Scene::update(U32 millis) {
+  m_totalMillis += millis;
+
+  if (m_totalMillis > 1000) {
+    // LOG(Info) << "next frame";
+    m_currentFrame += 1;
+    m_totalMillis %= 1000;
+
+    for (auto& prop : m_props) {
+      prop->nextFrame(m_currentFrame);
+    }
+  }
+
+}
+
 void Scene::render(SDL_Color* pixels) {
   assert(m_film);
 
   RenderState renderState{m_palette, m_width, m_height, pixels};
+
+  std::sort(std::begin(m_props), std::end(m_props),
+            [](auto& left, auto& right) { return left->layer() < right->layer(); });
 
   for (auto& prop : m_props) {
     prop->render(renderState);
@@ -121,6 +72,11 @@ void Scene::processFilm() {
         break;
       }
 
+      case BlockType::Anim: {
+        processAnimationBlock(block);
+        break;
+      }
+
       default: {
         // assert(false);
         break;
@@ -129,33 +85,7 @@ void Scene::processFilm() {
   }
 }
 
-void Scene::processViewBlock(const Film::Block& block) {
-#if 0
-  for (auto& chunk : block.chunks) {
-    // LOG(Info) << opCodeToString(chunk.opCode);
-    switch (chunk.opCode) {
-      case OpCode::Time:
-        // for (auto& var : chunk.variables) {
-        //   LOG(Info) << var;
-        // }
-        break;
-
-      case OpCode::Transition:
-        // for (auto& var : chunk.variables) {
-        //   LOG(Info) << var;
-        // }
-        break;
-
-      case OpCode::End:
-        break;
-
-      default:
-        assert(false);
-        break;
-    }
-  }
-#endif  // 0
-}
+void Scene::processViewBlock(const Film::Block& block) {}
 
 void Scene::processPaletteBlock(const Film::Block& block) {
   auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, block.name);
@@ -179,5 +109,15 @@ void Scene::processImageBlock(const Film::Block& block) {
     return;
   }
 
-  m_props.emplace_back(std::make_unique<ImageSceneProp>(std::move(image)));
+  m_props.emplace_back(std::make_unique<ImageProp>(block.chunks, std::move(image)));
+}
+
+void Scene::processAnimationBlock(const Film::Block& block) {
+  auto animation = loadResource<Animation>(m_entries, ResourceType::Animation, block.name);
+  if (!animation) {
+    LOG(Warning) << "Animation not found: " << block.name;
+    return;
+  }
+
+  m_props.emplace_back(std::make_unique<AnimationProp>(block.chunks, std::move(animation)));
 }

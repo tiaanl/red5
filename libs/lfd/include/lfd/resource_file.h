@@ -3,6 +3,7 @@
 
 #include <nucleus/Containers/DynamicArray.h>
 #include <nucleus/FilePath.h>
+#include <nucleus/Streams/ArrayInputStream.h>
 #include <nucleus/Text/StaticString.h>
 
 #include "lfd/resource_type.h"
@@ -49,11 +50,42 @@ class ResourceFile {
 public:
   ResourceFile(nu::FilePath path) : m_path{std::move(path)} {}
 
-  nu::DynamicArray<ResourceEntry> loadEntries() const;
+  std::vector<ResourceEntry> loadEntries() const;
   void saveEntries(const nu::DynamicArray<ResourceEntry>& entries);
 
 private:
   nu::FilePath m_path;
 };
+
+inline const ResourceEntry* findResource(const std::vector<ResourceEntry>& entries,
+                                         ResourceType resourceType, std::string_view name) {
+  auto it = std::find_if(std::begin(entries), std::end(entries), [&](const ResourceEntry& entry) {
+    return entry.type() == resourceType && entry.name() == nu::StringView{name.data(), name.size()};
+  });
+
+  if (it == std::end(entries)) {
+    return nullptr;
+  }
+
+  return &*it;
+}
+
+template <typename T>
+inline std::unique_ptr<T> loadResource(const std::vector<ResourceEntry>& entries,
+                                       ResourceType resourceType, std::string_view name) {
+  auto* resource = findResource(entries, resourceType, name);
+  if (!resource) {
+    return {};
+  }
+
+  // LOG(Info) << "Resource size: " << resource->data().size();
+
+  nu::ArrayInputStream stream{nu::ArrayView{resource->data().data(), resource->data().size()}};
+
+  auto result = std::make_unique<T>();
+  result->read(&stream, resource->data().size());
+
+  return result;
+}
 
 #endif  // RESOURCES_RESOURCE_FILE_H_

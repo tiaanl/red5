@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
 #if 1
+#include <lfd/animation.h>
 #include <nucleus/Streams/ArrayInputStream.h>
 #include <nucleus/Streams/DynamicBufferOutputStream.h>
 
@@ -70,7 +71,7 @@ int main(int argc, char* argv[]) {
   //      })[0];
   for (auto& resourceFilePath : resourceFiles) {
     if (!resourceFilePath.getPath().contains("LFD")
-        || !resourceFilePath.getPath().contains("BOX")
+        // || !resourceFilePath.getPath().contains("BOX")
     ) {
       continue;
     }
@@ -84,21 +85,28 @@ int main(int argc, char* argv[]) {
       // LOG(Info) << entry;
 
       nu::ArrayInputStream stream{nu::ArrayView<U8>{entry.data()}};
-      nu::DynamicBufferOutputStream outStream;
+      // nu::DynamicBufferOutputStream outStream;
 
-      if (entry.type() == ResourceType::Film) {
-        Film f;
-        f.read(&stream);
-        f.write(&outStream);
-//      } else if (entry.type() == ResourceType::Palette) {
-//        Palette p;
-//        p.read(&stream);
-//        p.write(&outStream);
-      } else if (entry.type() == ResourceType::Image) {
-        LOG(Info) << entry;
+      //      if (entry.type() == ResourceType::Film) {
+      //        Film f;
+      //        f.read(&stream, entry.data().size());
+      //        f.write(&outStream);
+      //      } else if (entry.type() == ResourceType::Palette) {
+      //        Palette p;
+      //        p.read(&stream);
+      //        p.write(&outStream);
+      //      } else
+      if (entry.type() == ResourceType::Image) {
+//        LOG(Info) << entry;
+
         Image p;
-        p.read(&stream);
-        p.write(&outStream);
+        p.read(&stream, entry.data().size());
+        // p.write(&outStream);
+      } else if (entry.type() == ResourceType::Animation) {
+//        LOG(Info) << entry;
+
+        Animation a;
+        a.read(&stream, entry.data().size());
       } else {
         continue;
       }

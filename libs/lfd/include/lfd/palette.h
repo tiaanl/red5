@@ -4,12 +4,14 @@
 
 #include <vector>
 
+#include "resource.h"
+
 namespace nu {
 class InputStream;
 class OutputStream;
 }  // namespace nu
 
-class Palette {
+class Palette : public Resource {
 public:
   struct Color {
     U8 red;
@@ -29,8 +31,8 @@ public:
     return m_colors;
   }
 
-  void read(nu::InputStream* stream);
-  void write(nu::OutputStream* stream);
+  void read(nu::InputStream* stream, MemSize size) override;
+  void write(nu::OutputStream* stream) override;
 
 private:
   U8 m_firstIndex;

@@ -9,7 +9,7 @@
 #include <nucleus/Logging.h>
 #endif
 
-void Palette::read(nu::InputStream* stream) {
+void Palette::read(nu::InputStream* stream, MemSize size) {
   m_firstIndex = stream->readU8();
   m_lastIndex = stream->readU8();
 
