@@ -31,7 +31,11 @@ public:
   }
 
   friend std::ostream& operator<<(std::ostream& os, const ResourceEntry& resourceEntry) {
-    os << '[' << (int)resourceEntry.m_type << ", " << resourceEntry.m_name.view() << ']';
+    char nameStr[9] = {};
+    std::memcpy(nameStr, resourceEntry.m_name.data(),
+                std::min(resourceEntry.m_name.length(), static_cast<StringLength>(8)));
+    os << '[' << resourceTypeToString(resourceEntry.m_type) << ", " << nameStr
+       << ", size: " << resourceEntry.data().size() << ']';
     return os;
   }
 

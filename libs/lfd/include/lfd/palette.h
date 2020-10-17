@@ -17,7 +17,19 @@ public:
     U8 blue;
   };
 
-  void load(nu::InputStream* stream);
+  U8 firstIndex() const {
+    return m_firstIndex;
+  }
+
+  U8 lastIndex() const {
+    return m_lastIndex;
+  }
+
+  const std::vector<Color>& colors() const {
+    return m_colors;
+  }
+
+  void read(nu::InputStream* stream);
   void write(nu::OutputStream* stream);
 
 private:

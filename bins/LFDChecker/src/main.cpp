@@ -44,10 +44,12 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
 #if 1
-#include <lfd/film.h>
 #include <nucleus/Streams/ArrayInputStream.h>
 #include <nucleus/Streams/DynamicBufferOutputStream.h>
 
+#include "lfd/film.h"
+#include "lfd/image.h"
+#include "lfd/palette.h"
 #include "lfd/resource_file.h"
 
 int main(int argc, char* argv[]) {
@@ -68,8 +70,8 @@ int main(int argc, char* argv[]) {
   //      })[0];
   for (auto& resourceFilePath : resourceFiles) {
     if (!resourceFilePath.getPath().contains("LFD")
-        // || !resourceFilePath.getPath().contains("BOX")
-        ) {
+        || !resourceFilePath.getPath().contains("BOX")
+    ) {
       continue;
     }
 
@@ -79,19 +81,29 @@ int main(int argc, char* argv[]) {
     auto entries = resourceFile.loadEntries();
 
     for (auto& entry : entries) {
-      if (entry.type() != ResourceType::Film) {
-        continue;
-      }
-
       // LOG(Info) << entry;
 
       nu::ArrayInputStream stream{nu::ArrayView<U8>{entry.data()}};
-      Film f;
-      f.load(&stream);
-
       nu::DynamicBufferOutputStream outStream;
-      f.write(&outStream);
 
+      if (entry.type() == ResourceType::Film) {
+        Film f;
+        f.read(&stream);
+        f.write(&outStream);
+//      } else if (entry.type() == ResourceType::Palette) {
+//        Palette p;
+//        p.read(&stream);
+//        p.write(&outStream);
+      } else if (entry.type() == ResourceType::Image) {
+        LOG(Info) << entry;
+        Image p;
+        p.read(&stream);
+        p.write(&outStream);
+      } else {
+        continue;
+      }
+
+#if 0
       if (entry.data().size() != outStream.buffer().size()) {
         LOG(Warning) << "Buffers are different sizes (" << entry.data().size() << " vs "
                      << outStream.buffer().size() << ")";
@@ -108,6 +120,7 @@ int main(int argc, char* argv[]) {
                    << (I32)right[i] << ")";
         break;
       }
+#endif  // 0
     }
   }
 

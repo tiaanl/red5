@@ -227,7 +227,7 @@ void writeBlock(nu::OutputStream* stream, const Film::Block& block) {
 
 }  // namespace
 
-void Film::load(nu::InputStream* stream) {
+void Film::read(nu::InputStream* stream) {
   m_blocks.clear();
 
   stream->skip(sizeof(U16));  // reserved

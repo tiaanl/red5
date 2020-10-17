@@ -63,7 +63,7 @@ public:
     std::vector<Chunk> chunks;
   };
 
-  void load(nu::InputStream* stream);
+  void read(nu::InputStream* stream);
   void write(nu::OutputStream* stream);
 
 private:
