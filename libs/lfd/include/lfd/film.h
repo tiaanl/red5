@@ -1,29 +1,16 @@
-#ifndef RESOURCE_FILM_H_
-#define RESOURCE_FILM_H_
+#pragma once
 
-#include <nucleus/Containers/DynamicArray.h>
-#include <nucleus/Memory/ScopedPtr.h>
-#include <nucleus/Streams/InputStream.h>
-#include <nucleus/Text/DynamicString.h>
+#include <nucleus/Types.h>
 
-#include "lfd.h"
+#include <string>
+#include <vector>
 
-// HEADER
-// - U16 reserved
-// - U16 number of frames
-// - U16 number of blocks
-// - blocks
-//   - U32 type
-//   - U8*8 name
-//   - U32 length
-//   - U16 type index
-//   - U16 number of chunks
-//   - U16 chunk data size
-//   - chunks
-//     - U16 op code
-//     - U16*? variables
+#include "lfd/resource_type.h"
 
-namespace film {
+namespace nu {
+class InputStream;
+class OutputStream;
+}  // namespace nu
 
 enum class OpCode : U16 {
   End = 0x02,          // Marker for the end of a `Block`
@@ -51,37 +38,35 @@ enum class OpCode : U16 {
 };
 
 enum class BlockType : U32 {
-  Anim = 0x4D494E41,  // Commands for an `Anim` resource.
-  Cust = 0x54535543,  // Commands for a `Cust` resource.
-  Delt = 0x544C4544,  // Commands for a `Delt` resource.
-  End = 0x00444E45,   // Marks the end of the `Film`.
-  Pltt = 0x54544C50,  // Commands for a `Pltt` resource.
-  View = 0x57454956,  // Commands for the layout of the `Film`.
-  Voic = 0x43494F56,  // Commands for `Blas` and `Voic` resources.
+  Anim = static_cast<U32>(ResourceType::Animation),
+  Cust = 0x54535543,
+  Delt = static_cast<U32>(ResourceType::Image),
+  Pltt = static_cast<U32>(ResourceType::Palette),
+  View = 0x57454956,
+  Voic = static_cast<U32>(ResourceType::Voice),
+
+  // Marks the end of the `Film`.
+  End = 0x00444E45,
 };
 
-struct Chunk {
-  OpCode opCode;
-  nu::DynamicArray<U16> vars;
+class Film {
+public:
+  struct Chunk {
+    OpCode opCode;
+    std::vector<U16> variables;
+  };
+
+  struct Block {
+    BlockType type;
+    U16 typeIndex;
+    std::string name;
+    std::vector<Chunk> chunks;
+  };
+
+  void load(nu::InputStream* stream);
+  void write(nu::OutputStream* stream);
+
+private:
+  U32 m_frameCount;
+  std::vector<Block> m_blocks;
 };
-
-struct Block {
-  BlockType type;
-  U16 typeIndex;
-  nu::DynamicString name;
-  nu::DynamicArray<Chunk> chunks;
-};
-
-struct Film {
-  U32 numberOfFrames;
-  nu::DynamicArray<Block> blocks;
-};
-
-const char* opCodeToString(OpCode opCode);
-
-nu::ScopedPtr<Film> read(nu::InputStream* stream);
-void write(nu::OutputStream* stream, const Film& film);
-
-}  // namespace film
-
-#endif  // RESOURCE_FILM_H_

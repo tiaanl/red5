@@ -1,8 +1,9 @@
-#if 1
-#include <Resources/ResourceFile.h>
+#if 0
 #include <nucleus/Streams/ArrayInputStream.h>
 #include <nucleus/Streams/DynamicBufferOutputStream.h>
 #include <resource/film.h>
+
+#include "lfd/resource_file.h"
 
 int main(int argc, char* argv[]) {
   const nu::FilePath& inPath = nu::FilePath{R"(C:\xwing\RESOURCE\LOGO2.LFD)"};
@@ -42,11 +43,12 @@ int main(int argc, char* argv[]) {
 }
 #endif  // 0
 
-#if 0
-#include <Resources/ResourceFile.h>
+#if 1
+#include <lfd/film.h>
 #include <nucleus/Streams/ArrayInputStream.h>
 #include <nucleus/Streams/DynamicBufferOutputStream.h>
-#include <resource/film.h>
+
+#include "lfd/resource_file.h"
 
 int main(int argc, char* argv[]) {
   auto resourcePath = nu::FilePath(R"(C:\xwing\RESOURCE)");
@@ -65,12 +67,13 @@ int main(int argc, char* argv[]) {
   //      resourceFiles, [](const nu::FilePath& path) { return path.getPath().contains("LOGO");
   //      })[0];
   for (auto& resourceFilePath : resourceFiles) {
-    if (!resourceFilePath.getPath().contains("LFD") ||
-        !resourceFilePath.getPath().contains("BOX")) {
+    if (!resourceFilePath.getPath().contains("LFD")
+        // || !resourceFilePath.getPath().contains("BOX")
+        ) {
       continue;
     }
 
-    LOG(Info) << resourceFilePath;
+    // LOG(Info) << resourceFilePath;
 
     ResourceFile resourceFile = ResourceFile{resourceFilePath};
     auto entries = resourceFile.loadEntries();
@@ -83,10 +86,11 @@ int main(int argc, char* argv[]) {
       // LOG(Info) << entry;
 
       nu::ArrayInputStream stream{nu::ArrayView<U8>{entry.data()}};
-      auto f = film::read(&stream);
+      Film f;
+      f.load(&stream);
 
       nu::DynamicBufferOutputStream outStream;
-      film::write(&outStream, *f);
+      f.write(&outStream);
 
       if (entry.data().size() != outStream.buffer().size()) {
         LOG(Warning) << "Buffers are different sizes (" << entry.data().size() << " vs "

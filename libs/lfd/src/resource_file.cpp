@@ -1,21 +1,12 @@
-#include "Resources/ResourceFile.h"
+#include "../include/lfd/resource_file.h"
 
 #include <nucleus/Streams/FileInputStream.h>
 #include <nucleus/Streams/FileOutputStream.h>
-#include <nucleus/Text/StringView.h>
 
 namespace {
 
-const U8 g_resourceTypes[][4] = {
-    {'R', 'M', 'A', 'P'},  // ResourceMap
-    {'P', 'L', 'T', 'T'},  // Palette
-    {'D', 'E', 'L', 'T'},  // Image
-    {'A', 'N', 'I', 'M'},  // Animation
-    {'F', 'I', 'L', 'M'},  // Film
-};
-
 struct Header {
-  U8 type[4];
+  ResourceType type;
   U8 name[8];
   U32 size;
 };
@@ -25,35 +16,19 @@ void readHeader(nu::InputStream* stream, Header* header) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Header& header) {
-  char typeStr[sizeof(Header::type) + 1] = {};
   char nameStr[sizeof(Header::name) + 1] = {};
 
-  std::memcpy(typeStr, header.type, sizeof(Header::type));
   std::memcpy(nameStr, header.name, sizeof(Header::name));
 
-  os << '[' << typeStr << ", " << nameStr << ", " << header.size << ']';
+  os << '[' << resourceTypeToString(header.type) << ", " << nameStr << ", " << header.size << ']';
 
   return os;
-}
-
-ResourceType toResourceType(U8* buf) {
-  for (U32 i = 0; i < NU_ARRAY_SIZE(g_resourceTypes); ++i) {
-    if (std::memcmp(buf, g_resourceTypes[i], 4) == 0) {
-      return static_cast<ResourceType>(i);
-    }
-  }
-
-  return ResourceType::Unknown;
-}
-
-const U8* resourceTypeToBuffer(ResourceType resourceType) {
-  return g_resourceTypes[static_cast<U32>(resourceType)];
 }
 
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
-  os << nu::StringView{(const char*)resourceTypeToBuffer(resourceType), 4};
+  os << resourceTypeToString(resourceType);
   return os;
 }
 
@@ -76,8 +51,6 @@ nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
     Header header{};
     readHeader(&stream, &header);
 
-    ResourceType type = toResourceType(header.type);
-
     nu::DynamicArray<U8> data;
     data.resize(header.size);
     stream.read(data.data(), header.size);
@@ -90,14 +63,15 @@ nu::DynamicArray<ResourceEntry> ResourceFile::loadEntries() const {
       }
     }
     nu::StringView nameStr{reinterpret_cast<Char*>(header.name), nameLength};
-    entries.emplaceBack(type, nameStr, std::move(data));
+    entries.emplaceBack(header.type, nameStr, std::move(data));
   }
 
   return entries;
 }
 
-void writeHeader(nu::OutputStream* stream, ResourceType resourceType, nu::StringView name, MemSize size) {
-  stream->write(resourceTypeToBuffer(resourceType), 4);
+void writeHeader(nu::OutputStream* stream, ResourceType resourceType, nu::StringView name,
+                 MemSize size) {
+  stream->writeU32(static_cast<U32>(resourceType));
   U8 nameBuf[8] = {};
   std::memcpy(nameBuf, name.data(), std::min(name.length(), sizeof(nameBuf)));
   stream->write(nameBuf, sizeof(nameBuf));

@@ -5,15 +5,7 @@
 #include <nucleus/FilePath.h>
 #include <nucleus/Text/StaticString.h>
 
-enum class ResourceType : U32 {
-  ResourceMap,
-  Palette,
-  Image,
-  Animation,
-  Film,
-
-  Unknown,
-};
+#include "lfd/resource_type.h"
 
 std::ostream& operator<<(std::ostream& os, ResourceType resourceType);
 
