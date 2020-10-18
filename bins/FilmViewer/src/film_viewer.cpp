@@ -26,11 +26,15 @@ int main(int argc, char* argv[]) {
       renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
 
   Scene scene;
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"});
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\REGISTER.LFD)"});
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\AWARDS.LFD)"});
-  scene.loadFilm("pilot");
-  // scene.loadFilm("mainmenu");
+
+  // Load the standard palette from the XWING base LFD file.
+  scene.loadPalette("standard");
+
+  if (!scene.loadFilm("mainmenu")) {
+    return 1;
+  }
 
   SDL_ShowWindow(window);
 
@@ -51,7 +55,6 @@ int main(int argc, char* argv[]) {
     SDL_RenderClear(renderer);
 #endif  // 0
 
-#if 1
     auto now = SDL_GetTicks();
     scene.update(now - lastTicks);
     lastTicks = now;
@@ -59,24 +62,13 @@ int main(int argc, char* argv[]) {
     SDL_Color* pixels;
     I32 pitch;
     if (SDL_LockTexture(screen, nullptr, (void**)&pixels, &pitch) == 0) {
-      std::memset(pixels, 255, pitch * g_screenHeight);
+      std::memset(pixels, 0, pitch * g_screenHeight);
+
       scene.render(pixels);
 
       SDL_UnlockTexture(screen);
       SDL_RenderCopy(renderer, screen, nullptr, nullptr);
     }
-#endif  // 0
-
-#if 0
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_Rect rect{
-        img.left() * g_screenScale,
-        img.top() * g_screenScale,
-        img.right() * g_screenScale,
-        img.bottom() * g_screenScale
-    };
-    SDL_RenderDrawRect(renderer, &rect);
-#endif  // 0
 
     SDL_RenderPresent(renderer);
   }

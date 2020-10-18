@@ -39,7 +39,6 @@ int main(int argc, char* argv[]) {
           break;
         }
 
-#if 0
         case ResourceType::Image: {
           Image image;
           image.read(&stream, entry.data().size());
@@ -57,7 +56,6 @@ int main(int argc, char* argv[]) {
           film.read(&stream, entry.data().size());
           break;
         }
-#endif  // 0
 
         default: {
           continue;

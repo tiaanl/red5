@@ -4,6 +4,7 @@
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
+#include <lfd/palette.h>
 #include <lfd/resource_file.h>
 
 #include <vector>
@@ -15,11 +16,16 @@ public:
   Scene();
 
   void addResources(const ResourceFile& resourceFile);
+
+  bool loadPalette(std::string_view name);
   bool loadFilm(std::string_view name);
+
   void update(U32 millis);
   void render(SDL_Color* pixels);
 
 private:
+  void applyPalette(const Palette& palette);
+
   void processFilm();
   void processViewBlock(const Film::Block& block);
   void processPaletteBlock(const Film::Block& block);

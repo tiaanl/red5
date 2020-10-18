@@ -17,7 +17,9 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
 
   U32 size = stream.readU32();
 
+#if 0
   lg::info("ResourceMap :: type: {}, name: {}, size: {}", resourceTypeToString(type), name, size);
+#endif  // 0
 
   // Skip the header block and get the details from the individual resource headers.
   stream.advance(size);

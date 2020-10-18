@@ -1,10 +1,11 @@
 #pragma once
 
+#include <base/streams/memory_input_stream.h>
+#include <lfd/resource_type.h>
+
 #include <filesystem>
 #include <optional>
 #include <vector>
-
-#include "lfd/resource_type.h"
 
 namespace base {
 class InputStream;
@@ -14,12 +15,6 @@ class ResourceEntry {
 public:
   ResourceEntry(ResourceType type, std::string name, std::vector<U8> data)
     : m_type{type}, m_name{name}, m_data{std::move(data)} {}
-
-  ResourceEntry(const ResourceEntry&) = delete;
-  ResourceEntry(ResourceEntry&&) = default;
-
-  ResourceEntry& operator=(const ResourceEntry&) = delete;
-  ResourceEntry& operator=(ResourceEntry&&) = default;
 
   ResourceType type() const {
     return m_type;
@@ -78,14 +73,9 @@ inline std::unique_ptr<T> loadResource(const std::vector<ResourceEntry>& entries
     return {};
   }
 
-  // LOG(Info) << "Resource size: " << resource->data().size();
+  base::MemoryInputStream stream{resource->data()};
+  auto result = std::make_unique<T>();
+  result->read(&stream, resource->data().size());
 
-  //  nu::ArrayInputStream stream{nu::ArrayView{resource->data().data(), resource->data().size()}};
-  //
-  //  auto result = std::make_unique<T>();
-  //  result->read(&stream, resource->data().size());
-  //
-  //  return result;
-
-  return {};
+  return result;
 }

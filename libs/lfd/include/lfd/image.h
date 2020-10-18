@@ -16,6 +16,9 @@ public:
     U16 left;
     U16 top;
     std::vector<U8> indices;
+
+    Line(U16 left, U16 top, std::vector<U8> indices)
+      : left{left}, top{top}, indices{std::move(indices)} {}
   };
 
   ~Image() override;

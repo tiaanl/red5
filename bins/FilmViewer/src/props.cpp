@@ -40,13 +40,6 @@ void Prop::updateState(U32 frame) {
         break;
       }
 
-      case OpCode::Frame: {
-        //        if (frame >= chunkTime) {
-        //          m_currentFrame = chunk.variables[0];
-        //        }
-        break;
-      }
-
       case OpCode::Move: {
         m_movePerFrame.x = chunk.variables[0];
         m_movePerFrame.y = chunk.variables[1];
@@ -68,12 +61,8 @@ void Prop::updateState(U32 frame) {
 void Prop::nextFrame(U32 sceneFrame) {
   updateState(sceneFrame);
 
-  if (m_movePerFrame.x != 0 || m_movePerFrame.y != 0) {
-    // LOG(Info) << "movePerFrame: " << m_movePerFrame.x << ", " << m_movePerFrame.y;
-  }
-
-  m_offset.x += m_movePerFrame.x;
-  m_offset.y += m_movePerFrame.y;
+  // m_offset.x += m_movePerFrame.x;
+  // m_offset.y += m_movePerFrame.y;
 }
 
 ImageProp::ImageProp(std::vector<Film::Chunk> chunks, std::unique_ptr<Image> image)
@@ -91,11 +80,10 @@ AnimationProp::AnimationProp(std::vector<Film::Chunk> chunks, std::unique_ptr<An
 void AnimationProp::nextFrame(U32 sceneFrame) {
   Prop::nextFrame(sceneFrame);
 
-  m_currentFrame = (U32)(m_animation->frames().size() - 1);
-  //  m_currentFrame += 1;
-  //  if (m_currentFrame >= m_animation->frames().size()) {
-  //    m_currentFrame = 0;
-  //  }
+  m_currentFrame += 1;
+  if (m_currentFrame >= m_animation->frames().size()) {
+    m_currentFrame = 0;
+  }
 }
 
 void AnimationProp::render(const RenderState& renderState) {
