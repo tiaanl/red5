@@ -4,9 +4,10 @@
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
-#include <nucleus/Types.h>
 
 #include <memory>
+
+#include "base/platform.h"
 
 struct RenderState {
   SDL_Color* palette;

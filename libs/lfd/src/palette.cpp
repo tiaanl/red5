@@ -1,15 +1,11 @@
 #include "lfd/palette.h"
 
-#include <nucleus/Streams/InputStream.h>
-#include <nucleus/Streams/OutputStream.h>
+#include "base/streams/input_stream.h"
+#include "base/streams/output_stream.h"
 
 #define TRACE_LOAD 0
 
-#if TRACE_LOAD
-#include <nucleus/Logging.h>
-#endif
-
-void Palette::read(nu::InputStream* stream, MemSize size) {
+void Palette::read(base::InputStream* stream, MemSize size) {
   m_firstIndex = stream->readU8();
   m_lastIndex = stream->readU8();
 
@@ -22,7 +18,7 @@ void Palette::read(nu::InputStream* stream, MemSize size) {
   stream->read(m_colors.data(), m_colors.size() * sizeof(Color));
 }
 
-void Palette::write(nu::OutputStream* stream) {
+void Palette::write(base::OutputStream* stream) {
   stream->writeU8(m_firstIndex);
   stream->writeU8(m_lastIndex);
   stream->write(m_colors.data(), m_colors.size() * sizeof(Color));

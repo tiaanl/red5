@@ -1,14 +1,13 @@
 #include "lfd/film.h"
 
-#include <nucleus/Logging.h>
-#include <nucleus/Streams/InputStream.h>
-#include <nucleus/Streams/OutputStream.h>
+#include "base/streams/input_stream.h"
+#include "base/streams/output_stream.h"
 
 #define TRACE_LOADING 0
 
 namespace {
 
-Film::Chunk readChunk(nu::InputStream* stream) {
+Film::Chunk readChunk(base::InputStream* stream) {
   auto dataSize = stream->readU16();
   auto opCode = static_cast<OpCode>(stream->readU16());
 
@@ -33,7 +32,7 @@ Film::Chunk readChunk(nu::InputStream* stream) {
   return newChunk;
 }
 
-Film::Block readBlock(nu::InputStream* stream) {
+Film::Block readBlock(base::InputStream* stream) {
   Film::Block result;
 
   result.type = static_cast<BlockType>(stream->readU32());
@@ -70,13 +69,13 @@ Film::Block readBlock(nu::InputStream* stream) {
   }
 
   MemSize bytesRead = stream->getPosition() - before;
-  DCHECK(bytesRead == chunksDataSize)
-      << "Incorrect amount of bytes read (" << bytesRead << " of " << chunksDataSize << ")";
+  //  DCHECK(bytesRead == chunksDataSize)
+  //      << "Incorrect amount of bytes read (" << bytesRead << " of " << chunksDataSize << ")";
 
   return result;
 }
 
-void writeChunk(nu::OutputStream* stream, const Film::Chunk& chunk) {
+void writeChunk(base::OutputStream* stream, const Film::Chunk& chunk) {
   stream->writeU16(static_cast<U16>(chunk.variables.size() + 2) * sizeof(U16));
   stream->writeU16(static_cast<U16>(chunk.opCode));
   for (auto v : chunk.variables) {
@@ -98,7 +97,7 @@ U32 calculateBlockSize(const Film::Block& block) {
   return size;
 }
 
-void writeBlock(nu::OutputStream* stream, const Film::Block& block) {
+void writeBlock(base::OutputStream* stream, const Film::Block& block) {
   stream->writeU32(static_cast<U32>(block.type));
 
   U8 nameStr[8] = {};
@@ -229,10 +228,10 @@ const char* blockTypeToString(BlockType blockType) {
 
 Film::~Film() = default;
 
-void Film::read(nu::InputStream* stream, MemSize size) {
+void Film::read(base::InputStream* stream, MemSize size) {
   m_blocks.clear();
 
-  stream->skip(sizeof(U16));  // reserved
+  stream->advance(sizeof(U16));  // reserved
   m_frameCount = stream->readU16();
   U16 numberOfBlocks = stream->readU16() + 1u;  // 0 indexed.
 
@@ -245,7 +244,7 @@ void Film::read(nu::InputStream* stream, MemSize size) {
   }
 }
 
-void Film::write(nu::OutputStream* stream) {
+void Film::write(base::OutputStream* stream) {
   stream->writeU16(4);
   stream->writeU16(m_frameCount);
   stream->writeU16(static_cast<U16>(m_blocks.size() - 1u));

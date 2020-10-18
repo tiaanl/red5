@@ -1,15 +1,15 @@
 #pragma once
 
-#include <nucleus/Types.h>
+#include "base/platform.h"
 
 #include <vector>
 
 #include "resource.h"
 
-namespace nu {
+namespace base {
 class InputStream;
 class OutputStream;
-}  // namespace nu
+}  // namespace base
 
 class Palette : public Resource {
 public:
@@ -31,8 +31,8 @@ public:
     return m_colors;
   }
 
-  void read(nu::InputStream* stream, MemSize size) override;
-  void write(nu::OutputStream* stream) override;
+  void read(base::InputStream* stream, MemSize size) override;
+  void write(base::OutputStream* stream) override;
 
 private:
   U8 m_firstIndex;

@@ -1,16 +1,16 @@
 #pragma once
 
-#include <nucleus/Types.h>
+#include "base/platform.h"
 
-namespace nu {
+namespace base {
 class InputStream;
 class OutputStream;
-}  //
+}
 
 class Resource {
 public:
   virtual ~Resource() = default;
 
-  virtual void read(nu::InputStream* stream, MemSize size) = 0;
-  virtual void write(nu::OutputStream* stream) = 0;
+  virtual void read(base::InputStream* stream, MemSize size) = 0;
+  virtual void write(base::OutputStream* stream) = 0;
 };

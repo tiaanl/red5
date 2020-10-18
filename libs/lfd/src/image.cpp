@@ -1,8 +1,7 @@
 #include "lfd/image.h"
 
-#include <nucleus/Logging.h>
-#include <nucleus/Streams/InputStream.h>
-#include <nucleus/Streams/OutputStream.h>
+#include "base/streams/input_stream.h"
+#include "base/streams/output_stream.h"
 
 #define TRACE_READ 0
 
@@ -10,7 +9,7 @@ namespace {
 
 using Line = Image::Line;
 
-Line readLine(nu::InputStream* stream) {
+Line readLine(base::InputStream* stream) {
   Line result;
 
   U16 dataSize = stream->readU16();
@@ -21,8 +20,9 @@ Line readLine(nu::InputStream* stream) {
   U16 lineLength = dataSize >> 1u;
 
 #if TRACE_READ
-  LOG(Info) << "Line :: dataSize: " << dataSize << ", left: " << result.left << ", top: " << result.top
-            << ", isCompressed: " << isCompressed << ", lineLength: " << lineLength;
+  LOG(Info) << "Line :: dataSize: " << dataSize << ", left: " << result.left
+            << ", top: " << result.top << ", isCompressed: " << isCompressed
+            << ", lineLength: " << lineLength;
 #endif
 
   if (isCompressed) {
@@ -65,7 +65,7 @@ Line readLine(nu::InputStream* stream) {
 
 Image::~Image() = default;
 
-void Image::read(nu::InputStream* stream, MemSize size) {
+void Image::read(base::InputStream* stream, MemSize size) {
   auto startPosition = stream->getPosition();
 
   m_left = stream->readU16();
@@ -82,13 +82,13 @@ void Image::read(nu::InputStream* stream, MemSize size) {
     m_lines.emplace_back(readLine(stream));
   }
 
-//  auto bytesRead = stream->getPosition() - startPosition;
-//  if (bytesRead != size) {
-//    LOG(Fatal) << "Image resource not fully read.  (" << bytesRead << " out of " << size << ")";
-//  }
+  //  auto bytesRead = stream->getPosition() - startPosition;
+  //  if (bytesRead != size) {
+  //    LOG(Fatal) << "Image resource not fully read.  (" << bytesRead << " out of " << size << ")";
+  //  }
 }
 
-void Image::write(nu::OutputStream* stream) {
+void Image::write(base::OutputStream* stream) {
   stream->writeU16(m_left);
   stream->writeU16(m_top);
   stream->writeU16(m_right);

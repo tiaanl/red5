@@ -90,7 +90,7 @@ void Scene::processViewBlock(const Film::Block& block) {}
 void Scene::processPaletteBlock(const Film::Block& block) {
   auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, block.name);
   if (!palette) {
-    LOG(Warning) << "Palette not found: " << block.name;
+    // LOG(Warning) << "Palette not found: " << block.name;
     return;
   }
 
@@ -105,7 +105,7 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 void Scene::processImageBlock(const Film::Block& block) {
   auto image = loadResource<Image>(m_entries, ResourceType::Image, block.name);
   if (!image) {
-    LOG(Warning) << "Image not found: " << block.name;
+    // LOG(Warning) << "Image not found: " << block.name;
     return;
   }
 
@@ -115,7 +115,7 @@ void Scene::processImageBlock(const Film::Block& block) {
 void Scene::processAnimationBlock(const Film::Block& block) {
   auto animation = loadResource<Animation>(m_entries, ResourceType::Animation, block.name);
   if (!animation) {
-    LOG(Warning) << "Animation not found: " << block.name;
+    // LOG(Warning) << "Animation not found: " << block.name;
     return;
   }
 

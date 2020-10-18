@@ -1,7 +1,9 @@
 #include "../include/lfd/resource_file.h"
 
-#include <nucleus/Streams/FileInputStream.h>
-#include <nucleus/Streams/FileOutputStream.h>
+#include <base/logging.h>
+
+#include "base/streams/file_input_stream.h"
+#include "base/streams/file_output_stream.h"
 
 namespace {
 
@@ -11,20 +13,6 @@ struct Header {
   U32 size;
 };
 
-void readHeader(nu::InputStream* stream, Header* header) {
-  stream->read(header, sizeof(Header));
-}
-
-std::ostream& operator<<(std::ostream& os, const Header& header) {
-  char nameStr[sizeof(Header::name) + 1] = {};
-
-  std::memcpy(nameStr, header.name, sizeof(Header::name));
-
-  os << '[' << resourceTypeToString(header.type) << ", " << nameStr << ", " << header.size << ']';
-
-  return os;
-}
-
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
@@ -33,13 +21,15 @@ std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
 }
 
 std::vector<ResourceEntry> ResourceFile::loadEntries() const {
-  // LOG(Info) << "Loading entries from resource file: " << m_path;
+  lg::info("Loading entries from resource file: {}", m_path.string());
 
-  nu::FileInputStream stream{m_path};
+  base::FileInputStream stream{m_path};
 
   Header mainHeader{};
-  readHeader(&stream, &mainHeader);
+  stream.read(&mainHeader, sizeof(mainHeader));
   MemSize entryCount = mainHeader.size / sizeof(Header);
+
+  lg::info("header: {}", mainHeader.size);
 
   // Skip the header block.
   stream.setPosition(stream.getPosition() + mainHeader.size);
@@ -49,9 +39,9 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
 
   for (MemSize i = 0; i < entryCount; ++i) {
     Header header{};
-    readHeader(&stream, &header);
+    stream.read(&header, sizeof(header));
 
-    nu::DynamicArray<U8> data;
+    std::vector<U8> data;
     data.resize(header.size);
     stream.read(data.data(), header.size);
 
@@ -62,14 +52,14 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
         break;
       }
     }
-    nu::StringView nameStr{reinterpret_cast<Char*>(header.name), nameLength};
+    std::string_view nameStr{reinterpret_cast<const char*>(header.name), nameLength};
     entries.emplace_back(header.type, nameStr, std::move(data));
   }
 
   return entries;
 }
 
-void writeHeader(nu::OutputStream* stream, ResourceType resourceType, nu::StringView name,
+void writeHeader(base::OutputStream* stream, ResourceType resourceType, std::string_view name,
                  MemSize size) {
   stream->writeU32(static_cast<U32>(resourceType));
   U8 nameBuf[8] = {};
@@ -78,8 +68,8 @@ void writeHeader(nu::OutputStream* stream, ResourceType resourceType, nu::String
   stream->writeU32(static_cast<U32>(size));
 }
 
-void ResourceFile::saveEntries(const nu::DynamicArray<ResourceEntry>& entries) {
-  nu::FileOutputStream stream{m_path};
+void ResourceFile::saveEntries(const std::vector<ResourceEntry>& entries) {
+  base::FileOutputStream stream{m_path};
 
   writeHeader(&stream, ResourceType::ResourceMap, "resource", entries.size() * 16);
 

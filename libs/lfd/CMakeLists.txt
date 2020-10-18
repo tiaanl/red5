@@ -1,6 +1,6 @@
 project(lfd)
 
-include(${nucleus_SOURCE_DIR}/cmake/Utils.cmake)
+include(${base_SOURCE_DIR}/cmake/Utils.cmake)
 
 set(lfd_HEADER_FILES
     include/lfd/animation.h
@@ -21,5 +21,5 @@ set(lfd_SOURCE_FILES
     src/resource_type.cpp
     )
 
-nucleus_add_library(lfd ${lfd_HEADER_FILES} ${lfd_SOURCE_FILES})
-target_link_libraries(lfd PUBLIC nucleus)
+base_add_library(lfd ${lfd_HEADER_FILES} ${lfd_SOURCE_FILES})
+target_link_libraries(lfd PUBLIC base)

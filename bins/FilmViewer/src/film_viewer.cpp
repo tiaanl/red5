@@ -26,11 +26,11 @@ int main(int argc, char* argv[]) {
       renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
 
   Scene scene;
-  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"}});
-  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\REGISTER.LFD)"}});
-  scene.addResources(ResourceFile{nu::FilePath{R"(C:\xwing\RESOURCE\AWARDS.LFD)"}});
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"});
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\REGISTER.LFD)"});
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\AWARDS.LFD)"});
   scene.loadFilm("pilot");
-//  scene.loadFilm("mainmenu");
+  // scene.loadFilm("mainmenu");
 
   SDL_ShowWindow(window);
 

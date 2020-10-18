@@ -1,17 +1,16 @@
 #pragma once
 
-#include <nucleus/Types.h>
-
 #include <string>
 #include <vector>
 
+#include "base/platform.h"
 #include "lfd/resource_type.h"
 #include "resource.h"
 
-namespace nu {
+namespace base {
 class InputStream;
 class OutputStream;
-}  // namespace nu
+}  // namespace base
 
 enum class OpCode : U16 {
   End = 0x02,          // Marker for the end of a `Block`
@@ -74,8 +73,8 @@ public:
     return m_blocks;
   }
 
-  void read(nu::InputStream* stream, MemSize size);
-  void write(nu::OutputStream* stream);
+  void read(base::InputStream* stream, MemSize size);
+  void write(base::OutputStream* stream);
 
 private:
   U32 m_frameCount;

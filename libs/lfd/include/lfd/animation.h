@@ -10,8 +10,8 @@ public:
     return m_frames;
   }
 
-  void read(nu::InputStream* stream, MemSize size) override;
-  void write(nu::OutputStream* stream) override;
+  void read(base::InputStream* stream, MemSize size) override;
+  void write(base::OutputStream* stream) override;
 
 private:
   std::vector<Image> m_frames;

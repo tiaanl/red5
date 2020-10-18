@@ -1,9 +1,8 @@
 #pragma once
 
-#include <nucleus/Types.h>
-
 #include <vector>
 
+#include "base/platform.h"
 #include "resource.h"
 
 namespace nu {
@@ -41,8 +40,8 @@ public:
     return m_lines;
   }
 
-  void read(nu::InputStream* stream, MemSize size) override;
-  void write(nu::OutputStream* stream) override;
+  void read(base::InputStream* stream, MemSize size) override;
+  void write(base::OutputStream* stream) override;
 
 private:
   U16 m_left;

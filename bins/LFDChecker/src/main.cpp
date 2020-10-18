@@ -44,47 +44,39 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
 #if 1
-#include <lfd/animation.h>
-#include <nucleus/Streams/ArrayInputStream.h>
-#include <nucleus/Streams/DynamicBufferOutputStream.h>
+#include <base/streams/memory_input_stream.h>
 
+#include <iostream>
+
+#include "base/logging.h"
+#include "lfd/animation.h"
 #include "lfd/film.h"
 #include "lfd/image.h"
 #include "lfd/palette.h"
 #include "lfd/resource_file.h"
 
 int main(int argc, char* argv[]) {
-  auto resourcePath = nu::FilePath(R"(C:\xwing\RESOURCE)");
+  auto resourcePath = std::filesystem::path{R"(C:\xwing\RESOURCE)"};
 
-  LOG(Info) << "Resource path: " << resourcePath;
+  lg::info("Resource Path: {}", resourcePath.string());
 
-  auto resourceFiles = nu::findAllFilesIn(resourcePath);
-  if (resourceFiles.isEmpty()) {
-    LOG(Error) << "No resource files found!";
-    return 1;
+  std::vector<std::filesystem::path> resourceFiles;
+  for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourcePath)) {
+    resourceFiles.emplace_back(dirEntry.path());
   }
 
-  // LOG(Info) << resourceFiles;
-
-  //  auto resourceFilePath = nu::filter(
-  //      resourceFiles, [](const nu::FilePath& path) { return path.getPath().contains("LOGO");
-  //      })[0];
-  for (auto& resourceFilePath : resourceFiles) {
-    if (!resourceFilePath.getPath().contains("LFD")
-        // || !resourceFilePath.getPath().contains("BOX")
-    ) {
+  for (auto& path : resourceFiles) {
+    if (path.extension() == "LFD") {
       continue;
     }
 
-    // LOG(Info) << resourceFilePath;
-
-    ResourceFile resourceFile = ResourceFile{resourceFilePath};
+    ResourceFile resourceFile = ResourceFile{path};
     auto entries = resourceFile.loadEntries();
 
     for (auto& entry : entries) {
-      // LOG(Info) << entry;
+      lg::info("entry: {} {}", resourceTypeToString(entry.type()), entry.name());
 
-      nu::ArrayInputStream stream{nu::ArrayView<U8>{entry.data()}};
+      base::MemoryInputStream stream{entry.data().data(), entry.data().size()};
       // nu::DynamicBufferOutputStream outStream;
 
       //      if (entry.type() == ResourceType::Film) {
@@ -97,13 +89,13 @@ int main(int argc, char* argv[]) {
       //        p.write(&outStream);
       //      } else
       if (entry.type() == ResourceType::Image) {
-//        LOG(Info) << entry;
+        //        LOG(Info) << entry;
 
         Image p;
         p.read(&stream, entry.data().size());
         // p.write(&outStream);
       } else if (entry.type() == ResourceType::Animation) {
-//        LOG(Info) << entry;
+        //        LOG(Info) << entry;
 
         Animation a;
         a.read(&stream, entry.data().size());

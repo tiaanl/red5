@@ -1,7 +1,5 @@
 #include "props.h"
 
-#include <nucleus/Logging.h>
-
 namespace {
 
 void drawImage(const Image& image, const RenderState& renderState, const Prop::Offset& offset) {
@@ -60,7 +58,7 @@ void Prop::updateState(U32 frame) {
       }
 
       default: {
-        LOG(Warning) << "OpCode not handled: " << opCodeToString(chunk.opCode);
+        // LOG(Warning) << "OpCode not handled: " << opCodeToString(chunk.opCode);
         break;
       }
     }
@@ -71,7 +69,7 @@ void Prop::nextFrame(U32 sceneFrame) {
   updateState(sceneFrame);
 
   if (m_movePerFrame.x != 0 || m_movePerFrame.y != 0) {
-    LOG(Info) << "movePerFrame: " << m_movePerFrame.x << ", " << m_movePerFrame.y;
+    // LOG(Info) << "movePerFrame: " << m_movePerFrame.x << ", " << m_movePerFrame.y;
   }
 
   m_offset.x += m_movePerFrame.x;

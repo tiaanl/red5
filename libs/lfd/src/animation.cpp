@@ -1,16 +1,14 @@
 #include "lfd/animation.h"
 
-#include <nucleus/Logging.h>
-#include <nucleus/Streams/InputStream.h>
-#include <nucleus/Streams/OutputStream.h>
-
 #include <cassert>
+
+#include "base/streams/input_stream.h"
 
 #define TRACE_READ 0
 
 namespace {
 
-Image readFrame(nu::InputStream* stream) {
+Image readFrame(base::InputStream* stream) {
   auto length = stream->readU32();
 
   auto startPosition = stream->getPosition();
@@ -31,7 +29,7 @@ Image readFrame(nu::InputStream* stream) {
 
 Animation::~Animation() = default;
 
-void Animation::read(nu::InputStream* stream, MemSize size) {
+void Animation::read(base::InputStream* stream, MemSize size) {
   auto frameCount = stream->readU16();
 
 #if TRACE_READ
@@ -43,6 +41,6 @@ void Animation::read(nu::InputStream* stream, MemSize size) {
   }
 }
 
-void Animation::write(nu::OutputStream* stream) {
+void Animation::write(base::OutputStream* stream) {
   assert(false);
 }
