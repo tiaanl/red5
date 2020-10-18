@@ -1,26 +1,27 @@
 #include "lfd/animation.h"
 
+#include <base/logging.h>
+#include <base/streams/input_stream.h>
+
 #include <cassert>
 
-#include "base/streams/input_stream.h"
-
-#define TRACE_READ 0
+#define TRACE_READ 1
 
 namespace {
 
 Image readFrame(base::InputStream* stream) {
-  auto length = stream->readU32();
+  auto dataSize = stream->readU32();
 
   auto startPosition = stream->getPosition();
 
 #if TRACE_READ
-  LOG(Info) << "data size for frame: " << length;
+  lg::info("Frame :: dataSize: {}", dataSize);
 #endif
 
   Image image;
-  image.read(stream, length);
+  image.read(stream, dataSize);
 
-  stream->setPosition(startPosition + length);
+  stream->setPosition(startPosition + dataSize);
 
   return image;
 }
@@ -33,7 +34,7 @@ void Animation::read(base::InputStream* stream, MemSize size) {
   auto frameCount = stream->readU16();
 
 #if TRACE_READ
-  LOG(Info) << "Animation :: frameCount: " << frameCount;
+  lg::info("Animation :: frameCount: {}", frameCount);
 #endif
 
   for (U16 i = 0; i < frameCount; ++i) {

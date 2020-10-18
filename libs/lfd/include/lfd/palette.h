@@ -38,4 +38,5 @@ private:
   U8 m_firstIndex;
   U8 m_lastIndex;
   std::vector<Color> m_colors;
+  std::vector<U32> m_extras;
 };

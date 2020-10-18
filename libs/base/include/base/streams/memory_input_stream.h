@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "base/streams/input_stream.h"
 
 namespace base {
@@ -7,6 +9,7 @@ namespace base {
 class MemoryInputStream : public InputStream {
 public:
   MemoryInputStream(const U8* data, MemSize size);
+  MemoryInputStream(const std::vector<U8>& data);
 
   MemSize getPosition() override;
   void setPosition(MemSize position) override;

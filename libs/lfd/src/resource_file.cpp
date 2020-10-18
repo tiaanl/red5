@@ -1,62 +1,51 @@
 #include "../include/lfd/resource_file.h"
 
 #include <base/logging.h>
-
-#include "base/streams/file_input_stream.h"
-#include "base/streams/file_output_stream.h"
-
-namespace {
-
-struct Header {
-  ResourceType type;
-  U8 name[8];
-  U32 size;
-};
-
-}  // namespace
-
-std::ostream& operator<<(std::ostream& os, ResourceType resourceType) {
-  os << resourceTypeToString(resourceType);
-  return os;
-}
+#include <base/streams/file_input_stream.h>
+#include <base/streams/file_output_stream.h>
 
 std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   lg::info("Loading entries from resource file: {}", m_path.string());
 
   base::FileInputStream stream{m_path};
 
-  Header mainHeader{};
-  stream.read(&mainHeader, sizeof(mainHeader));
-  MemSize entryCount = mainHeader.size / sizeof(Header);
+  // Read ResourceMap header.
+  ResourceType type = static_cast<ResourceType>(stream.readU32());
 
-  lg::info("header: {}", mainHeader.size);
+  U8 name[9] = {};
+  stream.read(name, 8);
 
-  // Skip the header block.
-  stream.setPosition(stream.getPosition() + mainHeader.size);
+  U32 size = stream.readU32();
+
+  lg::info("ResourceMap :: type: {}, name: {}, size: {}", resourceTypeToString(type), name, size);
+
+  // Skip the header block and get the details from the individual resource headers.
+  stream.advance(size);
 
   std::vector<ResourceEntry> entries;
-  entries.reserve(entryCount);
-
-  for (MemSize i = 0; i < entryCount; ++i) {
-    Header header{};
-    stream.read(&header, sizeof(header));
-
-    std::vector<U8> data;
-    data.resize(header.size);
-    stream.read(data.data(), header.size);
-
-    MemSize nameLength = 8;
-    for (MemSize j = 0; j < 8; ++j) {
-      if (!header.name[j]) {
-        nameLength = j;
-        break;
-      }
+  for (MemSize i = 0; i < size / 16; ++i) {
+    auto resource = readResourceEntry(&stream);
+    if (resource.has_value()) {
+      entries.emplace_back(std::move(resource.value()));
     }
-    std::string_view nameStr{reinterpret_cast<const char*>(header.name), nameLength};
-    entries.emplace_back(header.type, nameStr, std::move(data));
   }
 
   return entries;
+}
+
+// static
+std::optional<ResourceEntry> ResourceFile::readResourceEntry(base::InputStream* stream) {
+  ResourceType type = static_cast<ResourceType>(stream->readU32());
+  char name[9] = {};
+  stream->read(name, 8);
+  U32 size = stream->readU32();
+
+  std::vector<U8> data;
+  data.resize(size);
+
+  stream->read(data.data(), size);
+
+  return ResourceEntry{type, name, std::move(data)};
 }
 
 void writeHeader(base::OutputStream* stream, ResourceType resourceType, std::string_view name,

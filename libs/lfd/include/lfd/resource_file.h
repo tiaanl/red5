@@ -1,16 +1,25 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 #include "lfd/resource_type.h"
 
-std::ostream& operator<<(std::ostream& os, ResourceType resourceType);
+namespace base {
+class InputStream;
+}  // namespace base
 
 class ResourceEntry {
 public:
-  ResourceEntry(ResourceType type, std::string_view name, std::vector<U8> data)
+  ResourceEntry(ResourceType type, std::string name, std::vector<U8> data)
     : m_type{type}, m_name{name}, m_data{std::move(data)} {}
+
+  ResourceEntry(const ResourceEntry&) = delete;
+  ResourceEntry(ResourceEntry&&) = default;
+
+  ResourceEntry& operator=(const ResourceEntry&) = delete;
+  ResourceEntry& operator=(ResourceEntry&&) = default;
 
   ResourceType type() const {
     return m_type;
@@ -42,6 +51,8 @@ public:
   void saveEntries(const std::vector<ResourceEntry>& entries);
 
 private:
+  static std::optional<ResourceEntry> readResourceEntry(base::InputStream* stream);
+
   std::filesystem::path m_path;
 };
 
@@ -69,12 +80,12 @@ inline std::unique_ptr<T> loadResource(const std::vector<ResourceEntry>& entries
 
   // LOG(Info) << "Resource size: " << resource->data().size();
 
-//  nu::ArrayInputStream stream{nu::ArrayView{resource->data().data(), resource->data().size()}};
-//
-//  auto result = std::make_unique<T>();
-//  result->read(&stream, resource->data().size());
-//
-//  return result;
+  //  nu::ArrayInputStream stream{nu::ArrayView{resource->data().data(), resource->data().size()}};
+  //
+  //  auto result = std::make_unique<T>();
+  //  result->read(&stream, resource->data().size());
+  //
+  //  return result;
 
   return {};
 }
