@@ -10,7 +10,7 @@ void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
-    // lg::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
+    lg::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
     m_entries.emplace_back(std::move(entry));
   }
 }
@@ -40,11 +40,13 @@ bool Scene::loadFilm(std::string_view name) {
 }
 
 void Scene::update(U32 millis) {
+  static const U32 millisPerFrame = 250;
+
   m_totalMillis += millis;
 
-  if (m_totalMillis > 1000) {
+  if (m_totalMillis > millisPerFrame) {
     m_currentFrame += 1;
-    m_totalMillis %= 1000;
+    m_totalMillis %= millisPerFrame;
 
     for (auto& prop : m_props) {
       prop->nextFrame(m_currentFrame);

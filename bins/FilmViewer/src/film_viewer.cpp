@@ -6,7 +6,7 @@
 
 #include "scene.h"
 
-constexpr U16 g_screenScale = 4;
+constexpr U16 g_screenScale = 5;
 constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
 
@@ -26,13 +26,13 @@ int main(int argc, char* argv[]) {
       renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
 
   Scene scene;
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"});
 
   // Load the standard palette from the XWING base LFD file.
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   scene.loadPalette("standard");
 
-  if (!scene.loadFilm("mainmenu")) {
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\DFIRE.LFD)"});
+  if (!scene.loadFilm("dfire2_f")) {
     return 1;
   }
 

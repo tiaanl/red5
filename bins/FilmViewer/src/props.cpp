@@ -1,12 +1,20 @@
 #include "props.h"
 
+#include <base/logging.h>
+
 namespace {
 
 void drawImage(const Image& image, const RenderState& renderState, const Prop::Offset& offset) {
   // LOG(Info) << "Drawing image at (" << image.left() << ", " << image.top() << ")";
   for (auto& line : image.lines()) {
+    if (line.top + offset.y >= renderState.screenHeight) {
+      break;
+    }
     MemSize pos = (line.top + offset.y) * renderState.screenWidth + (line.left + offset.x);
     for (auto index : line.indices) {
+      if (line.left + offset.x + index >= renderState.screenWidth) {
+        break;
+      }
       renderState.pixels[pos++] = renderState.palette[index];
     }
   }
@@ -51,7 +59,7 @@ void Prop::updateState(U32 frame) {
       }
 
       default: {
-        // LOG(Warning) << "OpCode not handled: " << opCodeToString(chunk.opCode);
+        // lg::info("OpCode not handled: {}", opCodeToString(chunk.opCode));
         break;
       }
     }
@@ -61,8 +69,8 @@ void Prop::updateState(U32 frame) {
 void Prop::nextFrame(U32 sceneFrame) {
   updateState(sceneFrame);
 
-  // m_offset.x += m_movePerFrame.x;
-  // m_offset.y += m_movePerFrame.y;
+  m_offset.x += m_movePerFrame.x % 2;
+  m_offset.y += m_movePerFrame.y % 2;
 }
 
 ImageProp::ImageProp(std::vector<Film::Chunk> chunks, std::unique_ptr<Image> image)

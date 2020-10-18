@@ -73,8 +73,8 @@ public:
     return m_blocks;
   }
 
-  void read(base::InputStream* stream, MemSize size);
-  void write(base::OutputStream* stream);
+  void read(base::InputStream* stream, MemSize size) override;
+  void write(base::OutputStream* stream) override;
 
 private:
   U32 m_frameCount;
