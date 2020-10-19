@@ -1,8 +1,8 @@
 #include "scene/scene.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
+
+namespace scene {
 
 namespace {
 
@@ -48,7 +48,8 @@ SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
 
 }  // namespace
 
-Scene::Scene(SDL_Renderer* renderer) : m_renderer{renderer}, m_palette{} {}
+Scene::Scene(Delegate* sceneDelegate, SDL_Renderer* renderer)
+  : m_delegate{sceneDelegate}, m_renderer{renderer}, m_palette{} {}
 
 void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
@@ -183,7 +184,7 @@ void Scene::processImageBlock(const Film::Block& block) {
   SDL_Rect rect{image->left(), image->top(), image->width(), image->height()};
   renderItems.emplace_back(texture, rect);
 
-  m_props.emplace_back(block.chunks, std::move(renderItems));
+  m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
@@ -200,5 +201,7 @@ void Scene::processAnimationBlock(const Film::Block& block) {
     renderItems.emplace_back(texture, rect);
   }
 
-  m_props.emplace_back(block.chunks, std::move(renderItems));
+  m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
 }
+
+}  // namespace scene

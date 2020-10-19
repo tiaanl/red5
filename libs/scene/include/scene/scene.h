@@ -10,11 +10,14 @@
 
 #include <vector>
 
-#include "props.h"
+#include "scene/props.h"
+#include "scene/scene_delegate.h"
+
+namespace scene {
 
 class Scene {
 public:
-  explicit Scene(SDL_Renderer* renderer);
+  explicit Scene(Delegate* sceneDelegate, SDL_Renderer* renderer);
 
   void addResources(const ResourceFile& resourceFile);
 
@@ -33,6 +36,7 @@ private:
   void processImageBlock(const Film::Block& block);
   void processAnimationBlock(const Film::Block& block);
 
+  Delegate* m_delegate;
   SDL_Renderer* m_renderer;
 
   std::vector<ResourceEntry> m_entries;
@@ -47,3 +51,5 @@ private:
   U32 m_currentFrame = 0;
   U16 m_frameCount = 0;
 };
+
+}  // namespace scene

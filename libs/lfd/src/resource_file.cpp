@@ -2,7 +2,6 @@
 
 #include <base/streams/file_input_stream.h>
 #include <base/streams/file_output_stream.h>
-#include <spdlog/spdlog.h>
 
 std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   spdlog::info("Loading entries from resource file: {}", m_path.string());

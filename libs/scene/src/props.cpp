@@ -1,8 +1,8 @@
 #include "scene/props.h"
 
-#include <spdlog/spdlog.h>
-
 #define TRACE_OP_CODES 0
+
+namespace scene {
 
 RenderItem::RenderItem(SDL_Texture* texture, const SDL_Rect& rect)
   : m_texture{texture}, m_rect{rect} {}
@@ -25,8 +25,26 @@ bool RenderItem::render(SDL_Renderer* renderer, const SDL_Point& offset,
                           static_cast<SDL_RendererFlip>(flip)) == 0;
 }
 
-Prop::Prop(std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems)
-  : m_chunks{std::move(chunks)}, m_renderItems{std::move(renderItems)} {}
+Prop::Prop(Delegate* delegate, std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems)
+  : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_renderItems{std::move(renderItems)} {}
+
+void Prop::nextFrame(U32 sceneFrame) {
+  if (sceneFrame == 0) {
+    resetState();
+  }
+
+  updateState(sceneFrame);
+
+  m_offset.x += m_movePerFrame.x;
+  m_offset.y += m_movePerFrame.y;
+
+  m_currentFrame += m_animation.direction;
+  if (m_currentFrame < 0) {
+    m_currentFrame = static_cast<I16>(m_renderItems.size()) - 1;
+  } else if (m_currentFrame >= m_renderItems.size()) {
+    m_currentFrame = 0;
+  }
+}
 
 void Prop::updateState(U32 frame) {
   // Find the first chunk that has the same time as `frame`.
@@ -173,7 +191,7 @@ void Prop::applyEvent(I16 event) {
   spdlog::info("OpCode::Event :: event: {}", event);
 #endif
 
-  spdlog::info("Event {} triggered.", event);
+  m_delegate->onEvent(event);
 }
 
 void Prop::applyWindow(I16 x, I16 y, I16 w, I16 h) {
@@ -211,26 +229,10 @@ void Prop::applyOrientation(I16 x, I16 y) {
   m_orientation.y = y;
 }
 
-void Prop::nextFrame(U32 sceneFrame) {
-  if (sceneFrame == 0) {
-    resetState();
-  }
-
-  updateState(sceneFrame);
-
-  m_offset.x += m_movePerFrame.x;
-  m_offset.y += m_movePerFrame.y;
-
-  m_currentFrame += m_animation.direction;
-  if (m_currentFrame < 0) {
-    m_currentFrame = static_cast<I16>(m_renderItems.size()) - 1;
-  } else if (m_currentFrame >= m_renderItems.size()) {
-    m_currentFrame = 0;
-  }
-}
-
 void Prop::render(SDL_Renderer* renderer) {
   if (m_visible) {
     m_renderItems[m_currentFrame].render(renderer, m_offset, m_orientation);
   }
 }
+
+}  // namespace scene

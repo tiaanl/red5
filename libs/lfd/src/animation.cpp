@@ -1,7 +1,6 @@
 #include "lfd/animation.h"
 
 #include <base/streams/input_stream.h>
-#include <spdlog/spdlog.h>
 
 #include <cassert>
 

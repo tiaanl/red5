@@ -1,12 +1,8 @@
 #include <base/streams/memory_input_stream.h>
 #include <lfd/animation.h>
 #include <lfd/film.h>
-#include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
-#include <spdlog/spdlog.h>
-
-#include <iostream>
 
 int main(int argc, char* argv[]) {
   auto resourcePath = std::filesystem::path{R"(C:\xwing\RESOURCE)"};

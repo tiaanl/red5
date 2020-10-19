@@ -8,6 +8,10 @@
 
 #include <memory>
 
+#include "scene/scene_delegate.h"
+
+namespace scene {
+
 class RenderItem {
 public:
   RenderItem(SDL_Texture* texture, const SDL_Rect& rect);
@@ -21,7 +25,7 @@ private:
 
 class Prop {
 public:
-  Prop(std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems);
+  Prop(Delegate* delegate, std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems);
 
   U32 layer() const {
     return m_layer;
@@ -45,6 +49,7 @@ protected:
   void applyDisplay(I16 visible);
   void applyOrientation(I16 x, I16 y);
 
+  Delegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
   std::vector<RenderItem> m_renderItems;
 
@@ -60,3 +65,5 @@ protected:
     I16 frameRate;
   } m_animation;
 };
+
+}  // namespace scene
