@@ -3,10 +3,9 @@
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
+#include <scene/scene.h>
 #include <spdlog/sinks/msvc_sink.h>
 #include <spdlog/spdlog.h>
-
-#include "scene.h"
 
 constexpr U16 g_screenScale = 4;
 constexpr U16 g_screenWidth = 320;

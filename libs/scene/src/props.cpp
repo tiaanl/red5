@@ -1,4 +1,4 @@
-#include "props.h"
+#include "scene/props.h"
 
 #include <spdlog/spdlog.h>
 
