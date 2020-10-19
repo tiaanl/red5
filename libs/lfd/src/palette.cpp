@@ -1,8 +1,8 @@
 #include "lfd/palette.h"
 
-#include <base/logging.h>
 #include <base/streams/input_stream.h>
 #include <base/streams/output_stream.h>
+#include <spdlog/spdlog.h>
 
 #define TRACE_READ 0
 
@@ -13,8 +13,8 @@ void Palette::read(base::InputStream* stream, MemSize size) {
   U8 colorCount = m_lastIndex - m_firstIndex + 1;
 
 #if TRACE_READ
-  lg::info("Palette ({}) :: firstIndex: {}, lastIndex: {}, colorCount: {}", size, m_firstIndex,
-           m_lastIndex, colorCount);
+  spdlog::info("Palette ({}) :: firstIndex: {}, lastIndex: {}, colorCount: {}", size, m_firstIndex,
+               m_lastIndex, colorCount);
 #endif
 
   m_colors.resize(colorCount);

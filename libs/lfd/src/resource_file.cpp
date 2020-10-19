@@ -1,11 +1,11 @@
 #include "../include/lfd/resource_file.h"
 
-#include <base/logging.h>
 #include <base/streams/file_input_stream.h>
 #include <base/streams/file_output_stream.h>
+#include <spdlog/spdlog.h>
 
 std::vector<ResourceEntry> ResourceFile::loadEntries() const {
-  lg::info("Loading entries from resource file: {}", m_path.string());
+  spdlog::info("Loading entries from resource file: {}", m_path.string());
 
   base::FileInputStream stream{m_path};
 
@@ -18,7 +18,7 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   U32 size = stream.readU32();
 
 #if 0
-  lg::info("ResourceMap :: type: {}, name: {}, size: {}", resourceTypeToString(type), name, size);
+  spdlog::info("ResourceMap :: type: {}, name: {}, size: {}", resourceTypeToString(type), name, size);
 #endif  // 0
 
   // Skip the header block and get the details from the individual resource headers.

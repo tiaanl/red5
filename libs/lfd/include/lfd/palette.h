@@ -1,10 +1,10 @@
 #pragma once
 
-#include "base/platform.h"
+#include <base/platform.h>
 
 #include <vector>
 
-#include "resource.h"
+#include "lfd/resource.h"
 
 namespace base {
 class InputStream;

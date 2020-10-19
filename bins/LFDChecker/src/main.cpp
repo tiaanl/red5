@@ -1,17 +1,17 @@
-#include <base/logging.h>
 #include <base/streams/memory_input_stream.h>
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 
 int main(int argc, char* argv[]) {
   auto resourcePath = std::filesystem::path{R"(C:\xwing\RESOURCE)"};
 
-  lg::info("Resource Path: {}", resourcePath.string());
+  spdlog::info("Resource Path: {}", resourcePath.string());
 
   std::vector<std::filesystem::path> resourceFiles;
   for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourcePath)) {
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     auto entries = resourceFile.loadEntries();
 
     for (auto& entry : entries) {
-      // lg::info("Entry :: ({}) {}", resourceTypeToString(entry.type()), entry.name());
+      // spdlog::info("Entry :: ({}) {}", resourceTypeToString(entry.type()), entry.name());
 
       base::MemoryInputStream stream{entry.data()};
       auto startPosition = stream.getPosition();
@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
 
       // Check that the whole stream was consumed.
       if (stream.getPosition() < entry.data().size()) {
-        lg::warn("Resource contained {} bytes, but only {} bytes were read.", entry.data().size(),
-                 stream.getPosition() - startPosition);
+        spdlog::warn("Resource contained {} bytes, but only {} bytes were read.",
+                     entry.data().size(), stream.getPosition() - startPosition);
       }
     }
   }

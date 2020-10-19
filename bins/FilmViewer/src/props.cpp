@@ -1,6 +1,6 @@
 #include "props.h"
 
-#include <base/logging.h>
+#include <spdlog/spdlog.h>
 
 #define TRACE_OP_CODES 0
 
@@ -40,7 +40,7 @@ void Prop::updateState(U32 frame) {
   }
 
 #if TRACE_OP_CODES > 0
-  lg::info("Found first time at: {}", frame);
+  spdlog::info("Found first time at: {}", frame);
 #endif
 
   for (++it; it != std::end(m_chunks); ++it) {
@@ -100,7 +100,7 @@ void Prop::updateState(U32 frame) {
         break;
 
       default: {
-        lg::warn("OpCode not handled: {}", opCodeToString(it->opCode));
+        spdlog::warn("OpCode not handled: {}", opCodeToString(it->opCode));
         break;
       }
     }
@@ -119,7 +119,7 @@ void Prop::resetState() {
 
 void Prop::applyMove(I16 x, I16 y, I16 xx, I16 yy) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Move :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
+  spdlog::info("OpCode::Move :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
   m_offset.x += x;
@@ -131,7 +131,7 @@ void Prop::applyMove(I16 x, I16 y, I16 xx, I16 yy) {
 
 void Prop::applySpeed(I16 x, I16 y, I16 xx, I16 yy) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Speed :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
+  spdlog::info("OpCode::Speed :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
   m_movePerFrame.x = x;
@@ -143,7 +143,7 @@ void Prop::applySpeed(I16 x, I16 y, I16 xx, I16 yy) {
 
 void Prop::applyLayer(I16 layer) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Layer :: layer: {}", layer);
+  spdlog::info("OpCode::Layer :: layer: {}", layer);
 #endif
 
   m_layer = layer;
@@ -151,7 +151,7 @@ void Prop::applyLayer(I16 layer) {
 
 void Prop::applyFrame(I16 frame, I16 x) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Frame :: frame: {}, x: {}", frame, x);
+  spdlog::info("OpCode::Frame :: frame: {}, x: {}", frame, x);
 #endif
 
   m_currentFrame = frame;
@@ -161,7 +161,7 @@ void Prop::applyFrame(I16 frame, I16 x) {
 
 void Prop::applyAnimation(I16 direction, I16 frameRate) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Animation :: direction: {}, frameRate: {}", direction, frameRate);
+  spdlog::info("OpCode::Animation :: direction: {}, frameRate: {}", direction, frameRate);
 #endif
 
   m_animation.direction = direction;
@@ -170,21 +170,21 @@ void Prop::applyAnimation(I16 direction, I16 frameRate) {
 
 void Prop::applyEvent(I16 event) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Event :: event: {}", event);
+  spdlog::info("OpCode::Event :: event: {}", event);
 #endif
 
-  lg::info("Event {} triggered.", event);
+  spdlog::info("Event {} triggered.", event);
 }
 
 void Prop::applyWindow(I16 x, I16 y, I16 w, I16 h) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Window :: x: {}, y: {}, w: {}, h: {}", x, y, w, h);
+  spdlog::info("OpCode::Window :: x: {}, y: {}, w: {}, h: {}", x, y, w, h);
 #endif
 }
 
 void Prop::applyShift(I16 x, I16 y, I16 xx, I16 yy) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Shift :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
+  spdlog::info("OpCode::Shift :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
   m_offset.x = x;
@@ -196,7 +196,7 @@ void Prop::applyShift(I16 x, I16 y, I16 xx, I16 yy) {
 
 void Prop::applyDisplay(I16 visible) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Display :: visible: {}", visible);
+  spdlog::info("OpCode::Display :: visible: {}", visible);
 #endif
 
   m_visible = visible != 0;
@@ -204,7 +204,7 @@ void Prop::applyDisplay(I16 visible) {
 
 void Prop::applyOrientation(I16 x, I16 y) {
 #if TRACE_OP_CODES > 0
-  lg::info("OpCode::Orientation :: x: {}, y: {}", x, y);
+  spdlog::info("OpCode::Orientation :: x: {}, y: {}", x, y);
 #endif
 
   m_orientation.x = x;

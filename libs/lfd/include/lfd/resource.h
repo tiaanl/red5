@@ -1,11 +1,11 @@
 #pragma once
 
-#include "base/platform.h"
+#include <base/platform.h>
 
 namespace base {
 class InputStream;
 class OutputStream;
-}
+}  // namespace base
 
 class Resource {
 public:

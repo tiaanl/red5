@@ -1,9 +1,10 @@
 #pragma once
 
+#include <base/platform.h>
+
 #include <vector>
 
-#include "base/platform.h"
-#include "resource.h"
+#include "lfd/resource.h"
 
 namespace nu {
 class InputStream;

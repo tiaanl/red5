@@ -1,11 +1,12 @@
 #pragma once
 
 #include <base/streams/memory_input_stream.h>
-#include <lfd/resource_type.h>
 
 #include <filesystem>
 #include <optional>
 #include <vector>
+
+#include "lfd/resource_type.h"
 
 namespace base {
 class InputStream;

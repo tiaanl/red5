@@ -3,6 +3,8 @@
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/spdlog.h>
 
 #include "scene.h"
 
@@ -11,6 +13,8 @@ constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
 
 int main(int argc, char* argv[]) {
+  spdlog::default_logger()->sinks().push_back(std::make_shared<spdlog::sinks::windebug_sink_st>());
+
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     return 1;
   }
@@ -28,8 +32,8 @@ int main(int argc, char* argv[]) {
   scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   scene.loadPalette("standard");
 
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\BLUEPRNT.LFD)"});
-  if (!scene.loadFilm("blueprnt")) {
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\REGISTER.LFD)"});
+  if (!scene.loadFilm("pilot")) {
     return 1;
   }
 

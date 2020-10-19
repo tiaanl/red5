@@ -1,9 +1,8 @@
 #include "lfd/image.h"
 
-#include <base/logging.h>
-
-#include "base/streams/input_stream.h"
-#include "base/streams/output_stream.h"
+#include <base/streams/input_stream.h>
+#include <base/streams/output_stream.h>
+#include <spdlog/spdlog.h>
 
 #define TRACE_READ 0
 
@@ -25,8 +24,8 @@ bool readLine(base::InputStream* stream, std::vector<Line>* lines) {
   U16 lineLength = dataSize >> 1u;
 
 #if TRACE_READ >= 2
-  lg::info("Line :: dataSize: {}, left: {}, top: {}, isCompressed: {}, lineLength: {}", dataSize,
-           left, top, isCompressed, lineLength);
+  spdlog::info("Line :: dataSize: {}, left: {}, top: {}, isCompressed: {}, lineLength: {}",
+               dataSize, left, top, isCompressed, lineLength);
 #endif
 
   std::vector<U8> indices;
@@ -82,8 +81,8 @@ void Image::read(base::InputStream* stream, MemSize size) {
   m_bottom = stream->readU16();
 
 #if TRACE_READ >= 1
-  lg::info("Image ({}) :: left: {}, top: {}, right: {}, bottom: {}", size, m_left, m_top, m_right,
-           m_bottom);
+  spdlog::info("Image ({}) :: left: {}, top: {}, right: {}, bottom: {}", size, m_left, m_top,
+               m_right, m_bottom);
 #endif
 
   for (;;) {
