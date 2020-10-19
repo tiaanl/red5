@@ -1,6 +1,6 @@
 #include "scene.h"
 
-#include <base/logging.h>
+#include <spdlog/spdlog.h>
 
 #include <cassert>
 
@@ -54,7 +54,7 @@ void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
-    lg::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
+    spdlog::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
     m_entries.emplace_back(std::move(entry));
   }
 }
@@ -162,7 +162,7 @@ void Scene::processViewBlock(const Film::Block& block) {}
 void Scene::processPaletteBlock(const Film::Block& block) {
   auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, block.name);
   if (!palette) {
-    lg::warn("Palette not found: {}", block.name);
+    spdlog::warn("Palette not found: {}", block.name);
     return;
   }
 
@@ -174,7 +174,7 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 void Scene::processImageBlock(const Film::Block& block) {
   auto image = loadResource<Image>(m_entries, ResourceType::Image, block.name);
   if (!image) {
-    lg::warn("Image not found: {}", block.name);
+    spdlog::warn("Image not found: {}", block.name);
     return;
   }
 
@@ -189,7 +189,7 @@ void Scene::processImageBlock(const Film::Block& block) {
 void Scene::processAnimationBlock(const Film::Block& block) {
   auto animation = loadResource<Animation>(m_entries, ResourceType::Animation, block.name);
   if (!animation) {
-    lg::warn("Animation not found: {}", block.name);
+    spdlog::warn("Animation not found: {}", block.name);
     return;
   }
 
