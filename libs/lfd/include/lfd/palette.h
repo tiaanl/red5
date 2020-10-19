@@ -1,7 +1,5 @@
 #pragma once
 
-#include <base/platform.h>
-
 #include <vector>
 
 #include "lfd/resource.h"

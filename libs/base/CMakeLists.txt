@@ -21,3 +21,5 @@ set(base_SOURCE_FILES
 
 base_add_library(base ${base_HEADER_FILES} ${base_SOURCE_FILES})
 target_link_libraries(base PUBLIC spdlog::spdlog)
+
+target_precompile_headers(base PUBLIC include/base/platform.h)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "base/platform.h"
-
 namespace base {
 
 class InputStream {

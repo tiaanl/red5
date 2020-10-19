@@ -2,7 +2,6 @@
 
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
-#include <base/platform.h>
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>

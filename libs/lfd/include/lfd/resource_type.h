@@ -1,7 +1,5 @@
 #pragma once
 
-#include <base/platform.h>
-
 #include <string>
 
 enum class ResourceType : U32 {
