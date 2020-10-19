@@ -53,7 +53,7 @@ class Film : public Resource {
 public:
   struct Chunk {
     OpCode opCode;
-    std::vector<U16> variables;
+    std::vector<I16> variables;
   };
 
   struct Block {

@@ -22,7 +22,7 @@ Film::Chunk readChunk(base::InputStream* stream) {
   newChunk.opCode = opCode;
 
   for (U16 i = 0; i < varCount; ++i) {
-    auto variable = stream->readU16();
+    auto variable = stream->readI16();
     newChunk.variables.push_back(variable);
 #if TRACE_LOADING
     LOG(Info) << "      var: " << variable;

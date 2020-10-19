@@ -39,6 +39,14 @@ public:
     return m_bottom;
   }
 
+  U16 width() const {
+    return m_right - m_left + 1;
+  }
+
+  U16 height() const {
+    return m_bottom - m_top + 1;
+  }
+
   const std::vector<Line>& lines() const {
     return m_lines;
   }

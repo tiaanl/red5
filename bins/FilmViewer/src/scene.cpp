@@ -4,7 +4,51 @@
 
 #include <cassert>
 
-Scene::Scene() : m_palette{} {}
+namespace {
+
+void renderImageToBuffer(const Image& image, SDL_Color* palette, SDL_Color* pixels) {
+  auto imageWidth = image.width();
+  auto imageHeight = image.height();
+
+  for (auto& line : image.lines()) {
+    MemSize y = line.top - image.top();
+
+    if (y >= imageHeight) {
+      continue;
+    }
+
+    MemSize x = line.left - image.left();
+    MemSize pos = y * imageWidth + x;
+    for (auto index : line.indices) {
+      pixels[pos++] = palette[index];
+      if (++x >= imageWidth) {
+        break;
+      }
+    }
+  }
+}
+
+SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
+                                    const Image& image) {
+  U16 imageWidth = image.width();
+  U16 imageHeight = image.height();
+
+  std::vector<SDL_Color> buffer;
+  buffer.resize(imageWidth * imageHeight);
+  std::memset(buffer.data(), 0, buffer.size() * sizeof(SDL_Color));
+
+  renderImageToBuffer(image, palette, buffer.data());
+
+  SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormatFrom(
+      buffer.data(), imageWidth, imageHeight, 32, static_cast<I32>(imageWidth * sizeof(SDL_Color)),
+      SDL_PIXELFORMAT_RGBA32);
+
+  return SDL_CreateTextureFromSurface(renderer, surface);
+}
+
+}  // namespace
+
+Scene::Scene(SDL_Renderer* renderer) : m_renderer{renderer}, m_palette{} {}
 
 void Scene::addResources(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
@@ -40,30 +84,31 @@ bool Scene::loadFilm(std::string_view name) {
 }
 
 void Scene::update(U32 millis) {
-  static const U32 millisPerFrame = 250;
+  static const U32 millisPerFrame = 1000 / 8;
 
   m_totalMillis += millis;
 
   if (m_totalMillis > millisPerFrame) {
-    m_currentFrame += 1;
     m_totalMillis %= millisPerFrame;
 
+    // Advance the scene frame.
+    m_currentFrame += 1;
+    m_currentFrame %= m_frameCount;
+
     for (auto& prop : m_props) {
-      prop->nextFrame(m_currentFrame);
+      prop.nextFrame(m_currentFrame);
     }
   }
 }
 
-void Scene::render(SDL_Color* pixels) {
+void Scene::render() {
   assert(m_film);
 
-  RenderState renderState{m_palette, m_width, m_height, pixels};
-
   std::sort(std::begin(m_props), std::end(m_props),
-            [](auto& left, auto& right) { return right->layer() < left->layer(); });
+            [](auto& left, auto& right) { return right.layer() < left.layer(); });
 
   for (auto& prop : m_props) {
-    prop->render(renderState);
+    prop.render(m_renderer);
   }
 }
 
@@ -75,6 +120,8 @@ void Scene::applyPalette(const Palette& palette) {
 }
 
 void Scene::processFilm() {
+  m_frameCount = m_film->frameCount();
+
   for (auto& block : m_film->blocks()) {
     switch (block.type) {
       case BlockType::View: {
@@ -106,7 +153,7 @@ void Scene::processFilm() {
 
   // Switch to frame 0 for all props.
   for (auto& prop : m_props) {
-    prop->nextFrame(0);
+    prop.nextFrame(0);
   }
 }
 
@@ -131,7 +178,12 @@ void Scene::processImageBlock(const Film::Block& block) {
     return;
   }
 
-  m_props.emplace_back(std::make_unique<ImageProp>(block.chunks, std::move(image)));
+  std::vector<RenderItem> renderItems;
+  SDL_Texture* texture = createTextureFromImage(m_renderer, m_palette, *image);
+  SDL_Rect rect{image->left(), image->top(), image->width(), image->height()};
+  renderItems.emplace_back(texture, rect);
+
+  m_props.emplace_back(block.chunks, std::move(renderItems));
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
@@ -141,5 +193,12 @@ void Scene::processAnimationBlock(const Film::Block& block) {
     return;
   }
 
-  m_props.emplace_back(std::make_unique<AnimationProp>(block.chunks, std::move(animation)));
+  std::vector<RenderItem> renderItems;
+  for (auto& image : animation->frames()) {
+    SDL_Texture* texture = createTextureFromImage(m_renderer, m_palette, image);
+    SDL_Rect rect{image.left(), image.top(), image.width(), image.height()};
+    renderItems.emplace_back(texture, rect);
+  }
+
+  m_props.emplace_back(block.chunks, std::move(renderItems));
 }

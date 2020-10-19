@@ -1,78 +1,63 @@
 #pragma once
 
 #include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_render.h>
+#include <base/platform.h>
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
 
 #include <memory>
 
-#include "base/platform.h"
+class RenderItem {
+public:
+  RenderItem(SDL_Texture* texture, const SDL_Rect& rect);
 
-struct RenderState {
-  SDL_Color* palette;
-  U16 screenWidth;
-  U16 screenHeight;
-  SDL_Color* pixels;
-};
+  bool render(SDL_Renderer* renderer, const SDL_Point& offset, const SDL_Point& orientation);
 
-struct ScenePropState {
-  U16 layer;
-  bool visible;
+private:
+  SDL_Texture* m_texture;
+  SDL_Rect m_rect;
 };
 
 class Prop {
 public:
-  struct Offset {
-    I32 x = 0;
-    I32 y = 0;
-  };
-
-  Prop(std::vector<Film::Chunk> chunks);
+  Prop(std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems);
 
   U32 layer() const {
     return m_layer;
   }
 
-  U32 visible() const {
-    return m_visible;
-  }
-
-  virtual void nextFrame(U32 sceneFrame);
-  virtual void render(const RenderState& renderState) = 0;
+  void nextFrame(U32 sceneFrame);
+  void render(SDL_Renderer* renderer);
 
 protected:
   void updateState(U32 sceneFrame);
+  void resetState();
+
+  void applyMove(I16 x, I16 y, I16 xx, I16 yy);
+  void applySpeed(I16 x, I16 y, I16 xx, I16 yy);
+  void applyLayer(I16 layer);
+  void applyFrame(I16 frame, I16 x);
+  void applyAnimation(I16 direction, I16 frameRate);
+  void applyEvent(I16 event);
+  void applyWindow(I16 x, I16 y, I16 w, I16 h);
+  void applyShift(I16 x, I16 y, I16 xx, I16 yy);
+  void applyDisplay(I16 visible);
+  void applyOrientation(I16 x, I16 y);
 
   std::vector<Film::Chunk> m_chunks;
+  std::vector<RenderItem> m_renderItems;
 
-  Offset m_offset;
-  U32 m_layer = 0;
-  struct MovePerFrame {
-    U32 x = 0;
-    U32 y = 0;
-  } m_movePerFrame;
   bool m_visible = false;
-};
+  I16 m_currentFrame = 0;
+  I16 m_layer = 0;
+  SDL_Point m_offset = {0, 0};
+  SDL_Point m_movePerFrame = {0, 0};
+  SDL_Point m_orientation = {0, 0};
 
-class ImageProp : public Prop {
-public:
-  ImageProp(std::vector<Film::Chunk> chunks, std::unique_ptr<Image> image);
-
-  void render(const RenderState& renderState) override;
-
-private:
-  std::unique_ptr<Image> m_image;
-};
-
-class AnimationProp : public Prop {
-public:
-  AnimationProp(std::vector<Film::Chunk> chunks, std::unique_ptr<Animation> animation);
-
-  void nextFrame(U32 sceneFrame) override;
-  void render(const RenderState& renderState) override;
-
-private:
-  U32 m_currentFrame = 0;
-  std::unique_ptr<Animation> m_animation;
+  struct AnimationState {
+    I16 direction;
+    I16 frameRate;
+  } m_animation;
 };

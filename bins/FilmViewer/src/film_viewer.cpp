@@ -6,7 +6,7 @@
 
 #include "scene.h"
 
-constexpr U16 g_screenScale = 5;
+constexpr U16 g_screenScale = 4;
 constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
 
@@ -22,19 +22,19 @@ int main(int argc, char* argv[]) {
 
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
-  SDL_Texture* screen = SDL_CreateTexture(
-      renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, g_screenWidth, g_screenHeight);
-
-  Scene scene;
+  Scene scene{renderer};
 
   // Load the standard palette from the XWING base LFD file.
   scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   scene.loadPalette("standard");
 
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\DFIRE.LFD)"});
-  if (!scene.loadFilm("dfire2_f")) {
+  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\BLUEPRNT.LFD)"});
+  if (!scene.loadFilm("blueprnt")) {
     return 1;
   }
+
+  SDL_Texture* screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
+                                          SDL_TEXTUREACCESS_TARGET, g_screenWidth, g_screenHeight);
 
   SDL_ShowWindow(window);
 
@@ -50,25 +50,19 @@ int main(int argc, char* argv[]) {
       }
     }
 
-#if 0
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-#endif  // 0
-
     auto now = SDL_GetTicks();
     scene.update(now - lastTicks);
     lastTicks = now;
 
-    SDL_Color* pixels;
-    I32 pitch;
-    if (SDL_LockTexture(screen, nullptr, (void**)&pixels, &pitch) == 0) {
-      std::memset(pixels, 0, pitch * g_screenHeight);
+    SDL_SetRenderTarget(renderer, screen);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
-      scene.render(pixels);
+    scene.render();
 
-      SDL_UnlockTexture(screen);
-      SDL_RenderCopy(renderer, screen, nullptr, nullptr);
-    }
+    SDL_SetRenderTarget(renderer, nullptr);
+
+    SDL_RenderCopy(renderer, screen, nullptr, nullptr);
 
     SDL_RenderPresent(renderer);
   }
