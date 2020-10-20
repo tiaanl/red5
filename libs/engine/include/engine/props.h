@@ -8,13 +8,30 @@
 
 #include <memory>
 
-#include "scene/scene_delegate.h"
+#include "engine/scene_delegate.h"
 
-namespace scene {
+namespace engine {
 
 class RenderItem {
 public:
   RenderItem(SDL_Texture* texture, const SDL_Rect& rect);
+
+  RenderItem(const RenderItem&) = delete;
+  RenderItem(RenderItem&& other) : m_texture{other.m_texture}, m_rect{other.m_rect} {
+    other.m_texture = nullptr;
+  }
+
+  ~RenderItem();
+
+  RenderItem& operator=(const RenderItem&) = delete;
+  RenderItem& operator=(RenderItem&& other) {
+      m_texture = other.m_texture;
+      m_rect = other.m_rect;
+
+      other.m_texture = nullptr;
+
+      return *this;
+  };
 
   bool render(SDL_Renderer* renderer, const SDL_Point& offset, const SDL_Point& orientation);
 
@@ -25,7 +42,8 @@ private:
 
 class Prop {
 public:
-  Prop(Delegate* delegate, std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems);
+  Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
+       std::vector<RenderItem> renderItems);
 
   U32 layer() const {
     return m_layer;
@@ -49,7 +67,7 @@ protected:
   void applyDisplay(I16 visible);
   void applyOrientation(I16 x, I16 y);
 
-  Delegate* m_delegate;
+  SceneDelegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
   std::vector<RenderItem> m_renderItems;
 
@@ -66,4 +84,4 @@ protected:
   } m_animation;
 };
 
-}  // namespace scene
+}  // namespace engine

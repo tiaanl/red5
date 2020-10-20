@@ -1,16 +1,13 @@
 
 #include <SDL.h>
-#include <lfd/image.h>
-#include <lfd/palette.h>
-#include <lfd/resource_file.h>
-#include <scene/scene.h>
+#include <engine/scene.h>
 #include <spdlog/sinks/msvc_sink.h>
 
 constexpr U16 g_screenScale = 4;
 constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
 
-class FilmViewerSceneDelegate : public scene::Delegate {};
+class FilmViewerSceneDelegate : public engine::SceneDelegate {};
 
 int main(int argc, char* argv[]) {
   spdlog::default_logger()->sinks().push_back(std::make_shared<spdlog::sinks::windebug_sink_st>());
@@ -27,7 +24,7 @@ int main(int argc, char* argv[]) {
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
   FilmViewerSceneDelegate delegate;
-  scene::Scene scene{&delegate, renderer};
+  engine::Scene scene{&delegate, renderer};
 
   // Load the standard palette from the XWING base LFD file.
   scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});

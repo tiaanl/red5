@@ -1,11 +1,17 @@
-#include "scene/props.h"
+#include "engine/props.h"
 
 #define TRACE_OP_CODES 0
 
-namespace scene {
+namespace engine {
 
 RenderItem::RenderItem(SDL_Texture* texture, const SDL_Rect& rect)
   : m_texture{texture}, m_rect{rect} {}
+
+RenderItem::~RenderItem() {
+  if (m_texture) {
+    SDL_DestroyTexture(m_texture);
+  }
+}
 
 bool RenderItem::render(SDL_Renderer* renderer, const SDL_Point& offset,
                         const SDL_Point& orientation) {
@@ -25,7 +31,8 @@ bool RenderItem::render(SDL_Renderer* renderer, const SDL_Point& offset,
                           static_cast<SDL_RendererFlip>(flip)) == 0;
 }
 
-Prop::Prop(Delegate* delegate, std::vector<Film::Chunk> chunks, std::vector<RenderItem> renderItems)
+Prop::Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
+           std::vector<RenderItem> renderItems)
   : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_renderItems{std::move(renderItems)} {}
 
 void Prop::nextFrame(U32 sceneFrame) {
@@ -191,7 +198,7 @@ void Prop::applyEvent(I16 event) {
   spdlog::info("OpCode::Event :: event: {}", event);
 #endif
 
-  m_delegate->onEvent(event);
+  m_delegate->onSceneEvent(event);
 }
 
 void Prop::applyWindow(I16 x, I16 y, I16 w, I16 h) {
@@ -235,4 +242,4 @@ void Prop::render(SDL_Renderer* renderer) {
   }
 }
 
-}  // namespace scene
+}  // namespace engine

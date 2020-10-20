@@ -1,8 +1,8 @@
-#include "scene/scene.h"
+#include "engine/scene.h"
 
 #include <cassert>
 
-namespace scene {
+namespace engine {
 
 namespace {
 
@@ -33,6 +33,10 @@ SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
   U16 imageWidth = image.width();
   U16 imageHeight = image.height();
 
+  if (imageWidth <= 0 || imageWidth >= 512 || imageHeight <= 0 || imageHeight >= 512) {
+    return nullptr;
+  }
+
   std::vector<SDL_Color> buffer;
   buffer.resize(imageWidth * imageHeight);
   std::memset(buffer.data(), 0, buffer.size() * sizeof(SDL_Color));
@@ -43,25 +47,25 @@ SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
       buffer.data(), imageWidth, imageHeight, 32, static_cast<I32>(imageWidth * sizeof(SDL_Color)),
       SDL_PIXELFORMAT_RGBA32);
 
-  return SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+  SDL_FreeSurface(surface);
+
+  return texture;
 }
 
 }  // namespace
 
-Scene::Scene(Delegate* sceneDelegate, SDL_Renderer* renderer)
-  : m_delegate{sceneDelegate}, m_renderer{renderer}, m_palette{} {}
-
-void Scene::addResources(const ResourceFile& resourceFile) {
-  auto entries = resourceFile.loadEntries();
-
-  for (auto& entry : entries) {
-    spdlog::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
-    m_entries.emplace_back(std::move(entry));
-  }
-}
+Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SDL_Renderer* renderer)
+  : m_delegate{sceneDelegate}, m_resources{resources}, m_renderer{renderer}, m_palette{} {}
 
 bool Scene::loadPalette(std::string_view name) {
-  auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, name);
+  auto* resource = m_resources->findResource(ResourceType::Palette, name);
+  if (!resource) {
+    return false;
+  }
+
+  auto palette = loadResource<Palette>(*resource);
   if (!palette) {
     return false;
   }
@@ -72,7 +76,11 @@ bool Scene::loadPalette(std::string_view name) {
 }
 
 bool Scene::loadFilm(std::string_view name) {
-  auto film = loadResource<Film>(m_entries, ResourceType::Film, name);
+  auto* resource = m_resources->findResource(ResourceType::Film, name);
+  if (!resource) {
+    return false;
+  }
+  auto film = loadResource<Film>(*resource);
   if (!film) {
     return false;
   }
@@ -94,7 +102,13 @@ void Scene::update(U32 millis) {
 
     // Advance the scene frame.
     m_currentFrame += 1;
-    m_currentFrame %= m_frameCount;
+    if (m_currentFrame >= m_frameCount) {
+      if (m_delegate) {
+        m_delegate->onSceneLastFramePlayed();
+      }
+
+      m_currentFrame = 0;
+    }
 
     for (auto& prop : m_props) {
       prop.nextFrame(m_currentFrame);
@@ -161,7 +175,12 @@ void Scene::processFilm() {
 void Scene::processViewBlock(const Film::Block& block) {}
 
 void Scene::processPaletteBlock(const Film::Block& block) {
-  auto palette = loadResource<Palette>(m_entries, ResourceType::Palette, block.name);
+  auto* resource = m_resources->findResource(ResourceType::Palette, block.name);
+  if (!resource) {
+    return;
+  }
+
+  auto palette = loadResource<Palette>(*resource);
   if (!palette) {
     spdlog::warn("Palette not found: {}", block.name);
     return;
@@ -173,7 +192,12 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 }
 
 void Scene::processImageBlock(const Film::Block& block) {
-  auto image = loadResource<Image>(m_entries, ResourceType::Image, block.name);
+  auto* resource = m_resources->findResource(ResourceType::Image, block.name);
+  if (!resource) {
+    return;
+  }
+
+  auto image = loadResource<Image>(*resource);
   if (!image) {
     spdlog::warn("Image not found: {}", block.name);
     return;
@@ -181,6 +205,9 @@ void Scene::processImageBlock(const Film::Block& block) {
 
   std::vector<RenderItem> renderItems;
   SDL_Texture* texture = createTextureFromImage(m_renderer, m_palette, *image);
+  if (!texture) {
+    return;
+  }
   SDL_Rect rect{image->left(), image->top(), image->width(), image->height()};
   renderItems.emplace_back(texture, rect);
 
@@ -188,7 +215,12 @@ void Scene::processImageBlock(const Film::Block& block) {
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
-  auto animation = loadResource<Animation>(m_entries, ResourceType::Animation, block.name);
+  auto* resource = m_resources->findResource(ResourceType::Animation, block.name);
+  if (!resource) {
+    return;
+  }
+
+  auto animation = loadResource<Animation>(*resource);
   if (!animation) {
     spdlog::warn("Animation not found: {}", block.name);
     return;
@@ -204,4 +236,4 @@ void Scene::processAnimationBlock(const Film::Block& block) {
   m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
 }
 
-}  // namespace scene
+}  // namespace engine

@@ -52,31 +52,11 @@ private:
   std::filesystem::path m_path;
 };
 
-inline const ResourceEntry* findResource(const std::vector<ResourceEntry>& entries,
-                                         ResourceType resourceType, std::string_view name) {
-  auto it = std::find_if(std::begin(entries), std::end(entries), [&](const ResourceEntry& entry) {
-    return entry.type() == resourceType &&
-           entry.name() == std::string_view{name.data(), name.size()};
-  });
-
-  if (it == std::end(entries)) {
-    return nullptr;
-  }
-
-  return &*it;
-}
-
 template <typename T>
-inline std::unique_ptr<T> loadResource(const std::vector<ResourceEntry>& entries,
-                                       ResourceType resourceType, std::string_view name) {
-  auto* resource = findResource(entries, resourceType, name);
-  if (!resource) {
-    return {};
-  }
-
-  base::MemoryInputStream stream{resource->data()};
+inline std::unique_ptr<T> loadResource(const ResourceEntry& entry) {
+  base::MemoryInputStream stream{entry.data()};
   auto result = std::make_unique<T>();
-  result->read(&stream, resource->data().size());
+  result->read(&stream, entry.data().size());
 
   return result;
 }
