@@ -4,19 +4,17 @@
 
 #include <filesystem>
 
-#include "pilot_data.h"
+#include "../../../libs/xwing/include/xwing/stages/register_stage.h"
 
 namespace fs = std::filesystem;
 
-constexpr U16 g_screenScale = 3;
+constexpr U16 g_screenScale = 5;
 constexpr U16 g_screenWidth = 320;
 constexpr U16 g_screenHeight = 200;
 
 class CutsceneStage : public engine::Stage, public engine::SceneDelegate {
 public:
-  explicit CutsceneStage(engine::Resources* resources, SDL_Renderer* renderer,
-                         std::vector<std::string> films)
-    : m_resources{resources}, m_renderer{renderer}, m_films{std::move(films)} {}
+  explicit CutsceneStage(std::vector<std::string> films) : m_films{std::move(films)} {}
 
   bool onReady() override {
     loadFilm(m_films[m_currentFilmIndex]);
@@ -45,7 +43,7 @@ public:
 
 private:
   bool loadFilm(std::string_view name) {
-    auto scene = std::make_unique<engine::Scene>(this, m_resources, m_renderer);
+    auto scene = std::make_unique<engine::Scene>(this, resources(), renderer());
 
     // Apply the default palette.
     if (!scene->loadPalette("standard")) {
@@ -73,9 +71,6 @@ private:
     return loadFilm(m_films[m_currentFilmIndex]);
   }
 
-  engine::Resources* m_resources;
-  SDL_Renderer* m_renderer;
-
   std::vector<std::string> m_films;
   U32 m_currentFilmIndex = 0;
   std::unique_ptr<engine::Scene> m_currentScene;
@@ -94,14 +89,23 @@ int main(int argc, char* argv[]) {
   engine::Resources resources;
 
   fs::path resourceRoot{R"(C:\xwing\RESOURCE)"};
+  resources.addResourceFile({resourceRoot / "XWING.LFD"});
+#if 0
   for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourceRoot)) {
     if (dirEntry.path().extension() != ".LFD") {
       continue;
     }
     resources.addResourceFile({dirEntry.path()});
   }
+#endif  // 0
+
+  resources.addResourceFile({resourceRoot / "REGISTER.LFD"});
 
   engine::Engine engine{&resources, renderer};
+
+  engine.setStage(std::make_unique<xwing::RegisterStage>());
+
+#if 0
   // std::vector<std::string> films = {"logo_f", "along", "bat1_f", "bat2_f", "bat3_f", "bat4_f",
   // "brdg1_f", "brdg2_f", "intro5_f", "xlogo_f"};
   std::vector<std::string> films = {
@@ -365,7 +369,8 @@ int main(int argc, char* argv[]) {
       "yavin3_f",  //
       "yavin3_s",  //
   };
-  engine.setStage(std::make_unique<CutsceneStage>(&resources, renderer, std::move(films)));
+  engine.setStage(std::make_unique<CutsceneStage>(std::move(films)));
+#endif  // 0
 
   SDL_Texture* screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
                                           SDL_TEXTUREACCESS_TARGET, g_screenWidth, g_screenHeight);

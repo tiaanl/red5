@@ -8,7 +8,13 @@ Engine::Engine(Resources* resources, SDL_Renderer* renderer)
 void Engine::setStage(std::unique_ptr<Stage> stage) {
   spdlog::info("Setting stage");
 
+  if (m_currentStage) {
+    m_currentStage->detachFromEngine();
+  }
+
   m_currentStage = std::move(stage);
+
+  m_currentStage->attachToEngine(m_resources, m_renderer);
   m_currentStage->onReady();
 }
 
