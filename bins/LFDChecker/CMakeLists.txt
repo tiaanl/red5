@@ -1,5 +1,5 @@
 set(LFDChecker_SOURCE_FILES
-    src/main.cpp
+    src/lfd_checker.cpp
     )
 
 base_add_executable(LFDChecker ${LFDChecker_SOURCE_FILES})

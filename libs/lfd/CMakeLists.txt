@@ -5,6 +5,7 @@ include(${base_SOURCE_DIR}/cmake/Utils.cmake)
 set(lfd_HEADER_FILES
     include/lfd/animation.h
     include/lfd/film.h
+    include/lfd/font.h
     include/lfd/image.h
     include/lfd/palette.h
     include/lfd/resource.h
@@ -15,6 +16,7 @@ set(lfd_HEADER_FILES
 set(lfd_SOURCE_FILES
     src/animation.cpp
     src/film.cpp
+    src/font.cpp
     src/image.cpp
     src/palette.cpp
     src/resource_file.cpp

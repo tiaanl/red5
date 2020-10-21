@@ -3,6 +3,7 @@
 #include <lfd/film.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
+#include <lfd/font.h>
 
 int main(int argc, char* argv[]) {
   auto resourcePath = std::filesystem::path{R"(C:\xwing\RESOURCE)"};
@@ -51,6 +52,11 @@ int main(int argc, char* argv[]) {
           Film film;
           film.read(&stream, entry.data().size());
           break;
+        }
+
+        case ResourceType::Font: {
+          lfd::Font font;
+          font.read(&stream, entry.data().size());
         }
 
         default: {
