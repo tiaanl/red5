@@ -2,6 +2,7 @@ project(engine)
 
 set(engine_HEADER_FILES
     include/engine/engine.h
+    include/engine/font.h
     include/engine/props.h
     include/engine/resources.h
     include/engine/scene.h
@@ -12,6 +13,7 @@ set(engine_HEADER_FILES
 
 set(engine_SOURCE_FILES
     src/engine.cpp
+    src/font.cpp
     src/props.cpp
     src/resources.cpp
     src/scene.cpp

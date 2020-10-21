@@ -8,7 +8,7 @@ bool Resources::addResourceFile(const ResourceFile& resourceFile) {
   auto entries = resourceFile.loadEntries();
 
   for (auto& entry : entries) {
-    // spdlog::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
+    spdlog::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
     m_entries.emplace_back(std::move(entry));
   }
 

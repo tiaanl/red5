@@ -75,6 +75,22 @@ bool Scene::loadPalette(std::string_view name) {
   return true;
 }
 
+bool Scene::loadFont(std::string_view name) {
+  auto* resource = m_resources->findResource(ResourceType::Font, name);
+  if (!resource) {
+    return false;
+  }
+  auto font = loadResource<lfd::Font>(*resource);
+  if (!font) {
+    return false;
+  }
+
+  m_font = std::make_unique<Font>();
+  m_font->load(m_renderer, *font);
+
+  return true;
+}
+
 bool Scene::loadFilm(std::string_view name) {
   auto* resource = m_resources->findResource(ResourceType::Film, name);
   if (!resource) {
@@ -124,6 +140,10 @@ void Scene::render() {
 
   for (auto& prop : m_props) {
     prop.render(m_renderer);
+  }
+
+  if (m_font) {
+    m_font->renderText(m_renderer, {10, 10}, "TILO");
   }
 }
 

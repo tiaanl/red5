@@ -23,15 +23,19 @@ int main(int argc, char* argv[]) {
 
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
+  engine::Resources resources;
+  resources.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
+  resources.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\UNIFORM.LFD)"});
+
   FilmViewerSceneDelegate delegate;
-  engine::Scene scene{&delegate, renderer};
+  engine::Scene scene{&delegate, &resources, renderer};
 
   // Load the standard palette from the XWING base LFD file.
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   scene.loadPalette("standard");
+  // scene.loadFont("font8");
+  scene.loadFont("font6");
 
-  scene.addResources(ResourceFile{R"(C:\xwing\RESOURCE\REGISTER.LFD)"});
-  if (!scene.loadFilm("pilot")) {
+  if (!scene.loadFilm("uniform")) {
     return 1;
   }
 

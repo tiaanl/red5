@@ -11,8 +11,9 @@
 #include <vector>
 
 #include "engine/props.h"
-#include "engine/scene_delegate.h"
 #include "engine/resources.h"
+#include "engine/scene_delegate.h"
+#include "engine/font.h"
 
 namespace engine {
 
@@ -20,9 +21,8 @@ class Scene {
 public:
   explicit Scene(SceneDelegate* sceneDelegate, Resources* resources, SDL_Renderer* renderer);
 
-  void addResources(const ResourceFile& resourceFile);
-
   bool loadPalette(std::string_view name);
+  bool loadFont(std::string_view name);
   bool loadFilm(std::string_view name);
 
   void update(U32 millis);
@@ -42,6 +42,8 @@ private:
   SDL_Renderer* m_renderer;
 
   std::unique_ptr<Film> m_film;
+  std::unique_ptr<Font> m_font;
+
   SDL_Color m_palette[256];
 
   std::vector<Prop> m_props;
