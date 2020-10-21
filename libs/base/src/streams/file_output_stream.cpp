@@ -3,18 +3,12 @@
 
 namespace base {
 
-FileOutputStream::FileOutputStream(std::filesystem::path path) : m_path{std::move(path)} {}
+FileOutputStream::FileOutputStream(std::filesystem::path path) : m_stream{path} {}
 
 FileOutputStream::~FileOutputStream() = default;
 
-MemSize FileOutputStream::getPosition() const {
-  return 0;
-}
-
-void FileOutputStream::setPosition(MemSize position) {}
-
-MemSize FileOutputStream::write(const void* data, MemSize size) {
-  return 0;
+void FileOutputStream::write(const void* data, MemSize size) {
+  m_stream.write(static_cast<const char*>(data), size);
 }
 
 }  // namespace base

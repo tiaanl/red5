@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <fstream>
 
 #include "base/streams/output_stream.h"
 
@@ -11,12 +12,10 @@ public:
   explicit FileOutputStream(std::filesystem::path path);
   ~FileOutputStream() override;
 
-  MemSize getPosition() const override;
-  void setPosition(MemSize position) override;
-  MemSize write(const void* data, MemSize size) override;
+  void write(const void* data, MemSize size) override;
 
 private:
-  std::filesystem::path m_path;
+  std::ofstream m_stream;
 };
 
 }  // namespace base

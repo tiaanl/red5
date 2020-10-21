@@ -5,8 +5,8 @@ namespace base {
 OutputStream::~OutputStream() = default;
 
 #define DEFINE_WRITE(Type)                                                                         \
-  MemSize OutputStream::write##Type(Type value) {                                                  \
-    return write(reinterpret_cast<const U8*>(&value), sizeof(value));                              \
+  void OutputStream::write##Type(Type value) {                                                     \
+    write(reinterpret_cast<const U8*>(&value), sizeof(value));                                     \
   }
 
 DEFINE_WRITE(U8)

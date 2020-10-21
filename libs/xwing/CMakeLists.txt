@@ -1,0 +1,12 @@
+project(xwing)
+
+set(xwing_HEADER_FILES
+    include/xwing/pilot_data.h
+    )
+
+set(xwing_SOURCE_FILES
+    src/pilot_data.cpp
+    )
+
+base_add_library(xwing ${xwing_HEADER_FILES} ${xwing_SOURCE_FILES})
+target_link_libraries(xwing PUBLIC base)

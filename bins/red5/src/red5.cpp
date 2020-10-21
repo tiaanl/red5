@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+#include "pilot_data.h"
+
 namespace fs = std::filesystem;
 
 constexpr U16 g_screenScale = 3;
