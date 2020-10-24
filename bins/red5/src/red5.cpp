@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <engine/engine.h>
-#include <spdlog/sinks/msvc_sink.h>
 
 #include <filesystem>
 
@@ -9,8 +8,6 @@
 namespace fs = std::filesystem;
 
 constexpr U16 g_screenScale = 5;
-constexpr U16 g_screenWidth = 320;
-constexpr U16 g_screenHeight = 200;
 
 class CutsceneStage : public engine::Stage, public engine::SceneDelegate {
 public:
@@ -77,19 +74,12 @@ private:
 };
 
 int main(int argc, char* argv[]) {
-  spdlog::default_logger()->sinks().push_back(std::make_shared<spdlog::sinks::windebug_sink_st>());
-
-  SDL_Window* window =
-      SDL_CreateWindow("X-Wing Film Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       g_screenWidth * g_screenScale, g_screenHeight * g_screenScale,
-                       SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN);
-
-  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-
-  engine::Resources resources;
+  engine::Engine engine;
+  engine.init("X-Wing");
 
   fs::path resourceRoot{R"(C:\xwing\RESOURCE)"};
-  resources.addResourceFile({resourceRoot / "XWING.LFD"});
+  engine.addResourceFile({resourceRoot / "XWING.LFD"});
+
 #if 0
   for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourceRoot)) {
     if (dirEntry.path().extension() != ".LFD") {
@@ -99,9 +89,7 @@ int main(int argc, char* argv[]) {
   }
 #endif  // 0
 
-  resources.addResourceFile({resourceRoot / "REGISTER.LFD"});
-
-  engine::Engine engine{&resources, renderer};
+  engine.addResourceFile({resourceRoot / "REGISTER.LFD"});
 
   engine.setStage(std::make_unique<xwing::RegisterStage>());
 
@@ -372,42 +360,7 @@ int main(int argc, char* argv[]) {
   engine.setStage(std::make_unique<CutsceneStage>(std::move(films)));
 #endif  // 0
 
-  SDL_Texture* screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
-                                          SDL_TEXTUREACCESS_TARGET, g_screenWidth, g_screenHeight);
-
-  SDL_ShowWindow(window);
-
-  U32 lastTicks = SDL_GetTicks();
-  bool running = true;
-
-  while (running) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        running = false;
-        break;
-      }
-    }
-
-    auto now = SDL_GetTicks();
-    engine.update(now - lastTicks);
-    lastTicks = now;
-
-    SDL_SetRenderTarget(renderer, screen);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
-    engine.renderGameScreen();
-
-    SDL_SetRenderTarget(renderer, nullptr);
-
-    SDL_RenderCopy(renderer, screen, nullptr, nullptr);
-    engine.renderOverlay();
-
-    SDL_RenderPresent(renderer);
-  }
-
-  SDL_Quit();
+  engine.run();
 
   return 0;
 }

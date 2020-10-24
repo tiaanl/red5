@@ -11,23 +11,24 @@ namespace engine {
 
 class Engine {
 public:
-  Engine(Resources* resources, SDL_Renderer* renderer);
-
-  SDL_Renderer* renderer() const {
-    return m_renderer;
-  }
-
+  void addResourceFile(const ResourceFile& resourceFile);
   void setStage(std::unique_ptr<Stage> stage);
 
+  // Lifecycle
+  bool init(std::string_view windowTitle);
+  void run();
+
+private:
   void update(U32 ticks);
   void renderGameScreen();
   void renderOverlay();
 
-private:
-  Resources* m_resources;
+  Resources m_resources;
+  SDL_Window* m_window;
   SDL_Renderer* m_renderer;
+  SDL_Texture* m_screen;
 
-  TrueTypeFont m_ttf;
+  TrueTypeFont m_ttf{20};
   std::unique_ptr<Stage> m_currentStage;
 };
 
