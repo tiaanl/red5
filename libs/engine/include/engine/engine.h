@@ -2,9 +2,10 @@
 
 #include <memory>
 
+#include "engine/resources.h"
 #include "engine/scene.h"
 #include "engine/stage.h"
-#include "engine/resources.h"
+#include "true_type_font.h"
 
 namespace engine {
 
@@ -19,12 +20,14 @@ public:
   void setStage(std::unique_ptr<Stage> stage);
 
   void update(U32 ticks);
-  void render();
+  void renderGameScreen();
+  void renderOverlay();
 
 private:
   Resources* m_resources;
   SDL_Renderer* m_renderer;
 
+  TrueTypeFont m_ttf;
   std::unique_ptr<Stage> m_currentStage;
 };
 

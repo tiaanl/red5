@@ -1,12 +1,16 @@
 #include "engine/engine.h"
 
+#include <engine/true_type_font.h>
+
 namespace engine {
 
 Engine::Engine(Resources* resources, SDL_Renderer* renderer)
-  : m_resources{resources}, m_renderer{renderer} {}
+  : m_resources{resources}, m_renderer{renderer}, m_ttf(20) {}
 
 void Engine::setStage(std::unique_ptr<Stage> stage) {
   spdlog::info("Setting stage");
+
+  m_ttf.loadFromFont(m_renderer);
 
   if (m_currentStage) {
     m_currentStage->detachFromEngine();
@@ -24,10 +28,14 @@ void Engine::update(U32 ticks) {
   }
 }
 
-void Engine::render() {
+void Engine::renderGameScreen() {
   if (m_currentStage) {
     m_currentStage->onRender();
   }
+}
+
+void Engine::renderOverlay() {
+  m_ttf.renderText(m_renderer, {10, 10}, "test");
 }
 
 }  // namespace engine
