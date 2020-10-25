@@ -1,5 +1,7 @@
 #include "engine/font.h"
 
+#include <renderer/renderer.h>
+
 namespace engine {
 
 namespace {
@@ -11,36 +13,31 @@ bool isBitSet(U8 byte, U8 bit) {
 }  // namespace
 
 Font::~Font() {
-  for (auto& glyph : m_glyphs) {
-    if (glyph.texture) {
-      SDL_DestroyTexture(glyph.texture);
-    }
-  }
+  // TODO: Destroy all the textures.
 }
 
-void Font::renderText(SDL_Renderer* renderer, const SDL_Point& position, std::string_view text) {
+void Font::renderText(renderer::Renderer* renderer, const SDL_Point& position, std::string_view text) {
   SDL_Rect s{0, 0, 0, m_height};
   SDL_Rect d{position.x, position.y, 0, m_height};
 
   for (U8 ch : text) {
     auto& glyph = m_glyphs[ch];
 
-    SDL_Texture* texture = glyph.texture;
-    if (texture == nullptr) {
-      continue;
-    }
+    auto texture = glyph.texture;
 
     U16 width = glyph.width;
     s.w = width;
     d.w = width;
 
-    SDL_RenderCopy(renderer, texture, &s, &d);
+    renderer->copyTexture(texture, {d.x, d.y, d.w, d.h});
+
+    // SDL_RenderCopy(renderer, texture, &s, &d);
 
     d.x += width + 1;
   }
 }
 
-bool Font::load(SDL_Renderer* renderer, const lfd::Font& font) {
+bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
   m_height = font.height();
   m_baseLine = font.baseLine();
 
@@ -68,15 +65,9 @@ bool Font::load(SDL_Renderer* renderer, const lfd::Font& font) {
       }
     }
 
-    SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormatFrom(
-        image.data(), glyph.width, font.height(), 32,
-        static_cast<int>(glyph.width * sizeof(SDL_Color)), SDL_PIXELFORMAT_RGBA32);
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    auto texture = renderer->createTexture(image.data(), glyph.width, font.height());
     m_glyphs[font.startChar() + i].width = glyph.width;
     m_glyphs[font.startChar() + i].texture = texture;
-
-    SDL_FreeSurface(surface);
   }
 
   return true;

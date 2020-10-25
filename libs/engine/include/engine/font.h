@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL2/SDL_render.h>
 #include <lfd/font.h>
+#include <renderer/renderer.h>
 
 namespace engine {
 
@@ -9,14 +9,14 @@ class Font {
 public:
   ~Font();
 
-  void renderText(SDL_Renderer* renderer, const SDL_Point& position, std::string_view text);
+  void renderText(renderer::Renderer* renderer, const SDL_Point& position, std::string_view text);
 
-  bool load(SDL_Renderer* renderer, const lfd::Font& font);
+  bool load(renderer::Renderer* renderer, const lfd::Font& font);
 
 private:
   struct Glyph {
     U16 width;
-    SDL_Texture* texture;
+    renderer::TextureId texture;
   };
 
   U16 m_height = 0;

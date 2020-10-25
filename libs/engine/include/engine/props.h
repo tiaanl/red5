@@ -5,6 +5,7 @@
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
+#include <renderer/renderer.h>
 
 #include <memory>
 
@@ -14,30 +15,31 @@ namespace engine {
 
 class RenderItem {
 public:
-  RenderItem(SDL_Texture* texture, const SDL_Rect& rect);
+  RenderItem(renderer::TextureId texture, const renderer::Rect& rect);
 
   RenderItem(const RenderItem&) = delete;
   RenderItem(RenderItem&& other) : m_texture{other.m_texture}, m_rect{other.m_rect} {
-    other.m_texture = nullptr;
+    other.m_texture = renderer::TextureId::invalidValue();
   }
 
   ~RenderItem();
 
   RenderItem& operator=(const RenderItem&) = delete;
   RenderItem& operator=(RenderItem&& other) {
-      m_texture = other.m_texture;
-      m_rect = other.m_rect;
+    m_texture = other.m_texture;
+    m_rect = other.m_rect;
 
-      other.m_texture = nullptr;
+    other.m_texture = renderer::TextureId::invalidValue();
 
-      return *this;
+    return *this;
   };
 
-  bool render(SDL_Renderer* renderer, const SDL_Point& offset, const SDL_Point& orientation);
+  bool render(renderer::Renderer* renderer, const renderer::Position& offset,
+              const renderer::Position& orientation);
 
 private:
-  SDL_Texture* m_texture;
-  SDL_Rect m_rect;
+  renderer::TextureId m_texture;
+  renderer::Rect m_rect;
 };
 
 class Prop {
@@ -50,7 +52,7 @@ public:
   }
 
   void nextFrame(U32 sceneFrame);
-  void render(SDL_Renderer* renderer);
+  void render(renderer::Renderer* renderer);
 
 protected:
   void updateState(U32 sceneFrame);
@@ -74,9 +76,9 @@ protected:
   bool m_visible = false;
   I16 m_currentFrame = 0;
   I16 m_layer = 0;
-  SDL_Point m_offset = {0, 0};
-  SDL_Point m_movePerFrame = {0, 0};
-  SDL_Point m_orientation = {0, 0};
+  renderer::Position m_offset = {0, 0};
+  renderer::Position m_movePerFrame = {0, 0};
+  renderer::Position m_orientation = {0, 0};
 
   struct AnimationState {
     I16 direction;

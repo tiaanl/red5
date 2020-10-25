@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL_render.h>
+#include <renderer/renderer.h>
 
 #include "engine/resources.h"
 
@@ -20,7 +20,7 @@ protected:
     return m_resources;
   }
 
-  SDL_Renderer* renderer() const {
+  renderer::Renderer* renderer() const {
     assert(m_renderer != nullptr);
     return m_renderer;
   }
@@ -28,11 +28,11 @@ protected:
 private:
   friend class Engine;
 
-  void attachToEngine(Resources* resources, SDL_Renderer* renderer);
+  void attachToEngine(Resources* resources, renderer::Renderer* renderer);
   void detachFromEngine();
 
   Resources* m_resources;
-  SDL_Renderer* m_renderer;
+  renderer::Renderer* m_renderer;
 };
 
 }  // namespace engine

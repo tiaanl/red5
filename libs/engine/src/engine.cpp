@@ -19,7 +19,7 @@ void Engine::addResourceFile(const ResourceFile& resourceFile) {
 void Engine::setStage(std::unique_ptr<Stage> stage) {
   spdlog::info("Setting stage");
 
-  m_ttf.loadFromFont(m_renderer);
+  // m_ttf.loadFromFont(m_sdlRenderer);
 
   if (m_currentStage) {
     m_currentStage->detachFromEngine();
@@ -27,7 +27,7 @@ void Engine::setStage(std::unique_ptr<Stage> stage) {
 
   m_currentStage = std::move(stage);
 
-  m_currentStage->attachToEngine(&m_resources, m_renderer);
+  m_currentStage->attachToEngine(&m_resources, &m_renderer);
   m_currentStage->onReady();
 }
 
@@ -44,12 +44,9 @@ bool Engine::init(std::string_view windowTitle) {
                               g_screenWidth * screenScale, g_screenHeight * screenScale,
                               SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
-  m_renderer = SDL_CreateRenderer(m_window, -1, 0);
+  m_renderer.init(m_window);
 
-  // Create the screen texture.
-
-  m_screen = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET,
-                               g_screenWidth, g_screenHeight);
+  m_screen = m_renderer.createRenderTarget(g_screenWidth, g_screenHeight);
 
   return true;
 }
@@ -73,13 +70,12 @@ void Engine::run() {
     update(now - lastTicks);
     lastTicks = now;
 
-    SDL_SetRenderTarget(m_renderer, m_screen);
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-    SDL_RenderClear(m_renderer);
+    m_renderer.setRenderTarget(m_screen);
+    m_renderer.clear(0, 0, 0, 255);
 
     renderGameScreen();
 
-    SDL_SetRenderTarget(m_renderer, nullptr);
+    m_renderer.clearRenderTarget();
 
     SDL_Point windowSize;
     SDL_GetWindowSize(m_window, &windowSize.x, &windowSize.y);
@@ -93,13 +89,14 @@ void Engine::run() {
 
     I32 screenWidth = static_cast<I32>(std::round(static_cast<F32>(g_screenWidth) * scale));
 
-    SDL_Rect destination{windowSize.x / 2 - screenWidth / 2, windowSize.y / 2 - screenHeight / 2,
-                         screenWidth, screenHeight};
+    renderer::Rect destination{windowSize.x / 2 - screenWidth / 2,
+                               windowSize.y / 2 - screenHeight / 2, screenWidth, screenHeight};
 
-    SDL_RenderCopy(m_renderer, m_screen, nullptr, &destination);
-    renderOverlay();
+    m_renderer.copyTexture(m_screen, destination);
 
-    SDL_RenderPresent(m_renderer);
+    // renderOverlay();
+
+    m_renderer.present();
   }
 
   SDL_Quit();
@@ -118,7 +115,7 @@ void Engine::renderGameScreen() {
 }
 
 void Engine::renderOverlay() {
-  m_ttf.renderText(m_renderer, {10, 10}, "test");
+  // m_ttf.renderText(&m_renderer, {10, 10}, "test");
 }
 
 }  // namespace engine

@@ -28,13 +28,13 @@ void renderImageToBuffer(const Image& image, SDL_Color* palette, SDL_Color* pixe
   }
 }
 
-SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
-                                    const Image& image) {
+renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Color* palette,
+                                           const Image& image) {
   U16 imageWidth = image.width();
   U16 imageHeight = image.height();
 
   if (imageWidth <= 0 || imageWidth >= 512 || imageHeight <= 0 || imageHeight >= 512) {
-    return nullptr;
+    return renderer::TextureId::invalidValue();
   }
 
   std::vector<SDL_Color> buffer;
@@ -43,20 +43,12 @@ SDL_Texture* createTextureFromImage(SDL_Renderer* renderer, SDL_Color* palette,
 
   renderImageToBuffer(image, palette, buffer.data());
 
-  SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormatFrom(
-      buffer.data(), imageWidth, imageHeight, 32, static_cast<I32>(imageWidth * sizeof(SDL_Color)),
-      SDL_PIXELFORMAT_RGBA32);
-
-  SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-  SDL_FreeSurface(surface);
-
-  return texture;
+  return renderer->createTexture(buffer.data(), imageWidth, imageHeight);
 }
 
 }  // namespace
 
-Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SDL_Renderer* renderer)
+Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::Renderer* renderer)
   : m_delegate{sceneDelegate}, m_resources{resources}, m_renderer{renderer}, m_palette{} {}
 
 bool Scene::loadPalette(std::string_view name) {
@@ -224,11 +216,12 @@ void Scene::processImageBlock(const Film::Block& block) {
   }
 
   std::vector<RenderItem> renderItems;
-  SDL_Texture* texture = createTextureFromImage(m_renderer, m_palette, *image);
+  auto texture = createTextureFromImage(m_renderer, m_palette, *image);
   if (!texture) {
     return;
   }
-  SDL_Rect rect{image->left(), image->top(), image->width(), image->height()};
+
+  renderer::Rect rect{image->left(), image->top(), image->width(), image->height()};
   renderItems.emplace_back(texture, rect);
 
   m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
@@ -248,8 +241,8 @@ void Scene::processAnimationBlock(const Film::Block& block) {
 
   std::vector<RenderItem> renderItems;
   for (auto& image : animation->frames()) {
-    SDL_Texture* texture = createTextureFromImage(m_renderer, m_palette, image);
-    SDL_Rect rect{image.left(), image.top(), image.width(), image.height()};
+    auto texture = createTextureFromImage(m_renderer, m_palette, image);
+    renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
     renderItems.emplace_back(texture, rect);
   }
 

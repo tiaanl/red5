@@ -1,5 +1,7 @@
 #include "engine/true_type_font.h"
 
+#include <renderer/renderer.h>
+
 #define STB_TRUETYPE_IMPLEMENTATION
 
 #include "stb/stb_truetype.h"
@@ -10,7 +12,8 @@ namespace engine {
 
 TrueTypeFont::TrueTypeFont(I32 size) : m_size{size} {}
 
-void TrueTypeFont::loadFromFont(SDL_Renderer* renderer) {
+void TrueTypeFont::loadFromFont(renderer::Renderer* renderer) {
+#if 0
   constexpr U32 w = 256;
   constexpr U32 h = 256;
 
@@ -52,15 +55,16 @@ void TrueTypeFont::loadFromFont(SDL_Renderer* renderer) {
 
   SDL_FreeSurface(surface);
 
-  m_texture = SDL_CreateTextureFromSurface(renderer, fullColorSurface);
+  SDL_CreateTextureFromSurface(renderer, fullColorSurface);
   if (!m_texture) {
     spdlog::error("Error: {}", SDL_GetError());
   }
 
   SDL_FreeSurface(surface);
+#endif  // 0
 }
 
-void TrueTypeFont::renderText(SDL_Renderer* renderer, SDL_Point position,
+void TrueTypeFont::renderText(renderer::Renderer* renderer, SDL_Point position,
                               std::string_view text) const {
   F32 x = static_cast<F32>(position.x);
   F32 y = static_cast<F32>(position.y + m_size);
@@ -77,7 +81,7 @@ void TrueTypeFont::renderText(SDL_Renderer* renderer, SDL_Point position,
                          static_cast<I32>(std::round(y + glyph.yOffset)), glyph.boundingBox.w,
                          glyph.boundingBox.h};
 
-    SDL_RenderCopy(renderer, m_texture, &glyph.boundingBox, &destination);
+    // SDL_RenderCopy(renderer, m_texture, &glyph.boundingBox, &destination);
 
     x += glyph.xAdvance;
   }

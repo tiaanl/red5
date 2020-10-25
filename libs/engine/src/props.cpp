@@ -1,24 +1,24 @@
 #include "engine/props.h"
 
+#include <renderer/renderer.h>
+
 #define TRACE_OP_CODES 0
 
 namespace engine {
 
-RenderItem::RenderItem(SDL_Texture* texture, const SDL_Rect& rect)
+RenderItem::RenderItem(renderer::TextureId texture, const renderer::Rect& rect)
   : m_texture{texture}, m_rect{rect} {}
 
 RenderItem::~RenderItem() {
-  if (m_texture) {
-    SDL_DestroyTexture(m_texture);
-  }
+  // TODO: Destroy the texture
 }
 
-bool RenderItem::render(SDL_Renderer* renderer, const SDL_Point& offset,
-                        const SDL_Point& orientation) {
-  SDL_Rect r = m_rect;
-  r.x += offset.x;
-  r.y += offset.y;
+bool RenderItem::render(renderer::Renderer* renderer, const renderer::Position& offset,
+                        const renderer::Position& orientation) {
+  renderer::Rect rect = m_rect;
+  rect.position += offset;
 
+#if 0
   U32 flip = SDL_FLIP_NONE;
   if (orientation.x > 0) {
     flip |= SDL_FLIP_HORIZONTAL;
@@ -26,9 +26,11 @@ bool RenderItem::render(SDL_Renderer* renderer, const SDL_Point& offset,
   if (orientation.y > 0) {
     flip |= SDL_FLIP_VERTICAL;
   }
+#endif  // 0
 
-  return SDL_RenderCopyEx(renderer, m_texture, nullptr, &r, 0.0, nullptr,
-                          static_cast<SDL_RendererFlip>(flip)) == 0;
+  renderer->copyTexture(m_texture, rect);
+
+  return true;
 }
 
 Prop::Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
@@ -42,8 +44,7 @@ void Prop::nextFrame(U32 sceneFrame) {
 
   updateState(sceneFrame);
 
-  m_offset.x += m_movePerFrame.x;
-  m_offset.y += m_movePerFrame.y;
+  m_offset += m_movePerFrame;
 
   m_currentFrame += m_animation.direction;
   if (m_currentFrame < 0) {
@@ -147,8 +148,8 @@ void Prop::applyMove(I16 x, I16 y, I16 xx, I16 yy) {
   spdlog::info("OpCode::Move :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
-  m_offset.x += x;
-  m_offset.y += y;
+  m_offset.left += x;
+  m_offset.top += y;
 
   assert(xx == 0);
   assert(yy == 0);
@@ -159,8 +160,8 @@ void Prop::applySpeed(I16 x, I16 y, I16 xx, I16 yy) {
   spdlog::info("OpCode::Speed :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
-  m_movePerFrame.x = x;
-  m_movePerFrame.y = y;
+  m_movePerFrame.left = x;
+  m_movePerFrame.top = y;
 
   assert(xx == 0);
   assert(yy == 0);
@@ -212,8 +213,8 @@ void Prop::applyShift(I16 x, I16 y, I16 xx, I16 yy) {
   spdlog::info("OpCode::Shift :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
 #endif
 
-  m_offset.x = x;
-  m_offset.y = y;
+  m_offset.left = x;
+  m_offset.top = y;
 
   assert(xx == 0);
   assert(yy == 0);
@@ -232,11 +233,11 @@ void Prop::applyOrientation(I16 x, I16 y) {
   spdlog::info("OpCode::Orientation :: x: {}, y: {}", x, y);
 #endif
 
-  m_orientation.x = x;
-  m_orientation.y = y;
+  m_orientation.left = x;
+  m_orientation.top = y;
 }
 
-void Prop::render(SDL_Renderer* renderer) {
+void Prop::render(renderer::Renderer* renderer) {
   if (m_visible) {
     m_renderItems[m_currentFrame].render(renderer, m_offset, m_orientation);
   }

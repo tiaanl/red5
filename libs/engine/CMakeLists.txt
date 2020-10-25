@@ -35,4 +35,5 @@ set(engine_SOURCE_FILES
 base_add_library(engine ${engine_HEADER_FILES} ${engine_SOURCE_FILES})
 target_include_directories(engine PRIVATE ${engine_BINARY_DIR})
 target_link_libraries(engine PUBLIC lfd)
+target_link_libraries(engine PUBLIC renderer)
 # add_dependencies(engine compile_roboto_to_cpp)

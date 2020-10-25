@@ -1,5 +1,7 @@
 #pragma once
 
+#include <renderer/renderer.h>
+
 #include <memory>
 
 #include "engine/resources.h"
@@ -24,9 +26,10 @@ private:
   void renderOverlay();
 
   Resources m_resources;
+  renderer::Renderer m_renderer;
+
+  renderer::RenderTargetId m_screen;
   SDL_Window* m_window;
-  SDL_Renderer* m_renderer;
-  SDL_Texture* m_screen;
 
   TrueTypeFont m_ttf{20};
   std::unique_ptr<Stage> m_currentStage;

@@ -7,19 +7,20 @@
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
+#include <renderer/renderer.h>
 
 #include <vector>
 
+#include "engine/font.h"
 #include "engine/props.h"
 #include "engine/resources.h"
 #include "engine/scene_delegate.h"
-#include "engine/font.h"
 
 namespace engine {
 
 class Scene {
 public:
-  explicit Scene(SceneDelegate* sceneDelegate, Resources* resources, SDL_Renderer* renderer);
+  explicit Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::Renderer* renderer);
 
   bool loadPalette(std::string_view name);
   bool loadFont(std::string_view name);
@@ -39,7 +40,7 @@ private:
 
   SceneDelegate* m_delegate;
   Resources* m_resources;
-  SDL_Renderer* m_renderer;
+  renderer::Renderer* m_renderer;
 
   std::unique_ptr<Film> m_film;
   std::unique_ptr<Font> m_font;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL_render.h>
+#include <renderer/renderer.h>
 
 namespace engine {
 
@@ -8,9 +8,9 @@ class TrueTypeFont {
 public:
   explicit TrueTypeFont(I32 size);
 
-  void loadFromFont(SDL_Renderer* renderer);
+  void loadFromFont(renderer::Renderer* renderer);
 
-  void renderText(SDL_Renderer* renderer, SDL_Point position, std::string_view text) const;
+  void renderText(renderer::Renderer* renderer, SDL_Point position, std::string_view text) const;
 
 private:
   struct Glyph {

@@ -7,8 +7,6 @@
 
 namespace fs = std::filesystem;
 
-constexpr U16 g_screenScale = 5;
-
 class CutsceneStage : public engine::Stage, public engine::SceneDelegate {
 public:
   explicit CutsceneStage(std::vector<std::string> films) : m_films{std::move(films)} {}
