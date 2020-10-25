@@ -1,3 +1,5 @@
+project(red5)
+
 find_package(SDL2 CONFIG REQUIRED)
 
 set(red5_SOURCE_FILES

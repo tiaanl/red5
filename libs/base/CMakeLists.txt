@@ -1,7 +1,5 @@
 project(base)
 
-include(cmake/Utils.cmake)
-
 set(base_HEADER_FILES
     include/base/platform.h
     include/base/streams/file_input_stream.h

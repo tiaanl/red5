@@ -1,7 +1,5 @@
 project(lfd)
 
-include(${base_SOURCE_DIR}/cmake/Utils.cmake)
-
 set(lfd_HEADER_FILES
     include/lfd/animation.h
     include/lfd/film.h
