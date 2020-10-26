@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL_render.h>
 
+#include <glm/mat4x4.hpp>
+
 #include "renderer/dimensions.h"
 
 namespace renderer {
@@ -9,7 +11,7 @@ namespace renderer {
 #define DECLARE_RESOURCE_ID(Resource)                                                              \
   struct Resource {                                                                                \
     U32 id;                                                                                        \
-    static Resource invalidValue() {                                                               \
+    constexpr static Resource invalidValue() {                                                     \
       return {std::numeric_limits<U32>::max()};                                                    \
     }                                                                                              \
     friend bool operator==(const Resource& left, const Resource& right) {                          \
@@ -32,6 +34,8 @@ class Renderer {
 public:
   bool init(SDL_Window* window);
 
+  void resize(const Size& size);
+
   // Render target.
 
   void setRenderTarget(RenderTargetId renderTarget);
@@ -39,8 +43,8 @@ public:
 
   // Manage resources.
 
-  TextureId createTexture(void* data, I32 width, I32 height);
-  RenderTargetId createRenderTarget(I32 width, I32 height);
+  TextureId createTexture(void* data, const Size& size);
+  RenderTargetId createRenderTarget(const Size& size);
 
   // Rendering.
 
@@ -51,28 +55,40 @@ public:
   void copyTexture(RenderTargetId renderTarget, const Rect& to);
 
   // Per frame.
-
-  void present();
+  void beginFrame();
+  void finishFrame();
 
 private:
   struct TextureData {
-    SDL_Texture* texture;
+    U32 texture;
     Size size;
 
-    TextureData(SDL_Texture* texture, const Size& size) : texture{texture}, size{size} {}
+    TextureData(U32 texture, const Size& size) : texture{texture}, size{size} {}
   };
 
   struct RenderTargetData {
-    SDL_Texture* texture;
+    U32 framebuffer;
+    U32 texture;
     Size size;
 
-    RenderTargetData(SDL_Texture* texture, const Size& size) : texture{texture}, size{size} {}
+    RenderTargetData(U32 frameBuffer, U32 texture, const Size& size)
+      : framebuffer{frameBuffer}, texture{texture}, size{size} {}
   };
 
-  void copyTextureInternal(SDL_Texture* texture, const Rect& from, const Rect& to);
+  void copyTextureInternal(U32 texture, const Rect& from, const Rect& to);
 
-  SDL_Renderer* m_sdl;
-  RenderTargetId m_renderTarget;
+  SDL_Window* m_window;
+
+  Size m_windowSize;
+
+  RenderTargetId m_currentRenderTarget = RenderTargetId::invalidValue();
+
+  struct TextureProgram {
+    U32 program = 0;
+    U32 vertexBuffer = 0;
+    U32 vertexArrayObject = 0;
+    glm::mat4 viewMatrix;
+  } m_textureProgram;
 
   std::vector<TextureData> m_textures;
   std::vector<RenderTargetData> m_renderTargets;

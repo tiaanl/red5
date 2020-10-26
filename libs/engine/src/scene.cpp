@@ -43,7 +43,7 @@ renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Col
 
   renderImageToBuffer(image, palette, buffer.data());
 
-  return renderer->createTexture(buffer.data(), imageWidth, imageHeight);
+  return renderer->createTexture(buffer.data(), {imageWidth, imageHeight});
 }
 
 }  // namespace

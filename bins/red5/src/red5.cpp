@@ -73,7 +73,9 @@ private:
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
-  engine.init("X-Wing");
+  if (!engine.init("X-Wing")) {
+    return 1;
+  }
 
   fs::path resourceRoot{R"(C:\xwing\RESOURCE)"};
   engine.addResourceFile({resourceRoot / "XWING.LFD"});

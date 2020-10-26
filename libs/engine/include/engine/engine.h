@@ -28,8 +28,9 @@ private:
   Resources m_resources;
   renderer::Renderer m_renderer;
 
-  renderer::RenderTargetId m_screen;
   SDL_Window* m_window;
+  SDL_GLContext m_context;
+  renderer::RenderTargetId m_screen;
 
   TrueTypeFont m_ttf{20};
   std::unique_ptr<Stage> m_currentStage;

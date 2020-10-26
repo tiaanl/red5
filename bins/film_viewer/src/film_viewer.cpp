@@ -5,7 +5,9 @@
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
-  engine.init("Film Viewer");
+  if (!engine.init("Film Viewer")) {
+    return 1;
+  }
 
   engine.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   engine.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\UNIFORM.LFD)"});
