@@ -1,6 +1,7 @@
 #include "engine/font.h"
 
 #include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 namespace engine {
 
@@ -16,9 +17,10 @@ Font::~Font() {
   // TODO: Destroy all the textures.
 }
 
-void Font::renderText(renderer::Renderer* renderer, const SDL_Point& position, std::string_view text) {
+void Font::renderText(renderer::SpriteRenderer* renderer, const renderer::Position& position,
+                      std::string_view text) {
   SDL_Rect s{0, 0, 0, m_height};
-  SDL_Rect d{position.x, position.y, 0, m_height};
+  SDL_Rect d{position.left, position.top, 0, m_height};
 
   for (U8 ch : text) {
     auto& glyph = m_glyphs[ch];
@@ -29,7 +31,9 @@ void Font::renderText(renderer::Renderer* renderer, const SDL_Point& position, s
     s.w = width;
     d.w = width;
 
-    renderer->copyTexture(texture, {d.x, d.y, d.w, d.h});
+    // renderer->copyTexture(texture, {d.x, d.y, d.w, d.h});
+    renderer::Sprite sprite{texture, {d.w, d.h}};
+    renderer->render({d.x, d.y}, sprite);
 
     // SDL_RenderCopy(renderer, texture, &s, &d);
 
@@ -65,7 +69,7 @@ bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
       }
     }
 
-    auto texture = renderer->createTexture(image.data(), {glyph.width, font.height()});
+    auto texture = renderer->textures().create(image.data(), {glyph.width, font.height()});
     m_glyphs[font.startChar() + i].width = glyph.width;
     m_glyphs[font.startChar() + i].texture = texture;
   }

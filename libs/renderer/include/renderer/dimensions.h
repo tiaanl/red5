@@ -27,4 +27,6 @@ struct Rect {
   Rect(const Position& position, const Size& size) : position{position}, size{size} {}
 };
 
+Rect fitInto(const Rect& source, const Rect& destination);
+
 }  // namespace renderer

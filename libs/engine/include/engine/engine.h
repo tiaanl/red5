@@ -1,6 +1,7 @@
 #pragma once
 
 #include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 #include <memory>
 
@@ -27,12 +28,12 @@ private:
 
   Resources m_resources;
   renderer::Renderer m_renderer;
+  renderer::SpriteRenderer m_spriteRenderer;
 
   SDL_Window* m_window;
   SDL_GLContext m_context;
   renderer::RenderTargetId m_screen;
 
-  TrueTypeFont m_ttf{20};
   std::unique_ptr<Stage> m_currentStage;
 };
 

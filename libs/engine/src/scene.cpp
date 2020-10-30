@@ -1,5 +1,7 @@
 #include "engine/scene.h"
 
+#include <renderer/renderer.h>
+
 #include <cassert>
 
 namespace engine {
@@ -43,12 +45,12 @@ renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Col
 
   renderImageToBuffer(image, palette, buffer.data());
 
-  return renderer->createTexture(buffer.data(), {imageWidth, imageHeight});
+  return renderer->textures().create(buffer.data(), {imageWidth, imageHeight});
 }
 
 }  // namespace
 
-Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::Renderer* renderer)
+Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::SpriteRenderer* renderer)
   : m_delegate{sceneDelegate}, m_resources{resources}, m_renderer{renderer}, m_palette{} {}
 
 bool Scene::loadPalette(std::string_view name) {
@@ -78,7 +80,7 @@ bool Scene::loadFont(std::string_view name) {
   }
 
   m_font = std::make_unique<Font>();
-  m_font->load(m_renderer, *font);
+  m_font->load(m_renderer->renderer(), *font);
 
   return true;
 }
@@ -216,7 +218,7 @@ void Scene::processImageBlock(const Film::Block& block) {
   }
 
   std::vector<RenderItem> renderItems;
-  auto texture = createTextureFromImage(m_renderer, m_palette, *image);
+  auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, *image);
   if (!texture) {
     return;
   }
@@ -241,7 +243,7 @@ void Scene::processAnimationBlock(const Film::Block& block) {
 
   std::vector<RenderItem> renderItems;
   for (auto& image : animation->frames()) {
-    auto texture = createTextureFromImage(m_renderer, m_palette, image);
+    auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
     renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
     renderItems.emplace_back(texture, rect);
   }

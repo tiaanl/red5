@@ -1,6 +1,7 @@
 #include "engine/props.h"
 
 #include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 #define TRACE_OP_CODES 0
 
@@ -13,7 +14,7 @@ RenderItem::~RenderItem() {
   // TODO: Destroy the texture
 }
 
-bool RenderItem::render(renderer::Renderer* renderer, const renderer::Position& offset,
+bool RenderItem::render(renderer::SpriteRenderer* renderer, const renderer::Position& offset,
                         const renderer::Position& orientation) {
   renderer::Rect rect = m_rect;
   rect.position += offset;
@@ -28,7 +29,7 @@ bool RenderItem::render(renderer::Renderer* renderer, const renderer::Position& 
   }
 #endif  // 0
 
-  renderer->copyTexture(m_texture, rect);
+  renderer->render(rect.position, {m_texture, rect.size});
 
   return true;
 }
@@ -237,7 +238,7 @@ void Prop::applyOrientation(I16 x, I16 y) {
   m_orientation.top = y;
 }
 
-void Prop::render(renderer::Renderer* renderer) {
+void Prop::render(renderer::SpriteRenderer* renderer) {
   if (m_visible) {
     m_renderItems[m_currentFrame].render(renderer, m_offset, m_orientation);
   }

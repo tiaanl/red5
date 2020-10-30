@@ -5,30 +5,11 @@
 #include <glm/mat4x4.hpp>
 
 #include "renderer/dimensions.h"
+#include "renderer/types.h"
+#include "renderer/vertex_buffer_definition.h"
+#include "renderer/uniform_data.h"
 
 namespace renderer {
-
-#define DECLARE_RESOURCE_ID(Resource)                                                              \
-  struct Resource {                                                                                \
-    U32 id;                                                                                        \
-    constexpr static Resource invalidValue() {                                                     \
-      return {std::numeric_limits<U32>::max()};                                                    \
-    }                                                                                              \
-    friend bool operator==(const Resource& left, const Resource& right) {                          \
-      return left.id == right.id;                                                                  \
-    }                                                                                              \
-    friend bool operator!=(const Resource& left, const Resource& right) {                          \
-      return left.id != right.id;                                                                  \
-    }                                                                                              \
-    bool operator!() const {                                                                       \
-      return id == invalidValue().id;                                                              \
-    }                                                                                              \
-  }
-
-DECLARE_RESOURCE_ID(TextureId);
-DECLARE_RESOURCE_ID(RenderTargetId);
-
-#undef DECLARE_RESOURCE_ID
 
 class Renderer {
 public:
@@ -38,60 +19,50 @@ public:
 
   // Render target.
 
+  RenderTargetData* renderTarget();
   void setRenderTarget(RenderTargetId renderTarget);
   void clearRenderTarget();
+  void renderRenderTarget(RenderTargetId renderTarget, const Rect& destination);
 
   // Manage resources.
 
-  TextureId createTexture(void* data, const Size& size);
-  RenderTargetId createRenderTarget(const Size& size);
+  RenderTargetContainer& renderTargets() {
+    return m_renderTargets;
+  }
+
+  TextureContainer& textures() {
+    return m_textures;
+  }
+
+  VertexBufferContainer& vertexBuffers() {
+    return m_vertexBuffers;
+  }
+
+  ProgramContainer& programs() {
+    return m_programs;
+  }
 
   // Rendering.
 
   void clear(F32 red, F32 green, F32 blue, F32 alpha);
-  void copyTexture(TextureId texture, const Rect& to);
-  void copyTexture(TextureId texture, const Rect& from, const Rect& to);
-
-  void copyTexture(RenderTargetId renderTarget, const Rect& to);
+  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program, TextureId texture,
+                          const UniformData& uniformData);
 
   // Per frame.
+
   void beginFrame();
   void finishFrame();
 
 private:
-  struct TextureData {
-    U32 texture;
-    Size size;
-
-    TextureData(U32 texture, const Size& size) : texture{texture}, size{size} {}
-  };
-
-  struct RenderTargetData {
-    U32 framebuffer;
-    U32 texture;
-    Size size;
-
-    RenderTargetData(U32 frameBuffer, U32 texture, const Size& size)
-      : framebuffer{frameBuffer}, texture{texture}, size{size} {}
-  };
-
-  void copyTextureInternal(U32 texture, const Rect& from, const Rect& to);
-
   SDL_Window* m_window;
 
-  Size m_windowSize;
-
+  RenderTargetData m_windowRenderTarget;
   RenderTargetId m_currentRenderTarget = RenderTargetId::invalidValue();
 
-  struct TextureProgram {
-    U32 program = 0;
-    U32 vertexBuffer = 0;
-    U32 vertexArrayObject = 0;
-    glm::mat4 viewMatrix;
-  } m_textureProgram;
-
-  std::vector<TextureData> m_textures;
-  std::vector<RenderTargetData> m_renderTargets;
+  RenderTargetContainer m_renderTargets;
+  TextureContainer m_textures;
+  VertexBufferContainer m_vertexBuffers;
+  ProgramContainer m_programs;
 };
 
 }  // namespace renderer

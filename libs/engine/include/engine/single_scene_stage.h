@@ -20,7 +20,8 @@ public:
   void onSceneLastFramePlayed() override;
 
 private:
-  static std::unique_ptr<Scene> loadFilm(engine::Resources* resources, renderer::Renderer* renderer,
+  static std::unique_ptr<Scene> loadFilm(engine::Resources* resources,
+                                         renderer::SpriteRenderer* renderer,
                                          engine::SceneDelegate* sceneDelegate,
                                          std::string_view name);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lfd/font.h>
-#include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 namespace engine {
 
@@ -9,7 +9,8 @@ class Font {
 public:
   ~Font();
 
-  void renderText(renderer::Renderer* renderer, const SDL_Point& position, std::string_view text);
+  void renderText(renderer::SpriteRenderer* renderer, const renderer::Position& position,
+                  std::string_view text);
 
   bool load(renderer::Renderer* renderer, const lfd::Font& font);
 

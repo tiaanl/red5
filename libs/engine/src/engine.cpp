@@ -21,15 +21,13 @@ void Engine::addResourceFile(const ResourceFile& resourceFile) {
 void Engine::setStage(std::unique_ptr<Stage> stage) {
   spdlog::info("Setting stage");
 
-  // m_ttf.loadFromFont(m_sdlRenderer);
-
   if (m_currentStage) {
     m_currentStage->detachFromEngine();
   }
 
   m_currentStage = std::move(stage);
 
-  m_currentStage->attachToEngine(&m_resources, &m_renderer);
+  m_currentStage->attachToEngine(&m_resources, &m_spriteRenderer);
   m_currentStage->onReady();
 }
 
@@ -69,8 +67,11 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
-   m_screen = m_renderer.createRenderTarget({g_screenWidth, g_screenHeight});
-//  m_screen = m_renderer.createRenderTarget({1600, 1000});
+  m_screen = m_renderer.renderTargets().create({g_screenWidth, g_screenHeight});
+
+  if (!m_spriteRenderer.attachToRenderer(&m_renderer)) {
+    return false;
+  }
 
   return true;
 }
@@ -99,10 +100,8 @@ void Engine::run() {
     m_renderer.beginFrame();
 
     m_renderer.setRenderTarget(m_screen);
-    m_renderer.clear(0.5f, 0, 0, 1.0f);
-
+    m_renderer.clear(0.0f, 0, 0, 1.0f);
     renderGameScreen();
-
     m_renderer.clearRenderTarget();
 
     m_renderer.clear(0.0f, 0.5f, 0.0f, 1.0f);
@@ -110,21 +109,12 @@ void Engine::run() {
     SDL_Point windowSize;
     SDL_GetWindowSize(m_window, &windowSize.x, &windowSize.y);
 
-    F32 scale = static_cast<F32>(windowSize.x) / static_cast<F32>(g_screenWidth);
-    I32 screenHeight = static_cast<I32>(std::round(static_cast<F32>(g_screenHeight) * scale));
-    if (screenHeight > windowSize.y) {
-      scale = static_cast<F32>(windowSize.y) / static_cast<F32>(g_screenHeight);
-      screenHeight = static_cast<I32>(std::round(static_cast<F32>(g_screenHeight) * scale));
-    }
+    renderer::Rect destination{renderer::fitInto({0, 0, g_screenWidth, g_screenHeight},
+                                                 {0, 0, windowSize.x, windowSize.y})};
 
-    I32 screenWidth = static_cast<I32>(std::round(static_cast<F32>(g_screenWidth) * scale));
+    m_renderer.renderRenderTarget(m_screen, destination);
 
-    renderer::Rect destination{windowSize.x / 2 - screenWidth / 2,
-                               windowSize.y / 2 - screenHeight / 2, screenWidth, screenHeight};
-
-    m_renderer.copyTexture(m_screen, destination);
-
-    // renderOverlay();
+    renderOverlay();
 
     m_renderer.finishFrame();
   }

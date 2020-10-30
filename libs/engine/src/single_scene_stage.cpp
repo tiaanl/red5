@@ -36,7 +36,7 @@ void SingleSceneStage::onSceneLastFramePlayed() {
 
 // static
 std::unique_ptr<Scene> SingleSceneStage::loadFilm(engine::Resources* resources,
-                                                  renderer::Renderer* renderer,
+                                                  renderer::SpriteRenderer* renderer,
                                                   engine::SceneDelegate* sceneDelegate,
                                                   std::string_view name) {
   auto scene = std::make_unique<engine::Scene>(sceneDelegate, resources, renderer);

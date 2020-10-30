@@ -7,7 +7,7 @@
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
-#include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 #include <vector>
 
@@ -20,7 +20,8 @@ namespace engine {
 
 class Scene {
 public:
-  explicit Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::Renderer* renderer);
+  explicit Scene(SceneDelegate* sceneDelegate, Resources* resources,
+                 renderer::SpriteRenderer* renderer);
 
   bool loadPalette(std::string_view name);
   bool loadFont(std::string_view name);
@@ -40,7 +41,7 @@ private:
 
   SceneDelegate* m_delegate;
   Resources* m_resources;
-  renderer::Renderer* m_renderer;
+  renderer::SpriteRenderer* m_renderer;
 
   std::unique_ptr<Film> m_film;
   std::unique_ptr<Font> m_font;

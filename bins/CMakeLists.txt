@@ -1,5 +1,6 @@
+add_subdirectory(binary_to_cpp)
 add_subdirectory(film_viewer)
 add_subdirectory(lfd_checker)
-add_subdirectory(save_game_viewer)
 add_subdirectory(red5)
-add_subdirectory(binary_to_cpp)
+add_subdirectory(render_texture)
+add_subdirectory(save_game_viewer)

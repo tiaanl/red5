@@ -5,7 +5,7 @@
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
-#include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 #include <memory>
 
@@ -34,7 +34,7 @@ public:
     return *this;
   };
 
-  bool render(renderer::Renderer* renderer, const renderer::Position& offset,
+  bool render(renderer::SpriteRenderer* renderer, const renderer::Position& offset,
               const renderer::Position& orientation);
 
 private:
@@ -52,7 +52,7 @@ public:
   }
 
   void nextFrame(U32 sceneFrame);
-  void render(renderer::Renderer* renderer);
+  void render(renderer::SpriteRenderer* renderer);
 
 protected:
   void updateState(U32 sceneFrame);

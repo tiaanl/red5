@@ -1,6 +1,6 @@
 #pragma once
 
-#include <renderer/renderer.h>
+#include <renderer/sprite_renderer.h>
 
 #include "engine/resources.h"
 
@@ -20,7 +20,7 @@ protected:
     return m_resources;
   }
 
-  renderer::Renderer* renderer() const {
+  renderer::SpriteRenderer* renderer() const {
     assert(m_renderer != nullptr);
     return m_renderer;
   }
@@ -28,11 +28,11 @@ protected:
 private:
   friend class Engine;
 
-  void attachToEngine(Resources* resources, renderer::Renderer* renderer);
+  void attachToEngine(Resources* resources, renderer::SpriteRenderer* renderer);
   void detachFromEngine();
 
   Resources* m_resources;
-  renderer::Renderer* m_renderer;
+  renderer::SpriteRenderer* m_renderer;
 };
 
 }  // namespace engine
