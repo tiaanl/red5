@@ -4,7 +4,7 @@
 
 #include <lfd/resource_file.h>
 
-namespace engine {
+namespace game {
 
 class Resources {
 public:
@@ -17,4 +17,4 @@ private:
   std::vector<ResourceEntry> m_entries;
 };
 
-}  // namespace engine
+}  // namespace game

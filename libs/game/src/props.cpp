@@ -1,18 +1,13 @@
-#include "engine/props.h"
-
-#include <renderer/renderer.h>
-#include <renderer/sprite_renderer.h>
+#include "game/props.h"
 
 #define TRACE_OP_CODES 0
 
-namespace engine {
+namespace game {
 
 RenderItem::RenderItem(renderer::TextureId texture, const renderer::Rect& rect)
   : m_texture{texture}, m_rect{rect} {}
 
-RenderItem::~RenderItem() {
-  // TODO: Destroy the texture
-}
+RenderItem::~RenderItem() = default;
 
 bool RenderItem::render(renderer::SpriteRenderer* renderer, const renderer::Position& offset,
                         const renderer::Position& orientation) {
@@ -207,6 +202,11 @@ void Prop::applyWindow(I16 x, I16 y, I16 w, I16 h) {
 #if TRACE_OP_CODES > 0
   spdlog::info("OpCode::Window :: x: {}, y: {}, w: {}, h: {}", x, y, w, h);
 #endif
+
+  (void)x;
+  (void)y;
+  (void)w;
+  (void)h;
 }
 
 void Prop::applyShift(I16 x, I16 y, I16 xx, I16 yy) {
@@ -244,4 +244,4 @@ void Prop::render(renderer::SpriteRenderer* renderer) {
   }
 }
 
-}  // namespace engine
+}  // namespace game

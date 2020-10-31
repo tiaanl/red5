@@ -11,4 +11,4 @@ set(xwing_SOURCE_FILES
     )
 
 base_add_library(xwing ${xwing_HEADER_FILES} ${xwing_SOURCE_FILES})
-target_link_libraries(xwing PUBLIC engine)
+target_link_libraries(xwing PUBLIC game)

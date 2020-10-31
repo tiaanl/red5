@@ -2,7 +2,8 @@
 
 namespace xwing {
 
-RegisterStage::RegisterStage() : SingleSceneStage{"pilot"} {}
+RegisterStage::RegisterStage(std::shared_ptr<game::Resources> resources)
+  : SingleSceneStage{std::move(resources), "pilot"} {}
 
 RegisterStage::~RegisterStage() = default;
 

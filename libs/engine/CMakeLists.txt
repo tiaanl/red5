@@ -8,24 +8,12 @@ add_custom_target(compile_roboto_to_cpp
 
 set(engine_HEADER_FILES
     include/engine/engine.h
-    include/engine/font.h
-    include/engine/props.h
-    include/engine/resources.h
-    include/engine/scene.h
-    include/engine/scene_delegate.h
-    include/engine/single_scene_stage.h
     include/engine/stage.h
     include/engine/true_type_font.h
     )
 
 set(engine_SOURCE_FILES
     src/engine.cpp
-    src/font.cpp
-    src/props.cpp
-    src/resources.cpp
-    src/scene.cpp
-    src/scene_delegate.cpp
-    src/single_scene_stage.cpp
     src/stage.cpp
     src/stb/stb_truetype.h
     src/true_type_font.cpp

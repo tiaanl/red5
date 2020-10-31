@@ -3,13 +3,14 @@
 
 #include <filesystem>
 
-#include "../../../libs/xwing/include/xwing/stages/register_stage.h"
+#include "xwing/stages/register_stage.h"
 
 namespace fs = std::filesystem;
 
-class CutsceneStage : public engine::Stage, public engine::SceneDelegate {
+class CutsceneStage : public game::GameStage, public game::SceneDelegate {
 public:
-  explicit CutsceneStage(std::vector<std::string> films) : m_films{std::move(films)} {}
+  CutsceneStage(std::shared_ptr<game::Resources> resources, std::vector<std::string> films)
+    : game::GameStage{std::move(resources)}, m_films{std::move(films)} {}
 
   bool onReady() override {
     loadFilm(m_films[m_currentFilmIndex]);
@@ -38,7 +39,7 @@ public:
 
 private:
   bool loadFilm(std::string_view name) {
-    auto scene = std::make_unique<engine::Scene>(this, resources(), renderer());
+    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), renderer());
 
     // Apply the default palette.
     if (!scene->loadPalette("standard")) {
@@ -68,7 +69,7 @@ private:
 
   std::vector<std::string> m_films;
   U32 m_currentFilmIndex = 0;
-  std::unique_ptr<engine::Scene> m_currentScene;
+  std::unique_ptr<game::Scene> m_currentScene;
 };
 
 int main(int argc, char* argv[]) {
@@ -78,7 +79,6 @@ int main(int argc, char* argv[]) {
   }
 
   fs::path resourceRoot{R"(C:\xwing\RESOURCE)"};
-  engine.addResourceFile({resourceRoot / "XWING.LFD"});
 
 #if 0
   for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourceRoot)) {
@@ -89,9 +89,11 @@ int main(int argc, char* argv[]) {
   }
 #endif  // 0
 
-  engine.addResourceFile({resourceRoot / "REGISTER.LFD"});
+  auto stage = std::make_unique<xwing::RegisterStage>(std::make_shared<game::Resources>());
+  stage->addResourceFile({resourceRoot / "XWING.LFD"});
+  stage->addResourceFile({resourceRoot / "REGISTER.LFD"});
 
-  engine.setStage(std::make_unique<xwing::RegisterStage>());
+  engine.setStage(std::move(stage));
 
 #if 0
   // std::vector<std::string> films = {"logo_f", "along", "bat1_f", "bat2_f", "bat3_f", "bat4_f",

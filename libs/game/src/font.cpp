@@ -1,9 +1,6 @@
-#include "engine/font.h"
+#include "game/font.h"
 
-#include <renderer/renderer.h>
-#include <renderer/sprite_renderer.h>
-
-namespace engine {
+namespace game {
 
 namespace {
 
@@ -13,9 +10,7 @@ bool isBitSet(U8 byte, U8 bit) {
 
 }  // namespace
 
-Font::~Font() {
-  // TODO: Destroy all the textures.
-}
+Font::~Font() = default;
 
 void Font::renderText(renderer::SpriteRenderer* renderer, const renderer::Position& position,
                       std::string_view text) {
@@ -77,4 +72,4 @@ bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
   return true;
 }
 
-}  // namespace engine
+}  // namespace game

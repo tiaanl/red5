@@ -1,6 +1,6 @@
-#include "engine/scene_delegate.h"
+#include "game/scene_delegate.h"
 
-namespace engine {
+namespace game {
 
 SceneDelegate::~SceneDelegate() = default;
 
@@ -12,4 +12,4 @@ void SceneDelegate::onSceneEvent(I16 event) {
 
 void SceneDelegate::onSceneLastFramePlayed() {}
 
-}  // namespace engine
+}  // namespace game

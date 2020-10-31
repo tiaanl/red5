@@ -1,11 +1,16 @@
-#include "engine/single_scene_stage.h"
+#include "game/single_scene_stage.h"
 
-namespace engine {
+namespace game {
 
-SingleSceneStage::SingleSceneStage(std::string_view filmName) : m_filmName{filmName} {}
+SingleSceneStage::SingleSceneStage(std::shared_ptr<Resources> resources, std::string_view filmName)
+  : GameStage{std::move(resources)}, m_filmName{filmName} {}
+
+bool SingleSceneStage::addResourceFile(const ResourceFile& resourceFile) {
+  return m_resources->addResourceFile(resourceFile);
+}
 
 bool SingleSceneStage::onReady() {
-  m_scene = loadFilm(resources(), renderer(), this, m_filmName);
+  m_scene = loadFilm(m_resources.get(), renderer(), this, m_filmName);
 
   return !!m_scene;
 }
@@ -35,11 +40,11 @@ void SingleSceneStage::onSceneLastFramePlayed() {
 }
 
 // static
-std::unique_ptr<Scene> SingleSceneStage::loadFilm(engine::Resources* resources,
+std::unique_ptr<Scene> SingleSceneStage::loadFilm(Resources* resources,
                                                   renderer::SpriteRenderer* renderer,
-                                                  engine::SceneDelegate* sceneDelegate,
+                                                  SceneDelegate* sceneDelegate,
                                                   std::string_view name) {
-  auto scene = std::make_unique<engine::Scene>(sceneDelegate, resources, renderer);
+  auto scene = std::make_unique<Scene>(sceneDelegate, resources, renderer);
 
   // Apply the default palette.
   if (!scene->loadPalette("standard")) {
@@ -56,4 +61,4 @@ std::unique_ptr<Scene> SingleSceneStage::loadFilm(engine::Resources* resources,
   return scene;
 }
 
-}  // namespace engine
+}  // namespace game

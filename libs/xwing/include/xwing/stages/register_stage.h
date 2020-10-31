@@ -1,16 +1,14 @@
 #pragma once
 
 #include <base/platform.h>
-#include <engine/single_scene_stage.h>
+#include <game/single_scene_stage.h>
 
 namespace xwing {
 
-class RegisterStage : public engine::SingleSceneStage {
+class RegisterStage : public game::SingleSceneStage {
 public:
-  RegisterStage();
+  explicit RegisterStage(std::shared_ptr<game::Resources> resources);
   ~RegisterStage() override;
-
-
 };
 
 }  // namespace xwing

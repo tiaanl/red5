@@ -14,10 +14,6 @@ constexpr U16 g_screenHeight = 200;
 
 }  // namespace
 
-void Engine::addResourceFile(const ResourceFile& resourceFile) {
-  m_resources.addResourceFile(resourceFile);
-}
-
 void Engine::setStage(std::unique_ptr<Stage> stage) {
   spdlog::info("Setting stage");
 
@@ -27,7 +23,7 @@ void Engine::setStage(std::unique_ptr<Stage> stage) {
 
   m_currentStage = std::move(stage);
 
-  m_currentStage->attachToEngine(&m_resources, &m_spriteRenderer);
+  m_currentStage->attachToEngine(&m_spriteRenderer);
   m_currentStage->onReady();
 }
 

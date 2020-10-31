@@ -7,5 +7,5 @@ set(film_viewer_SOURCE_FILES
     )
 
 base_add_executable(film_viewer ${film_viewer_SOURCE_FILES})
-target_link_libraries(film_viewer PRIVATE engine)
+target_link_libraries(film_viewer PRIVATE game)
 target_link_libraries(film_viewer PRIVATE SDL2::SDL2main SDL2::SDL2-static)

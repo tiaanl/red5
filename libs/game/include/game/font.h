@@ -3,7 +3,7 @@
 #include <lfd/font.h>
 #include <renderer/sprite_renderer.h>
 
-namespace engine {
+namespace game {
 
 class Font {
 public:
@@ -25,4 +25,4 @@ private:
   Glyph m_glyphs[256] = {};
 };
 
-}  // namespace engine
+}  // namespace game

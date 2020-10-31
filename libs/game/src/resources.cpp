@@ -1,6 +1,6 @@
-#include "engine/resources.h"
+#include "game/resources.h"
 
-namespace engine {
+namespace game {
 
 Resources::Resources() = default;
 
@@ -29,4 +29,4 @@ ResourceEntry* Resources::findResource(ResourceType type, std::string_view name)
   return &*it;
 }
 
-}  // namespace engine
+}  // namespace game

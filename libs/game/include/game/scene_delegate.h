@@ -1,6 +1,6 @@
 #pragma once
 
-namespace engine {
+namespace game {
 
 class SceneDelegate {
 public:
@@ -11,4 +11,4 @@ public:
   virtual void onSceneLastFramePlayed();
 };
 
-}  // namespace engine
+}  // namespace game

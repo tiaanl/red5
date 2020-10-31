@@ -6,12 +6,13 @@
 #include <lfd/film.h>
 #include <lfd/image.h>
 #include <renderer/sprite_renderer.h>
+#include <renderer/types.h>
 
 #include <memory>
 
-#include "engine/scene_delegate.h"
+#include "game/scene_delegate.h"
 
-namespace engine {
+namespace game {
 
 class RenderItem {
 public:
@@ -81,9 +82,9 @@ protected:
   renderer::Position m_orientation = {0, 0};
 
   struct AnimationState {
-    I16 direction;
-    I16 frameRate;
+    I16 direction = 0;
+    I16 frameRate = 0;
   } m_animation;
 };
 
-}  // namespace engine
+}  // namespace game

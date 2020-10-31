@@ -26,37 +26,37 @@ int main(int argc, char* argv[]) {
     for (auto& entry : entries) {
       // spdlog::info("Entry :: ({}) {}", resourceTypeToString(entry.type()), entry.name());
 
-      base::MemoryInputStream stream{entry.floatData()};
+      base::MemoryInputStream stream{entry.data()};
       auto startPosition = stream.getPosition();
 
       switch (entry.type()) {
         case ResourceType::Palette: {
           Palette palette;
-          palette.read(&stream, entry.floatData().size());
+          palette.read(&stream, entry.data().size());
           break;
         }
 
         case ResourceType::Image: {
           Image image;
-          image.read(&stream, entry.floatData().size());
+          image.read(&stream, entry.data().size());
           break;
         }
 
         case ResourceType::Animation: {
           Animation animation;
-          animation.read(&stream, entry.floatData().size());
+          animation.read(&stream, entry.data().size());
           break;
         }
 
         case ResourceType::Film: {
           Film film;
-          film.read(&stream, entry.floatData().size());
+          film.read(&stream, entry.data().size());
           break;
         }
 
         case ResourceType::Font: {
           lfd::Font font;
-          font.read(&stream, entry.floatData().size());
+          font.read(&stream, entry.data().size());
         }
 
         default: {
@@ -65,9 +65,9 @@ int main(int argc, char* argv[]) {
       }
 
       // Check that the whole stream was consumed.
-      if (stream.getPosition() < entry.floatData().size()) {
+      if (stream.getPosition() < entry.data().size()) {
         spdlog::warn("Resource contained {} bytes, but only {} bytes were read.",
-                     entry.floatData().size(), stream.getPosition() - startPosition);
+                     entry.data().size(), stream.getPosition() - startPosition);
       }
     }
   }

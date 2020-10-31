@@ -1,10 +1,8 @@
-#include "engine/scene.h"
-
-#include <renderer/renderer.h>
+#include "game/scene.h"
 
 #include <cassert>
 
-namespace engine {
+namespace game {
 
 namespace {
 
@@ -251,4 +249,4 @@ void Scene::processAnimationBlock(const Film::Block& block) {
   m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
 }
 
-}  // namespace engine
+}  // namespace game

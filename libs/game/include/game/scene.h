@@ -11,12 +11,12 @@
 
 #include <vector>
 
-#include "engine/font.h"
-#include "engine/props.h"
-#include "engine/resources.h"
-#include "engine/scene_delegate.h"
+#include "game/font.h"
+#include "game/props.h"
+#include "game/resources.h"
+#include "game/scene_delegate.h"
 
-namespace engine {
+namespace game {
 
 class Scene {
 public:
@@ -55,4 +55,4 @@ private:
   U16 m_frameCount = 0;
 };
 
-}  // namespace engine
+}  // namespace game

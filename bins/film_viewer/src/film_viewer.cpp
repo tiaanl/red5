@@ -1,7 +1,7 @@
-
 #include <SDL.h>
 #include <engine/engine.h>
-#include <engine/single_scene_stage.h>
+#include <game/resources.h>
+#include <game/single_scene_stage.h>
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
@@ -9,10 +9,12 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  engine.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
-  engine.addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\UNIFORM.LFD)"});
+  auto stage =
+      std::make_unique<game::SingleSceneStage>(std::make_shared<game::Resources>(), "uniform");
+  stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
+  stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\UNIFORM.LFD)"});
 
-  engine.setStage(std::make_unique<engine::SingleSceneStage>("uniform"));
+  engine.setStage(std::move(stage));
 
   engine.run();
 
