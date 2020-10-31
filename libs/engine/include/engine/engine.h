@@ -12,7 +12,7 @@ namespace engine {
 
 class Engine {
 public:
-  void setStage(std::unique_ptr<Stage> stage);
+  bool setStage(std::unique_ptr<Stage> stage);
 
   // Lifecycle
   bool init(std::string_view windowTitle);

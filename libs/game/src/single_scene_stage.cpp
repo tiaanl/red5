@@ -9,8 +9,12 @@ bool SingleSceneStage::addResourceFile(const ResourceFile& resourceFile) {
   return m_resources->addResourceFile(resourceFile);
 }
 
-bool SingleSceneStage::onReady() {
-  m_scene = loadFilm(m_resources.get(), renderer(), this, m_filmName);
+bool SingleSceneStage::onLoad() {
+  if (!GameStage::onLoad()) {
+    return false;
+  }
+
+  m_scene = loadFilm(m_resources.get(), &m_spriteRenderer, this, m_filmName);
 
   return !!m_scene;
 }
@@ -21,7 +25,7 @@ void SingleSceneStage::onUpdate(U32 millis) {
   }
 }
 
-void SingleSceneStage::onRender() {
+void SingleSceneStage::onRenderGameScreen() {
   if (m_scene) {
     m_scene->render();
   }

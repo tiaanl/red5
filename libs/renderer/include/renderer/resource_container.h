@@ -20,7 +20,7 @@ public:
     Identifier(U32 id) : id{id} {}
 
     bool isValid() const {
-      return id == invalidValue();
+      return id != invalidValue();
     }
 
     friend bool operator==(const Identifier& left, const Identifier& right) {

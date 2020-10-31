@@ -3,7 +3,7 @@
 
 class MyStage : public engine::Stage {
 public:
-  bool onReady() override {
+  bool onLoad() override {
     U8 data[] = {
         255, 0,   0,   255,  // red
         0,   255, 0,   255,  // green
@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  engine.setStage(std::make_unique<MyStage>());
+  if (!engine.setStage(std::make_unique<MyStage>())) {
+    return 1;
+  }
 
   engine.run();
 

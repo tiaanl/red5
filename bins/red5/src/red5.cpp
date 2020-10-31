@@ -12,7 +12,7 @@ public:
   CutsceneStage(std::shared_ptr<game::Resources> resources, std::vector<std::string> films)
     : game::GameStage{std::move(resources)}, m_films{std::move(films)} {}
 
-  bool onReady() override {
+  bool onLoad() override {
     loadFilm(m_films[m_currentFilmIndex]);
 
     return true;
@@ -93,7 +93,9 @@ int main(int argc, char* argv[]) {
   stage->addResourceFile({resourceRoot / "XWING.LFD"});
   stage->addResourceFile({resourceRoot / "REGISTER.LFD"});
 
-  engine.setStage(std::move(stage));
+  if (!engine.setStage(std::move(stage))) {
+    return 1;
+  }
 
 #if 0
   // std::vector<std::string> films = {"logo_f", "along", "bat1_f", "bat2_f", "bat3_f", "bat4_f",

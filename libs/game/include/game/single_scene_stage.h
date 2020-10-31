@@ -2,8 +2,8 @@
 
 #include <engine/stage.h>
 
-#include "game/scene.h"
 #include "game/game_stage.h"
+#include "game/scene.h"
 
 namespace game {
 
@@ -14,9 +14,11 @@ public:
   bool addResourceFile(const ResourceFile& resourceFile);
 
   // Override: engine::Stage
-  bool onReady() override;
+  bool onLoad() override;
   void onUpdate(U32 millis) override;
-  void onRender() override;
+
+  // Override: GameStage
+  void onRenderGameScreen() override;
 
   // Override: SceneDelegate
   void onSceneReady() override;

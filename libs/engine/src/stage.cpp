@@ -4,7 +4,7 @@ namespace engine {
 
 Stage::~Stage() = default;
 
-void Stage::attachToEngine(renderer::SpriteRenderer* renderer) {
+void Stage::attachToEngine(renderer::Renderer* renderer) {
   m_renderer = renderer;
 }
 

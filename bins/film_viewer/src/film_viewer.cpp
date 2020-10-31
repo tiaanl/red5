@@ -14,7 +14,9 @@ int main(int argc, char* argv[]) {
   stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
   stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\UNIFORM.LFD)"});
 
-  engine.setStage(std::move(stage));
+  if (!engine.setStage(std::move(stage))) {
+    return 1;
+  }
 
   engine.run();
 

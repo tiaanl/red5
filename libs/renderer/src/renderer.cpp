@@ -28,6 +28,7 @@ bool Renderer::init(SDL_Window* window) {
 
 void Renderer::resize(const Size& size) {
   m_windowRenderTarget.size = size;
+
   GL_CHECK_VOID(glViewport(0, 0, size.width, size.height), "Could not set renderer viewport.");
 
   spdlog::info("Resize renderer: ({}, {})", size.width, size.height);

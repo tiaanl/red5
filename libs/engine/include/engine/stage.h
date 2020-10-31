@@ -8,23 +8,18 @@ class Stage {
 public:
   virtual ~Stage();
 
-  virtual bool onReady() = 0;
+  virtual bool onLoad() = 0;
   virtual void onUpdate(U32 millis) = 0;
   virtual void onRender() = 0;
 
 protected:
-  renderer::SpriteRenderer* renderer() const {
-    assert(m_renderer != nullptr);
-    return m_renderer;
-  }
+  renderer::Renderer* m_renderer;
+
+  virtual void attachToEngine(renderer::Renderer* renderer);
+  virtual void detachFromEngine();
 
 private:
   friend class Engine;
-
-  void attachToEngine(renderer::SpriteRenderer* renderer);
-  void detachFromEngine();
-
-  renderer::SpriteRenderer* m_renderer;
 };
 
 }  // namespace engine

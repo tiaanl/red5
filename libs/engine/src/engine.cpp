@@ -14,8 +14,8 @@ constexpr U16 g_screenHeight = 200;
 
 }  // namespace
 
-void Engine::setStage(std::unique_ptr<Stage> stage) {
-  spdlog::info("Setting stage");
+bool Engine::setStage(std::unique_ptr<Stage> stage) {
+  // spdlog::info("Setting stage");
 
   if (m_currentStage) {
     m_currentStage->detachFromEngine();
@@ -23,8 +23,13 @@ void Engine::setStage(std::unique_ptr<Stage> stage) {
 
   m_currentStage = std::move(stage);
 
-  m_currentStage->attachToEngine(&m_spriteRenderer);
-  m_currentStage->onReady();
+  m_currentStage->attachToEngine(&m_renderer);
+
+  if (!m_currentStage->onLoad()) {
+    return false;
+  }
+
+  return true;
 }
 
 bool Engine::init(std::string_view windowTitle) {
@@ -84,8 +89,10 @@ void Engine::run() {
       if (event.type == SDL_QUIT) {
         running = false;
         break;
-      } else if (event.type == SDL_WINDOWEVENT_RESIZED) {
-        m_renderer.resize({event.window.data1, event.window.data2});
+      } else if (event.type == SDL_WINDOWEVENT) {
+        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+          m_renderer.resize({event.window.data1, event.window.data2});
+        }
       }
     }
 
@@ -95,22 +102,9 @@ void Engine::run() {
 
     m_renderer.beginFrame();
 
-    m_renderer.setRenderTarget(m_screen);
-    m_renderer.clear(0.0f, 0, 0, 1.0f);
-    renderGameScreen();
-    m_renderer.clearRenderTarget();
-
-    m_renderer.clear(0.0f, 0.5f, 0.0f, 1.0f);
-
-    SDL_Point windowSize;
-    SDL_GetWindowSize(m_window, &windowSize.x, &windowSize.y);
-
-    renderer::Rect destination{renderer::fitInto({0, 0, g_screenWidth, g_screenHeight},
-                                                 {0, 0, windowSize.x, windowSize.y})};
-
-    m_renderer.renderRenderTarget(m_screen, destination);
-
-    renderOverlay();
+    if (m_currentStage) {
+      m_currentStage->onRender();
+    }
 
     m_renderer.finishFrame();
   }
