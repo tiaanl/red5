@@ -23,15 +23,25 @@ public:
   explicit Scene(SceneDelegate* sceneDelegate, Resources* resources,
                  renderer::SpriteRenderer* renderer);
 
+  PropContainer& props() {
+    return m_props;
+  }
+
   bool loadPalette(std::string_view name);
-  bool loadFont(std::string_view name);
   bool loadFilm(std::string_view name);
+  bool loadFont(std::string_view name);
+
+  PropId insertImage(std::string_view name, std::vector<Film::Chunk> chunks);
+  PropId insertAnimation(std::string_view name, std::vector<Film::Chunk> chunks);
 
   void update(U32 millis);
   void render();
 
 private:
   void applyPalette(const Palette& palette);
+
+  PropId insertImageProp(const Image& image, std::vector<Film::Chunk> chunks);
+  PropId insertAnimationProp(const Animation& animation, std::vector<Film::Chunk> chunks);
 
   void processFilm();
   void processViewBlock(const Film::Block& block);
@@ -48,7 +58,8 @@ private:
 
   SDL_Color m_palette[256];
 
-  std::vector<Prop> m_props;
+  PropContainer m_props;
+  std::vector<PropId> m_renderOrder;
 
   U32 m_totalMillis = 0;
   U32 m_currentFrame = 0;

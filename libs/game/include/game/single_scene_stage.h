@@ -27,12 +27,10 @@ public:
   void onSceneLastFramePlayed() override;
 
 private:
-  static std::unique_ptr<Scene> loadFilm(Resources* resources, renderer::SpriteRenderer* renderer,
-                                         SceneDelegate* sceneDelegate, std::string_view name);
-
   std::string m_filmName;
 
   std::unique_ptr<Scene> m_scene;
+  PropId m_mouseCursor;
 };
 
 }  // namespace game

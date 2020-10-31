@@ -96,7 +96,12 @@ void SpriteRenderer::render(const Sprite& sprite) const {
   auto viewMatrix = glm::ortho(0.0f, static_cast<F32>(targetSize.width),
                                static_cast<F32>(targetSize.height), 0.0f);
 
-  Rect rect = sprite.rect();
+#if 0
+  spdlog::info("Rending sprite at: (({}, {}), ({}, {}))", rect.position.left, rect.position.top,
+               rect.size.width, rect.size.height);
+#endif  // 0
+
+  auto rect = sprite.m_rect;
 
   UniformData uniforms;
   uniforms.set("u_viewMatrix", viewMatrix);

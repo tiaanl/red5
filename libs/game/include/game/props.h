@@ -19,16 +19,29 @@ public:
   Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
        std::vector<renderer::Sprite> sprites);
 
-  U32 layer() const {
+  I16 currentFrame() const {
+    return m_currentFrame;
+  }
+
+  void setCurrentFrame(I16 currentFrame);
+
+  I16 layer() const {
     return m_layer;
   }
+
+  void setLayer(I16 layer);
+
+  const renderer::Position& offset() const {
+    return m_offset;
+  }
+
+  void setOffset(const renderer::Position& offset);
 
   void nextFrame(U32 sceneFrame);
   void render(renderer::SpriteRenderer* renderer);
 
 protected:
   void updateState(U32 sceneFrame);
-  void resetState();
 
   void applyMove(I16 x, I16 y, I16 xx, I16 yy);
   void applySpeed(I16 x, I16 y, I16 xx, I16 yy);
@@ -45,7 +58,7 @@ protected:
   std::vector<Film::Chunk> m_chunks;
   std::vector<renderer::Sprite> m_sprites;
 
-  bool m_visible = false;
+  bool m_visible = true;
   I16 m_currentFrame = 0;
   I16 m_layer = 0;
   renderer::Position m_offset = {0, 0};
@@ -57,5 +70,13 @@ protected:
     I16 frameRate = 0;
   } m_animation;
 };
+
+class PropContainer : public renderer::ResourceContainer<Prop> {
+public:
+  Identifier create(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
+                    std::vector<renderer::Sprite> sprites);
+};
+
+using PropId = PropContainer::Identifier;
 
 }  // namespace game

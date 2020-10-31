@@ -36,6 +36,10 @@ public:
     }
   };
 
+  MemSize size() const {
+    return m_data.size();
+  }
+
   DataType* getData(Identifier identifier) {
     // TODO: This should return const?
     return &m_data[identifier.id];

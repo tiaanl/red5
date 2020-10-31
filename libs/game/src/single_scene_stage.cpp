@@ -14,9 +14,30 @@ bool SingleSceneStage::onLoad() {
     return false;
   }
 
-  m_scene = loadFilm(m_resources.get(), &m_spriteRenderer, this, m_filmName);
+  m_scene = std::make_unique<Scene>(this, m_resources.get(), &m_spriteRenderer);
 
-  return !!m_scene;
+  // Apply the default palette.
+  if (!m_scene->loadPalette("standard")) {
+    return false;
+  }
+
+  spdlog::info("Loading film: {}", m_filmName);
+
+  if (!m_scene->loadFilm(m_filmName)) {
+    return false;
+  }
+
+  // Insert the mouse cursor to the scene.
+  m_mouseCursor = m_scene->insertAnimation("cursors", {});
+  if (!m_mouseCursor) {
+    return false;
+  }
+
+  auto prop = m_scene->props().getData(m_mouseCursor);
+  prop->setCurrentFrame(0);
+  prop->setLayer(0);
+
+  return true;
 }
 
 void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
@@ -41,7 +62,10 @@ void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
   x = static_cast<I32>(std::round(mouseX));
   y = static_cast<I32>(std::round(mouseY));
 
-  spdlog::info("Mouse position: ({}, {})", x, y);
+  // spdlog::info("Mouse position: ({}, {})", x, y);
+
+  auto prop = m_scene->props().getData(m_mouseCursor);
+  prop->setOffset({x, y});
 }
 
 void SingleSceneStage::onUpdate(U32 millis) {
@@ -66,28 +90,6 @@ void SingleSceneStage::onSceneEvent(I16 event) {
 
 void SingleSceneStage::onSceneLastFramePlayed() {
   SceneDelegate::onSceneLastFramePlayed();
-}
-
-// static
-std::unique_ptr<Scene> SingleSceneStage::loadFilm(Resources* resources,
-                                                  renderer::SpriteRenderer* renderer,
-                                                  SceneDelegate* sceneDelegate,
-                                                  std::string_view name) {
-  auto scene = std::make_unique<Scene>(sceneDelegate, resources, renderer);
-
-  // Apply the default palette.
-  if (!scene->loadPalette("standard")) {
-    return {};
-  }
-
-  spdlog::info("Loading film: {}", name);
-
-  // Load the specified film.
-  if (!scene->loadFilm(name)) {
-    return {};
-  }
-
-  return scene;
 }
 
 }  // namespace game

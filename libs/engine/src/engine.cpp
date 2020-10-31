@@ -49,6 +49,8 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
+  SDL_ShowCursor(SDL_DISABLE);
+
   m_context = SDL_GL_CreateContext(m_window);
   if (!m_context) {
     SDL_DestroyWindow(m_window);

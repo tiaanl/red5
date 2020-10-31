@@ -27,6 +27,10 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   for (MemSize i = 0; i < size / 16; ++i) {
     auto resource = readResourceEntry(&stream);
     if (resource.has_value()) {
+#if 0
+      spdlog::info("entry: ({}) {}", resourceTypeToString(resource.value().type()),
+                   resource.value().name());
+#endif  // 0
       entries.emplace_back(std::move(resource.value()));
     }
   }

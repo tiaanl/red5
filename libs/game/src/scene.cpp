@@ -67,6 +67,23 @@ bool Scene::loadPalette(std::string_view name) {
   return true;
 }
 
+bool Scene::loadFilm(std::string_view name) {
+  auto* resource = m_resources->findResource(ResourceType::Film, name);
+  if (!resource) {
+    return false;
+  }
+  auto film = loadResource<Film>(*resource);
+  if (!film) {
+    return false;
+  }
+
+  m_film.swap(film);
+
+  processFilm();
+
+  return true;
+}
+
 bool Scene::loadFont(std::string_view name) {
   auto* resource = m_resources->findResource(ResourceType::Font, name);
   if (!resource) {
@@ -83,21 +100,32 @@ bool Scene::loadFont(std::string_view name) {
   return true;
 }
 
-bool Scene::loadFilm(std::string_view name) {
-  auto* resource = m_resources->findResource(ResourceType::Film, name);
+PropId Scene::insertImage(std::string_view name, std::vector<Film::Chunk> chunks) {
+  auto* resource = m_resources->findResource(ResourceType::Image, name);
   if (!resource) {
-    return false;
-  }
-  auto film = loadResource<Film>(*resource);
-  if (!film) {
-    return false;
+    return PropId::invalidValue();
   }
 
-  m_film.swap(film);
+  auto image = loadResource<Image>(*resource);
+  if (!image) {
+    return PropId::invalidValue();
+  }
 
-  processFilm();
+  return insertImageProp(*image, std::move(chunks));
+}
 
-  return true;
+PropId Scene::insertAnimation(std::string_view name, std::vector<Film::Chunk> chunks) {
+  auto* resource = m_resources->findResource(ResourceType::Animation, name);
+  if (!resource) {
+    return PropId::invalidValue();
+  }
+
+  auto animation = loadResource<Animation>(*resource);
+  if (!animation) {
+    return PropId::invalidValue();
+  }
+
+  return insertAnimationProp(*animation, std::move(chunks));
 }
 
 void Scene::update(U32 millis) {
@@ -118,20 +146,29 @@ void Scene::update(U32 millis) {
       m_currentFrame = 0;
     }
 
-    for (auto& prop : m_props) {
-      prop.nextFrame(m_currentFrame);
+    for (auto& propId : m_renderOrder) {
+      auto prop = m_props.getData(propId);
+      if (prop) {
+        prop->nextFrame(m_currentFrame);
+      }
     }
   }
 }
 
 void Scene::render() {
-  assert(m_film);
+  std::sort(std::begin(m_renderOrder), std::end(m_renderOrder),
+            [this](const PropId& left, const PropId& right) {
+              Prop* leftData = m_props.getData(left);
+              Prop* rightData = m_props.getData(right);
 
-  std::sort(std::begin(m_props), std::end(m_props),
-            [](auto& left, auto& right) { return right.layer() < left.layer(); });
+              return rightData->layer() < leftData->layer();
+            });
 
-  for (auto& prop : m_props) {
-    prop.render(m_renderer);
+  for (auto& propId : m_renderOrder) {
+    auto prop = m_props.getData(propId);
+    if (prop) {
+      prop->render(m_renderer);
+    }
   }
 }
 
@@ -140,6 +177,39 @@ void Scene::applyPalette(const Palette& palette) {
   for (auto& c : palette.colors()) {
     m_palette[i++] = SDL_Color{c.red, c.green, c.blue, 255};
   }
+}
+
+PropId Scene::insertImageProp(const Image& image, std::vector<Film::Chunk> chunks) {
+  std::vector<renderer::Sprite> sprites;
+
+  auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
+  if (!texture) {
+    PropId::invalidValue();
+  }
+
+  renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
+  sprites.emplace_back(texture, rect);
+
+  auto propId = m_props.create(m_delegate, std::move(chunks), std::move(sprites));
+
+  m_renderOrder.emplace_back(propId);
+
+  return propId;
+}
+
+PropId Scene::insertAnimationProp(const Animation& animation, std::vector<Film::Chunk> chunks) {
+  std::vector<renderer::Sprite> sprites;
+  for (auto& image : animation.frames()) {
+    auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
+    renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
+    sprites.emplace_back(texture, rect);
+  }
+
+  auto propId = m_props.create(m_delegate, std::move(chunks), std::move(sprites));
+
+  m_renderOrder.emplace_back(propId);
+
+  return propId;
 }
 
 void Scene::processFilm() {
@@ -174,10 +244,15 @@ void Scene::processFilm() {
     }
   }
 
+#if 0
   // Switch to frame 0 for all props.
-  for (auto& prop : m_props) {
-    prop.nextFrame(0);
+  for (auto& propId : m_renderOrder) {
+    auto prop = m_props.getData(propId);
+    if (prop) {
+      prop->nextFrame(0);
+    }
   }
+#endif  // 0
 }
 
 void Scene::processViewBlock(const Film::Block& block) {}
@@ -200,49 +275,11 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 }
 
 void Scene::processImageBlock(const Film::Block& block) {
-  auto* resource = m_resources->findResource(ResourceType::Image, block.name);
-  if (!resource) {
-    return;
-  }
-
-  auto image = loadResource<Image>(*resource);
-  if (!image) {
-    spdlog::warn("Image not found: {}", block.name);
-    return;
-  }
-
-  std::vector<renderer::Sprite> sprites;
-  auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, *image);
-  if (!texture) {
-    return;
-  }
-
-  renderer::Rect rect{image->left(), image->top(), image->width(), image->height()};
-  sprites.emplace_back(texture, rect);
-
-  m_props.emplace_back(m_delegate, block.chunks, std::move(sprites));
+  insertImage(block.name, block.chunks);
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
-  auto* resource = m_resources->findResource(ResourceType::Animation, block.name);
-  if (!resource) {
-    return;
-  }
-
-  auto animation = loadResource<Animation>(*resource);
-  if (!animation) {
-    spdlog::warn("Animation not found: {}", block.name);
-    return;
-  }
-
-  std::vector<renderer::Sprite> sprites;
-  for (auto& image : animation->frames()) {
-    auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
-    renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
-    sprites.emplace_back(texture, rect);
-  }
-
-  m_props.emplace_back(m_delegate, block.chunks, std::move(sprites));
+  insertAnimation(block.name, block.chunks);
 }
 
 }  // namespace game

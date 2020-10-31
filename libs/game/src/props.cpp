@@ -8,20 +8,29 @@ Prop::Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
            std::vector<renderer::Sprite> sprites)
   : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_sprites{std::move(sprites)} {}
 
-void Prop::nextFrame(U32 sceneFrame) {
-  if (sceneFrame == 0) {
-    resetState();
-  }
+void Prop::setCurrentFrame(I16 currentFrame) {
+  m_currentFrame = currentFrame;
+}
 
+void Prop::setLayer(I16 layer) {
+  m_layer = layer;
+}
+
+void Prop::setOffset(const renderer::Position& offset) {
+  m_offset = offset;
+}
+
+void Prop::nextFrame(U32 sceneFrame) {
   updateState(sceneFrame);
 
   m_offset += m_movePerFrame;
+}
 
-  m_currentFrame += m_animation.direction;
-  if (m_currentFrame < 0) {
-    m_currentFrame = static_cast<I16>(m_sprites.size()) - 1;
-  } else if (m_currentFrame >= m_sprites.size()) {
-    m_currentFrame = 0;
+void Prop::render(renderer::SpriteRenderer* renderer) {
+  if (m_visible) {
+    auto sprite = m_sprites[m_currentFrame];
+    sprite.setPosition(sprite.position() + m_offset);
+    renderer->render(sprite);
   }
 }
 
@@ -104,16 +113,6 @@ void Prop::updateState(U32 frame) {
   }
 }
 
-void Prop::resetState() {
-  m_visible = false;
-  m_currentFrame = 0;
-  m_layer = 0;
-  m_offset = {0, 0};
-  m_movePerFrame = {0, 0};
-  m_animation.direction = 0;
-  m_animation.frameRate = 0;
-}
-
 void Prop::applyMove(I16 x, I16 y, I16 xx, I16 yy) {
 #if TRACE_OP_CODES > 0
   spdlog::info("OpCode::Move :: x: {}, y: {}, xx: {}, yy: {}", x, y, xx, yy);
@@ -157,9 +156,9 @@ void Prop::applyFrame(I16 frame, I16 x) {
 }
 
 void Prop::applyAnimation(I16 direction, I16 frameRate) {
-#if TRACE_OP_CODES > 0
+// #if TRACE_OP_CODES > 0
   spdlog::info("OpCode::Animation :: direction: {}, frameRate: {}", direction, frameRate);
-#endif
+// #endif
 
   m_animation.direction = direction;
   m_animation.frameRate = frameRate;
@@ -213,10 +212,10 @@ void Prop::applyOrientation(I16 x, I16 y) {
   m_orientation.top = y;
 }
 
-void Prop::render(renderer::SpriteRenderer* renderer) {
-  if (m_visible) {
-    renderer->render(m_sprites[m_currentFrame]);
-  }
+renderer::ResourceContainer<Prop>::Identifier PropContainer::create(
+    SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
+    std::vector<renderer::Sprite> sprites) {
+  return emplaceData(delegate, std::move(chunks), std::move(sprites));
 }
 
 }  // namespace game
