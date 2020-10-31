@@ -1,4 +1,3 @@
-#include <SDL2/SDL.h>
 #include <engine/engine.h>
 
 #include <filesystem>
@@ -24,7 +23,7 @@ public:
     }
   }
 
-  void onRender() override {
+  void onRenderGameScreen() override {
     if (m_currentScene) {
       m_currentScene->render();
     }
@@ -39,7 +38,7 @@ public:
 
 private:
   bool loadFilm(std::string_view name) {
-    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), renderer());
+    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), &m_spriteRenderer);
 
     // Apply the default palette.
     if (!scene->loadPalette("standard")) {

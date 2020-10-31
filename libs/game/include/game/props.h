@@ -14,39 +14,10 @@
 
 namespace game {
 
-class RenderItem {
-public:
-  RenderItem(renderer::TextureId texture, const renderer::Rect& rect);
-
-  RenderItem(const RenderItem&) = delete;
-  RenderItem(RenderItem&& other) : m_texture{other.m_texture}, m_rect{other.m_rect} {
-    other.m_texture = renderer::TextureId::invalidValue();
-  }
-
-  ~RenderItem();
-
-  RenderItem& operator=(const RenderItem&) = delete;
-  RenderItem& operator=(RenderItem&& other) {
-    m_texture = other.m_texture;
-    m_rect = other.m_rect;
-
-    other.m_texture = renderer::TextureId::invalidValue();
-
-    return *this;
-  };
-
-  bool render(renderer::SpriteRenderer* renderer, const renderer::Position& offset,
-              const renderer::Position& orientation);
-
-private:
-  renderer::TextureId m_texture;
-  renderer::Rect m_rect;
-};
-
 class Prop {
 public:
   Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-       std::vector<RenderItem> renderItems);
+       std::vector<renderer::Sprite> sprites);
 
   U32 layer() const {
     return m_layer;
@@ -72,7 +43,7 @@ protected:
 
   SceneDelegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
-  std::vector<RenderItem> m_renderItems;
+  std::vector<renderer::Sprite> m_sprites;
 
   bool m_visible = false;
   I16 m_currentFrame = 0;

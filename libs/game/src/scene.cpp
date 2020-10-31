@@ -133,10 +133,6 @@ void Scene::render() {
   for (auto& prop : m_props) {
     prop.render(m_renderer);
   }
-
-  if (m_font) {
-    m_font->renderText(m_renderer, {10, 10}, "TILO");
-  }
 }
 
 void Scene::applyPalette(const Palette& palette) {
@@ -215,16 +211,16 @@ void Scene::processImageBlock(const Film::Block& block) {
     return;
   }
 
-  std::vector<RenderItem> renderItems;
+  std::vector<renderer::Sprite> sprites;
   auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, *image);
   if (!texture) {
     return;
   }
 
   renderer::Rect rect{image->left(), image->top(), image->width(), image->height()};
-  renderItems.emplace_back(texture, rect);
+  sprites.emplace_back(texture, rect);
 
-  m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
+  m_props.emplace_back(m_delegate, block.chunks, std::move(sprites));
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
@@ -239,14 +235,14 @@ void Scene::processAnimationBlock(const Film::Block& block) {
     return;
   }
 
-  std::vector<RenderItem> renderItems;
+  std::vector<renderer::Sprite> sprites;
   for (auto& image : animation->frames()) {
     auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
     renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
-    renderItems.emplace_back(texture, rect);
+    sprites.emplace_back(texture, rect);
   }
 
-  m_props.emplace_back(m_delegate, block.chunks, std::move(renderItems));
+  m_props.emplace_back(m_delegate, block.chunks, std::move(sprites));
 }
 
 }  // namespace game

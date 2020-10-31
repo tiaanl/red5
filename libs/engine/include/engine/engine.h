@@ -20,16 +20,13 @@ public:
 
 private:
   void update(U32 ticks);
-  void renderGameScreen();
-  void renderOverlay();
 
   renderer::Renderer m_renderer;
-  renderer::SpriteRenderer m_spriteRenderer;
 
   SDL_Window* m_window;
   SDL_GLContext m_context;
-  renderer::RenderTargetId m_screen;
 
+  renderer::Size m_windowSize{0, 0};
   std::unique_ptr<Stage> m_currentStage;
 };
 

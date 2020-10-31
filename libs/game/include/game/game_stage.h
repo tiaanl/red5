@@ -12,7 +12,9 @@ public:
 
   virtual void onRenderGameScreen() = 0;
 
+  // Override: engine::Stage
   bool onLoad() override;
+  void onStageResized(I32 width, I32 height) override;
   void onRender() override final;
 
 protected:
@@ -23,6 +25,9 @@ protected:
   std::shared_ptr<Resources> m_resources;
 
   renderer::SpriteRenderer m_spriteRenderer;
+  renderer::Rect m_gameScreenRect{0, 0, 0, 0};
+
+private:
   renderer::RenderTargetId m_gameScreen;
 };
 

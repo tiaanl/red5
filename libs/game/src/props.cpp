@@ -4,34 +4,9 @@
 
 namespace game {
 
-RenderItem::RenderItem(renderer::TextureId texture, const renderer::Rect& rect)
-  : m_texture{texture}, m_rect{rect} {}
-
-RenderItem::~RenderItem() = default;
-
-bool RenderItem::render(renderer::SpriteRenderer* renderer, const renderer::Position& offset,
-                        const renderer::Position& orientation) {
-  renderer::Rect rect = m_rect;
-  rect.position += offset;
-
-#if 0
-  U32 flip = SDL_FLIP_NONE;
-  if (orientation.x > 0) {
-    flip |= SDL_FLIP_HORIZONTAL;
-  }
-  if (orientation.y > 0) {
-    flip |= SDL_FLIP_VERTICAL;
-  }
-#endif  // 0
-
-  renderer->render(rect.position, {m_texture, rect.size});
-
-  return true;
-}
-
 Prop::Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-           std::vector<RenderItem> renderItems)
-  : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_renderItems{std::move(renderItems)} {}
+           std::vector<renderer::Sprite> sprites)
+  : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_sprites{std::move(sprites)} {}
 
 void Prop::nextFrame(U32 sceneFrame) {
   if (sceneFrame == 0) {
@@ -44,8 +19,8 @@ void Prop::nextFrame(U32 sceneFrame) {
 
   m_currentFrame += m_animation.direction;
   if (m_currentFrame < 0) {
-    m_currentFrame = static_cast<I16>(m_renderItems.size()) - 1;
-  } else if (m_currentFrame >= m_renderItems.size()) {
+    m_currentFrame = static_cast<I16>(m_sprites.size()) - 1;
+  } else if (m_currentFrame >= m_sprites.size()) {
     m_currentFrame = 0;
   }
 }
@@ -240,7 +215,7 @@ void Prop::applyOrientation(I16 x, I16 y) {
 
 void Prop::render(renderer::SpriteRenderer* renderer) {
   if (m_visible) {
-    m_renderItems[m_currentFrame].render(renderer, m_offset, m_orientation);
+    renderer->render(m_sprites[m_currentFrame]);
   }
 }
 

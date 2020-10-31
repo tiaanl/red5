@@ -22,6 +22,14 @@ bool GameStage::onLoad() {
   return true;
 }
 
+void GameStage::onStageResized(I32 width, I32 height) {
+  Stage::onStageResized(width, height);
+
+  auto screen = m_renderer->renderTarget();
+  m_gameScreenRect = renderer::fitInto({0, 0, g_gameScreenWidth, g_gameScreenHeight},
+                                       {0, 0, screen->size.width, screen->size.height});
+}
+
 void GameStage::onRender() {
   if (!m_gameScreen.isValid()) {
     return;
@@ -33,14 +41,10 @@ void GameStage::onRender() {
   m_renderer->clearRenderTarget();
 
   m_renderer->clear(0.0f, 0.5f, 0.0f, 1.0f);
-  auto screen = m_renderer->renderTarget();
 
   // spdlog::info("screen: ({}, {})", screen->size.width, screen->size.height);
 
-  renderer::Rect destination{renderer::fitInto({0, 0, g_gameScreenWidth, g_gameScreenHeight},
-                                               {0, 0, screen->size.width, screen->size.height})};
-
-  m_renderer->renderRenderTarget(m_gameScreen, destination);
+  m_renderer->renderRenderTarget(m_gameScreen, m_gameScreenRect);
 }
 
 void GameStage::attachToEngine(renderer::Renderer* renderer) {

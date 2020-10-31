@@ -21,7 +21,7 @@ public:
 
   // Render sprites.
 
-  void render(const Position& position, const Sprite& sprite) const;
+  void render(const Sprite& sprite) const;
 
 private:
   Renderer* m_renderer;

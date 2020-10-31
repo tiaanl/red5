@@ -5,15 +5,6 @@
 
 namespace engine {
 
-namespace {
-
-constexpr I32 g_screenScale = 5;
-
-constexpr U16 g_screenWidth = 320;
-constexpr U16 g_screenHeight = 200;
-
-}  // namespace
-
 bool Engine::setStage(std::unique_ptr<Stage> stage) {
   // spdlog::info("Setting stage");
 
@@ -28,6 +19,9 @@ bool Engine::setStage(std::unique_ptr<Stage> stage) {
   if (!m_currentStage->onLoad()) {
     return false;
   }
+
+  // Trigger an onStageResized so that the stage can configure any size dependent objects.
+  m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
 
   return true;
 }
@@ -46,8 +40,7 @@ bool Engine::init(std::string_view windowTitle) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
   m_window = SDL_CreateWindow(
-      windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      g_screenWidth * g_screenScale, g_screenHeight * g_screenScale,
+      windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 1000,
       SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
   if (!m_window) {
@@ -64,13 +57,9 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
+  SDL_GetWindowSize(m_window, &m_windowSize.width, &m_windowSize.height);
+
   if (!m_renderer.init(m_window)) {
-    return false;
-  }
-
-  m_screen = m_renderer.renderTargets().create({g_screenWidth, g_screenHeight});
-
-  if (!m_spriteRenderer.attachToRenderer(&m_renderer)) {
     return false;
   }
 
@@ -91,7 +80,15 @@ void Engine::run() {
         break;
       } else if (event.type == SDL_WINDOWEVENT) {
         if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-          m_renderer.resize({event.window.data1, event.window.data2});
+          m_windowSize = {event.window.data1, event.window.data2};
+          m_renderer.resize(m_windowSize);
+          if (m_currentStage) {
+            m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
+          }
+        }
+      } else if (event.type == SDL_MOUSEMOTION) {
+        if (m_currentStage) {
+          m_currentStage->onMouseMoved(event.motion.x, event.motion.y);
         }
       }
     }
@@ -116,16 +113,6 @@ void Engine::update(U32 ticks) {
   if (m_currentStage) {
     m_currentStage->onUpdate(ticks);
   }
-}
-
-void Engine::renderGameScreen() {
-  if (m_currentStage) {
-    m_currentStage->onRender();
-  }
-}
-
-void Engine::renderOverlay() {
-  // m_ttf.renderText(&m_renderer, {10, 10}, "test");
 }
 
 }  // namespace engine

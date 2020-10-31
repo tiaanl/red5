@@ -91,13 +91,12 @@ void SpriteRenderer::detachFromRenderer() {
   m_renderer = nullptr;
 }
 
-void SpriteRenderer::render(const Position& position, const Sprite& sprite) const {
-  // auto targetSize = m_renderer->renderTarget()->size;
-  Size targetSize{320, 200};
+void SpriteRenderer::render(const Sprite& sprite) const {
+  auto targetSize = m_renderer->renderTarget()->size;
   auto viewMatrix = glm::ortho(0.0f, static_cast<F32>(targetSize.width),
                                static_cast<F32>(targetSize.height), 0.0f);
 
-  Rect rect{position, sprite.m_size};
+  Rect rect = sprite.rect();
 
   UniformData uniforms;
   uniforms.set("u_viewMatrix", viewMatrix);

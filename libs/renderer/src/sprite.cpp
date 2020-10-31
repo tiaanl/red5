@@ -2,7 +2,7 @@
 
 namespace renderer {
 
-Sprite::Sprite(TextureId texture, const Size& size)
-  : m_texture{texture}, m_size{size} {}
+Sprite::Sprite(TextureId texture, const Rect& rect)
+  : m_texture{texture}, m_rect{rect} {}
 
 }  // namespace renderer

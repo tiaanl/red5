@@ -15,6 +15,7 @@ public:
 
   // Override: engine::Stage
   bool onLoad() override;
+  void onMouseMoved(I32 x, I32 y) override;
   void onUpdate(U32 millis) override;
 
   // Override: GameStage

@@ -14,8 +14,8 @@ Font::~Font() = default;
 
 void Font::renderText(renderer::SpriteRenderer* renderer, const renderer::Position& position,
                       std::string_view text) {
-  SDL_Rect s{0, 0, 0, m_height};
-  SDL_Rect d{position.left, position.top, 0, m_height};
+  renderer::Rect s{0, 0, 0, m_height};
+  renderer::Rect d{position.left, position.top, 0, m_height};
 
   for (U8 ch : text) {
     auto& glyph = m_glyphs[ch];
@@ -23,16 +23,15 @@ void Font::renderText(renderer::SpriteRenderer* renderer, const renderer::Positi
     auto texture = glyph.texture;
 
     U16 width = glyph.width;
-    s.w = width;
-    d.w = width;
+    s.size.width = width;
+    d.size.width = width;
 
-    // renderer->copyTexture(texture, {d.x, d.y, d.w, d.h});
-    renderer::Sprite sprite{texture, {d.w, d.h}};
-    renderer->render({d.x, d.y}, sprite);
+    renderer::Sprite sprite{texture, d};
+    renderer->render(sprite);
 
     // SDL_RenderCopy(renderer, texture, &s, &d);
 
-    d.x += width + 1;
+    d.position.left += width + 1;
   }
 }
 

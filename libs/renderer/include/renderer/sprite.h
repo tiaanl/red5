@@ -8,17 +8,17 @@ namespace renderer {
 
 class Sprite {
 public:
-  Sprite(TextureId textureId, const Size& size);
+  Sprite(TextureId textureId, const Rect& rect);
 
-  const Size& size() const {
-    return m_size;
+  const Rect& rect() const {
+    return m_rect;
   }
 
 private:
   friend class SpriteRenderer;
 
   TextureId m_texture;
-  Size m_size;
+  Rect m_rect;
 };
 
 }  // namespace renderer
