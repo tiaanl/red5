@@ -6,7 +6,6 @@
 #include <memory>
 
 #include "engine/stage.h"
-#include "true_type_font.h"
 
 namespace engine {
 

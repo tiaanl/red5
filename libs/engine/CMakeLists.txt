@@ -1,23 +1,13 @@
 project(engine)
 
-set(ROBOTO_FROM_FILE ${engine_SOURCE_DIR}/resources/roboto-condensed-regular.ttf)
-set(ROBOTO_TO_FILE ${engine_BINARY_DIR}/roboto-condensed-regular.cpp)
-add_custom_target(compile_roboto_to_cpp
-    COMMAND binary_to_cpp ${ROBOTO_FROM_FILE} ${ROBOTO_TO_FILE}
-    )
-
 set(engine_HEADER_FILES
     include/engine/engine.h
     include/engine/stage.h
-    include/engine/true_type_font.h
     )
 
 set(engine_SOURCE_FILES
     src/engine.cpp
     src/stage.cpp
-    src/stb/stb_truetype.h
-    src/true_type_font.cpp
-    ${ROBOTO_TO_FILE}
     )
 
 base_add_library(engine ${engine_HEADER_FILES} ${engine_SOURCE_FILES})
@@ -26,4 +16,3 @@ target_link_libraries(engine PUBLIC lfd)
 target_link_libraries(engine PUBLIC renderer)
 target_link_libraries(engine PUBLIC SDL2::SDL2main SDL2::SDL2-static)
 target_link_libraries(engine PRIVATE imgui::imgui)
-# add_dependencies(engine compile_roboto_to_cpp)
