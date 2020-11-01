@@ -4,12 +4,16 @@
 
 namespace game {
 
-Prop::Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-           std::vector<renderer::Sprite> sprites)
-  : m_delegate{delegate}, m_chunks{std::move(chunks)}, m_sprites{std::move(sprites)} {}
+Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
+           std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites)
+  : m_resourceType{type},
+    m_name{name},
+    m_delegate{delegate},
+    m_chunks{std::move(chunks)},
+    m_sprites{std::move(sprites)} {}
 
-void Prop::setCurrentFrame(I16 currentFrame) {
-  m_currentFrame = currentFrame;
+void Prop::setSpriteIndex(I16 currentFrame) {
+  m_currentSpriteIndex = currentFrame;
 }
 
 void Prop::setLayer(I16 layer) {
@@ -20,15 +24,22 @@ void Prop::setOffset(const renderer::Position& offset) {
   m_offset = offset;
 }
 
-void Prop::nextFrame(U32 sceneFrame) {
+void Prop::sceneTick(I32 sceneFrame) {
   updateState(sceneFrame);
+
+  m_currentSpriteIndex += m_animation.direction;
+  if (m_currentSpriteIndex >= m_sprites.size()) {
+    m_currentSpriteIndex = static_cast<I16>(m_sprites.size() - 1);
+  } else if (m_currentSpriteIndex < 0) {
+    m_currentSpriteIndex = 0;
+  }
 
   m_offset += m_movePerFrame;
 }
 
 void Prop::render(renderer::SpriteRenderer* renderer) {
   if (m_visible) {
-    auto sprite = m_sprites[m_currentFrame];
+    auto sprite = m_sprites[m_currentSpriteIndex];
     sprite.setPosition(sprite.position() + m_offset);
     renderer->render(sprite);
   }
@@ -150,15 +161,15 @@ void Prop::applyFrame(I16 frame, I16 x) {
   spdlog::info("OpCode::Frame :: frame: {}, x: {}", frame, x);
 #endif
 
-  m_currentFrame = frame;
+  m_currentSpriteIndex = frame;
 
   assert(x == 0);
 }
 
 void Prop::applyAnimation(I16 direction, I16 frameRate) {
-// #if TRACE_OP_CODES > 0
+  // #if TRACE_OP_CODES > 0
   spdlog::info("OpCode::Animation :: direction: {}, frameRate: {}", direction, frameRate);
-// #endif
+  // #endif
 
   m_animation.direction = direction;
   m_animation.frameRate = frameRate;
@@ -213,9 +224,9 @@ void Prop::applyOrientation(I16 x, I16 y) {
 }
 
 renderer::ResourceContainer<Prop>::Identifier PropContainer::create(
-    SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-    std::vector<renderer::Sprite> sprites) {
-  return emplaceData(delegate, std::move(chunks), std::move(sprites));
+    ResourceType type, std::string_view name, SceneDelegate* delegate,
+    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites) {
+  return emplaceData(type, name, delegate, std::move(chunks), std::move(sprites));
 }
 
 }  // namespace game

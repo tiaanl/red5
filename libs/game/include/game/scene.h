@@ -35,19 +35,24 @@ public:
   PropId insertAnimation(std::string_view name, std::vector<Film::Chunk> chunks);
 
   void update(U32 millis);
-  void render();
+  void renderGameScreen();
+  void renderDebugInfo();
 
 private:
   void applyPalette(const Palette& palette);
 
-  PropId insertImageProp(const Image& image, std::vector<Film::Chunk> chunks);
-  PropId insertAnimationProp(const Animation& animation, std::vector<Film::Chunk> chunks);
+  PropId insertImageProp(std::string_view name, const Image& image,
+                         std::vector<Film::Chunk> chunks);
+  PropId insertAnimationProp(std::string_view name, const Animation& animation,
+                             std::vector<Film::Chunk> chunks);
 
   void processFilm();
   void processViewBlock(const Film::Block& block);
   void processPaletteBlock(const Film::Block& block);
   void processImageBlock(const Film::Block& block);
   void processAnimationBlock(const Film::Block& block);
+
+  void advanceToNextFrame();
 
   SceneDelegate* m_delegate;
   Resources* m_resources;
@@ -62,8 +67,12 @@ private:
   std::vector<PropId> m_renderOrder;
 
   U32 m_totalMillis = 0;
-  U32 m_currentFrame = 0;
+  I32 m_currentFrame = 0;
   U16 m_frameCount = 0;
+
+  // Debug stuff:
+  ResourceType m_selectedResourceType;
+  std::string m_selectedEntry;
 };
 
 }  // namespace game

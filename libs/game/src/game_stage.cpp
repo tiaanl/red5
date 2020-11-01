@@ -11,8 +11,9 @@ constexpr I32 g_gameScreenHeight = 200;
 
 GameStage::GameStage(std::shared_ptr<Resources> resources) : m_resources{std::move(resources)} {}
 
+void GameStage::onRenderDebugInfo() {}
+
 bool GameStage::onLoad() {
-  spdlog::info("GameStage::onLoad");
   m_gameScreen = m_renderer->renderTargets().create({g_gameScreenWidth, g_gameScreenHeight});
   if (!m_gameScreen) {
     spdlog::error("Could not create game screen render target.");
@@ -41,10 +42,8 @@ void GameStage::onRender() {
   m_renderer->clearRenderTarget();
 
   m_renderer->clear(0.0f, 0.5f, 0.0f, 1.0f);
-
-  // spdlog::info("screen: ({}, {})", screen->size.width, screen->size.height);
-
   m_renderer->renderRenderTarget(m_gameScreen, m_gameScreenRect);
+  onRenderDebugInfo();
 }
 
 void GameStage::attachToEngine(renderer::Renderer* renderer) {

@@ -25,7 +25,7 @@ public:
 
   void onRenderGameScreen() override {
     if (m_currentScene) {
-      m_currentScene->render();
+      m_currentScene->renderGameScreen();
     }
   }
 

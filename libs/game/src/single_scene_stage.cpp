@@ -34,7 +34,7 @@ bool SingleSceneStage::onLoad() {
   }
 
   auto prop = m_scene->props().getData(m_mouseCursor);
-  prop->setCurrentFrame(0);
+  prop->setSpriteIndex(0);
   prop->setLayer(0);
 
   return true;
@@ -76,7 +76,13 @@ void SingleSceneStage::onUpdate(U32 millis) {
 
 void SingleSceneStage::onRenderGameScreen() {
   if (m_scene) {
-    m_scene->render();
+    m_scene->renderGameScreen();
+  }
+}
+
+void SingleSceneStage::onRenderDebugInfo() {
+  if (m_scene) {
+    m_scene->renderDebugInfo();
   }
 }
 
@@ -87,7 +93,6 @@ void SingleSceneStage::onSceneReady() {
 void SingleSceneStage::onSceneEvent(I16 event) {
   SceneDelegate::onSceneEvent(event);
 }
-
 void SingleSceneStage::onSceneLastFramePlayed() {
   SceneDelegate::onSceneLastFramePlayed();
 }

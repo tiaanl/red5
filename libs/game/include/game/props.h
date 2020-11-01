@@ -16,14 +16,22 @@ namespace game {
 
 class Prop {
 public:
-  Prop(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-       std::vector<renderer::Sprite> sprites);
+  Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
+       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
 
-  I16 currentFrame() const {
-    return m_currentFrame;
+  ResourceType resourceType() const {
+    return m_resourceType;
   }
 
-  void setCurrentFrame(I16 currentFrame);
+  std::string_view name() const {
+    return m_name;
+  }
+
+  I16 spriteIndex() const {
+    return m_currentSpriteIndex;
+  }
+
+  void setSpriteIndex(I16 currentFrame);
 
   I16 layer() const {
     return m_layer;
@@ -37,7 +45,7 @@ public:
 
   void setOffset(const renderer::Position& offset);
 
-  void nextFrame(U32 sceneFrame);
+  void sceneTick(I32 sceneFrame);
   void render(renderer::SpriteRenderer* renderer);
 
 protected:
@@ -54,12 +62,15 @@ protected:
   void applyDisplay(I16 visible);
   void applyOrientation(I16 x, I16 y);
 
+  ResourceType m_resourceType;
+  std::string m_name;
+
   SceneDelegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
   std::vector<renderer::Sprite> m_sprites;
 
-  bool m_visible = true;
-  I16 m_currentFrame = 0;
+  bool m_visible = false;
+  I16 m_currentSpriteIndex = 0;
   I16 m_layer = 0;
   renderer::Position m_offset = {0, 0};
   renderer::Position m_movePerFrame = {0, 0};
@@ -69,12 +80,15 @@ protected:
     I16 direction = 0;
     I16 frameRate = 0;
   } m_animation;
+
+private:
+  friend class Scene;
 };
 
 class PropContainer : public renderer::ResourceContainer<Prop> {
 public:
-  Identifier create(SceneDelegate* delegate, std::vector<Film::Chunk> chunks,
-                    std::vector<renderer::Sprite> sprites);
+  Identifier create(ResourceType type, std::string_view name, SceneDelegate* delegate,
+                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
 };
 
 using PropId = PropContainer::Identifier;

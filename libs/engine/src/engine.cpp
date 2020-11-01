@@ -1,6 +1,9 @@
 #include "engine/engine.h"
 
 #include <SDL2/SDL.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
 #include <spdlog/sinks/msvc_sink.h>
 
 namespace engine {
@@ -34,14 +37,32 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
-  // Set up OpenGL properties for SDL.
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#ifdef __APPLE__
+  // GL 3.2 Core + GLSL 150
+  const char* glslVersion = "#version 150";
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
+                      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);  // Always required on Mac
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#else
+  // GL 3.0 + GLSL 130
+  const char* glslVersion = "#version 130";
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
 
-  m_window = SDL_CreateWindow(
-      windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 1000,
-      SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+  // Create window with graphics context
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+  SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL |
+                                                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+
+  m_window = SDL_CreateWindow(windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              1600, 1000, windowFlags);
 
   if (!m_window) {
     SDL_Quit();
@@ -59,11 +80,30 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
+  SDL_GL_MakeCurrent(m_window, m_context);
+  SDL_GL_SetSwapInterval(1);  // Enable vsync
+
   SDL_GetWindowSize(m_window, &m_windowSize.width, &m_windowSize.height);
 
   if (!m_renderer.init(m_window)) {
     return false;
   }
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  // ImGui::StyleColorsClassic();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplSDL2_InitForOpenGL(m_window, m_context);
+  ImGui_ImplOpenGL3_Init(glslVersion);
 
   return true;
 }
@@ -77,6 +117,8 @@ void Engine::run() {
   while (running) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+      ImGui_ImplSDL2_ProcessEvent(&event);
+
       if (event.type == SDL_QUIT) {
         running = false;
         break;
@@ -99,15 +141,28 @@ void Engine::run() {
     update(now - lastTicks);
     lastTicks = now;
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(m_window);
+    ImGui::NewFrame();
+
     m_renderer.beginFrame();
 
     if (m_currentStage) {
       m_currentStage->onRender();
     }
 
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     m_renderer.finishFrame();
   }
 
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+
+  SDL_GL_DeleteContext(m_context);
+  SDL_DestroyWindow(m_window);
   SDL_Quit();
 }
 

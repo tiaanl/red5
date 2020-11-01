@@ -20,6 +20,7 @@ public:
 
   // Override: GameStage
   void onRenderGameScreen() override;
+  void onRenderDebugInfo() override;
 
   // Override: SceneDelegate
   void onSceneReady() override;
