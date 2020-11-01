@@ -15,13 +15,13 @@
 #include "game/props.h"
 #include "game/resources.h"
 #include "game/scene_delegate.h"
+#include "game/scene_renderer.h"
 
 namespace game {
 
 class Scene {
 public:
-  explicit Scene(SceneDelegate* sceneDelegate, Resources* resources,
-                 renderer::SpriteRenderer* renderer);
+  Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer);
 
   PropContainer& props() {
     return m_props;
@@ -56,7 +56,7 @@ private:
 
   SceneDelegate* m_delegate;
   Resources* m_resources;
-  renderer::SpriteRenderer* m_renderer;
+  SceneRenderer* m_sceneRenderer;
 
   std::unique_ptr<Film> m_film;
   std::unique_ptr<Font> m_font;
@@ -71,7 +71,7 @@ private:
   U16 m_frameCount = 0;
 
   // Debug stuff:
-  ResourceType m_selectedResourceType;
+  ResourceType m_selectedResourceType{};
   std::string m_selectedEntry;
 };
 

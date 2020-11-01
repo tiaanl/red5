@@ -14,7 +14,7 @@ enum class UniformType : U32 {
   Float2,
   Float3,
   Float4,
-  Matrix4x4,
+  Matrix4X4,
   Texture,
 };
 
@@ -28,7 +28,7 @@ public:
   void set(std::string_view name, F32 value1, F32 value2, F32 value3, F32 value4);
   void set(std::string_view name, const glm::mat4x4& matrix);
   void set(std::string_view name, UniformType type, F32* values, MemSize count);
-  void set(std::string_view name, U32 texture);
+  void set(std::string_view name, TextureId texture);
 
 private:
   friend class Renderer;

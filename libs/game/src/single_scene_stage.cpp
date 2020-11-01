@@ -14,7 +14,7 @@ bool SingleSceneStage::onLoad() {
     return false;
   }
 
-  m_scene = std::make_unique<Scene>(this, m_resources.get(), &m_spriteRenderer);
+  m_scene = std::make_unique<Scene>(this, m_resources.get(), &m_sceneRenderer);
 
   // Apply the default palette.
   if (!m_scene->loadPalette("standard")) {

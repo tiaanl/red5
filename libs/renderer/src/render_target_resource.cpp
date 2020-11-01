@@ -9,9 +9,9 @@ namespace renderer {
 namespace {
 
 void destroyRenderTargetInternal(RenderTargetData& data) {
-  GL_CHECK_VOID(glDeleteTextures(1, &data.texture), "Could not delete render target texture.");
+  GL_CHECK_VOID(glDeleteTextures(1, &data.texture), "Could not delete renderInternal target texture.");
   GL_CHECK_VOID(glDeleteBuffers(1, &data.framebuffer),
-                "Could not delete render target frame buffer.");
+                "Could not delete renderInternal target frame buffer.");
 }
 
 }  // namespace

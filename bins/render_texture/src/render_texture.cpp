@@ -10,7 +10,8 @@ public:
         0,   0,   255, 255,  // blue
         255, 255, 255, 255,  // white
     };
-    m_texture = renderer()->renderer()->textures().create(data, {2, 2});
+    m_texture =
+        m_renderer->textures().create(data, renderer::TextureFormat::RedGreenBlueAlpha, {2, 2});
     if (!m_texture.isValid()) {
       return false;
     }
@@ -21,7 +22,7 @@ public:
   void onUpdate(U32 millis) override {}
 
   void onRender() override {
-    renderer()->render({0, 0}, {m_texture, {2, 2}});
+    // m_renderer->renderInternal({0, 0}, {m_texture, {2, 2}});
   }
 
 private:

@@ -54,6 +54,12 @@ SpriteRenderer::~SpriteRenderer() {
   detachFromRenderer();
 }
 
+void SpriteRenderer::render(const Sprite& sprite) const {
+  UniformData uniforms;
+  buildUniforms(sprite, &uniforms);
+  renderInternal(sprite, m_program, uniforms);
+}
+
 bool SpriteRenderer::attachToRenderer(Renderer* renderer) {
   m_renderer = renderer;
 
@@ -76,7 +82,7 @@ bool SpriteRenderer::attachToRenderer(Renderer* renderer) {
     return false;
   }
 
-  m_program = m_renderer->programs().create(g_textureVertexShader, g_textureFragmentShader);
+  m_program = createProgramInternal();
   if (!m_program) {
     return false;
   }
@@ -91,23 +97,25 @@ void SpriteRenderer::detachFromRenderer() {
   m_renderer = nullptr;
 }
 
-void SpriteRenderer::render(const Sprite& sprite) const {
+ProgramId SpriteRenderer::createProgramInternal() {
+  return m_renderer->programs().create(g_textureVertexShader, g_textureFragmentShader);
+}
+
+void SpriteRenderer::buildUniforms(const Sprite& sprite, UniformData* uniforms) const {
   auto targetSize = m_renderer->renderTarget()->size;
   auto viewMatrix = glm::ortho(0.0f, static_cast<F32>(targetSize.width),
                                static_cast<F32>(targetSize.height), 0.0f);
 
-#if 0
-  spdlog::info("Rending sprite at: (({}, {}), ({}, {}))", rect.position.left, rect.position.top,
-               rect.size.width, rect.size.height);
-#endif  // 0
-
   auto rect = sprite.m_rect;
+  uniforms->set("u_viewMatrix", viewMatrix);
+  uniforms->set("u_rect", static_cast<F32>(rect.position.left), static_cast<F32>(rect.position.top),
+                static_cast<F32>(rect.size.width), static_cast<F32>(rect.size.height));
+  uniforms->set("u_texture", sprite.m_texture);
+}
 
-  UniformData uniforms;
-  uniforms.set("u_viewMatrix", viewMatrix);
-  uniforms.set("u_rect", static_cast<F32>(rect.position.left), static_cast<F32>(rect.position.top),
-               static_cast<F32>(rect.size.width), static_cast<F32>(rect.size.height));
-  m_renderer->renderVertexBuffer(m_vertexBuffer, m_program, sprite.m_texture, uniforms);
+void SpriteRenderer::renderInternal(const Sprite& sprite, ProgramId program,
+                                    const UniformData& uniforms) const {
+  m_renderer->renderVertexBuffer(m_vertexBuffer, program, sprite.m_texture, uniforms);
 }
 
 }  // namespace renderer

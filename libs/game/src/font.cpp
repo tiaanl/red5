@@ -63,7 +63,8 @@ bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
       }
     }
 
-    auto texture = renderer->textures().create(image.data(), {glyph.width, font.height()});
+    auto texture = renderer->textures().create(
+        image.data(), renderer::TextureFormat::RedGreenBlueAlpha, {glyph.width, font.height()});
     m_glyphs[font.startChar() + i].width = glyph.width;
     m_glyphs[font.startChar() + i].texture = texture;
   }

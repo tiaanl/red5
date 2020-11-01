@@ -4,8 +4,10 @@ namespace engine {
 
 Stage::~Stage() = default;
 
-void Stage::attachToEngine(renderer::Renderer* renderer) {
+bool Stage::attachToEngine(renderer::Renderer* renderer) {
   m_renderer = renderer;
+
+  return true;
 }
 
 void Stage::detachFromEngine() {

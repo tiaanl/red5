@@ -3,6 +3,7 @@
 #include <engine/stage.h>
 
 #include "game/resources.h"
+#include "scene_renderer.h"
 
 namespace game {
 
@@ -20,12 +21,12 @@ public:
 
 protected:
   // Override: engine::Stage
-  void attachToEngine(renderer::Renderer* renderer) override;
+  bool attachToEngine(renderer::Renderer* renderer) override;
   void detachFromEngine() override;
 
   std::shared_ptr<Resources> m_resources;
 
-  renderer::SpriteRenderer m_spriteRenderer;
+  SceneRenderer m_sceneRenderer;
   renderer::Rect m_gameScreenRect{0, 0, 0, 0};
 
 private:

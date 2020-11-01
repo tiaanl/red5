@@ -51,7 +51,7 @@ void Renderer::setRenderTarget(RenderTargetId renderTarget) {
                 "Could not bind frame buffer.");
 
   GL_CHECK_VOID(glViewport(0, 0, renderTargetData->size.width, renderTargetData->size.height),
-                "Could not set render target viewport size.");
+                "Could not set renderInternal target viewport size.");
 
   //  if (renderTarget != RenderTargetId::invalidValue()) {
   //    m_textureProgram.viewMatrix = glm::ortho(0.0f,
@@ -67,7 +67,7 @@ void Renderer::clearRenderTarget() {
   GL_CHECK_VOID(glBindFramebuffer(GL_FRAMEBUFFER, 0), "Could not unbind frame buffer.");
 
   GL_CHECK_VOID(glViewport(0, 0, m_windowRenderTarget.size.width, m_windowRenderTarget.size.height),
-                "Could not set render target viewport size.");
+                "Could not set renderInternal target viewport size.");
 }
 
 void Renderer::renderRenderTarget(RenderTargetId renderTarget, const Rect& destination) {
@@ -118,11 +118,11 @@ void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program
                                   const UniformData& uniformData) {
   auto vertexBufferData = m_vertexBuffers.getData(vertexBuffer);
   auto programData = m_programs.getData(program);
-  auto textureData = m_textures.getData(texture);
 
   GL_CHECK_VOID(glUseProgram(programData->id), "Could not bind program.")
   GL_CHECK_VOID(glBindVertexArray(vertexBufferData->id), "Could not bind vertex array.")
-  GL_CHECK_VOID(glBindTexture(GL_TEXTURE_2D, textureData->texture), "Could not bind texture.")
+
+  U32 nextTextureUnit = 0;
 
   // Upload all the uniform data to the GPU.
   for (auto& uniform : uniformData.m_data) {
@@ -159,15 +159,26 @@ void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program
                       "Could not set uniform data.");
         break;
 
-      case UniformType::Matrix4x4:
+      case UniformType::Matrix4X4:
         GL_CHECK_VOID(glUniformMatrix4fv(location, 1, 0, uniform.floatData),
                       "Could not set uniform data.");
         break;
 
-      case UniformType::Texture:
-        GL_CHECK_VOID(glUniform1uiv(location, 1, uniform.unsignedIntData),
-                      "Could not set uniform data.");
+      case UniformType::Texture: {
+        auto textureData = m_textures.getData(uniform.texture);
+        if (!textureData) {
+          spdlog::error("Texture from uniform not found.");
+          break;
+        }
+
+        GL_CHECK_VOID(glActiveTexture(GL_TEXTURE0 + nextTextureUnit),
+                      "Could not set active texture unit.");
+        GL_CHECK_VOID(glBindTexture(textureData->dimensions, textureData->texture),
+                      "Could not bind texture.");
+        GL_CHECK_VOID(glUniform1i(location, nextTextureUnit), "Could not set texture uniform.");
+        ++nextTextureUnit;
         break;
+      }
     };
   }
 
@@ -180,6 +191,7 @@ void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program
   GL_CHECK_VOID(glDisable(GL_BLEND), "Could not disable blending.");
 
   GL_CHECK_VOID(glBindTexture(GL_TEXTURE_2D, 0), "Could not unbind texture.")
+  GL_CHECK_VOID(glBindTexture(GL_TEXTURE_1D, 0), "Could not unbind texture.")
   GL_CHECK_VOID(glBindVertexArray(0), "Could not unbind vertex array.")
   GL_CHECK_VOID(glUseProgram(0), "Could not unbind program.")
 }

@@ -17,7 +17,9 @@ bool Engine::setStage(std::unique_ptr<Stage> stage) {
 
   m_currentStage = std::move(stage);
 
-  m_currentStage->attachToEngine(&m_renderer);
+  if (!m_currentStage->attachToEngine(&m_renderer)) {
+    return false;
+  }
 
   if (!m_currentStage->onLoad()) {
     return false;

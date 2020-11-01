@@ -1,16 +1,20 @@
 #include "game/props.h"
 
+#include <game/scene_renderer.h>
+
 #define TRACE_OP_CODES 0
 
 namespace game {
 
 Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
-           std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites)
+           std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
+           std::vector<renderer::Sprite> indexSprites)
   : m_resourceType{type},
     m_name{name},
     m_delegate{delegate},
     m_chunks{std::move(chunks)},
-    m_sprites{std::move(sprites)} {}
+    m_sprites{std::move(sprites)},
+    m_indexSprites{std::move(indexSprites)} {}
 
 void Prop::setSpriteIndex(I16 currentFrame) {
   m_currentSpriteIndex = currentFrame;
@@ -37,9 +41,10 @@ void Prop::sceneTick(I32 sceneFrame) {
   m_offset += m_movePerFrame;
 }
 
-void Prop::render(renderer::SpriteRenderer* renderer) {
+void Prop::render(SceneRenderer* renderer) {
   if (m_visible) {
-    auto sprite = m_sprites[m_currentSpriteIndex];
+    // auto sprite = m_sprites[m_currentSpriteIndex];
+    auto sprite = m_indexSprites[m_currentSpriteIndex];
     sprite.setPosition(sprite.position() + m_offset);
     renderer->render(sprite);
   }
@@ -225,8 +230,10 @@ void Prop::applyOrientation(I16 x, I16 y) {
 
 renderer::ResourceContainer<Prop>::Identifier PropContainer::create(
     ResourceType type, std::string_view name, SceneDelegate* delegate,
-    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites) {
-  return emplaceData(type, name, delegate, std::move(chunks), std::move(sprites));
+    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
+    std::vector<renderer::Sprite> indexSprites) {
+  return emplaceData(type, name, delegate, std::move(chunks), std::move(sprites),
+                     std::move(indexSprites));
 }
 
 }  // namespace game

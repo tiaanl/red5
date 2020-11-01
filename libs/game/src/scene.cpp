@@ -30,12 +30,13 @@ void renderImageToBuffer(const Image& image, SDL_Color* palette, SDL_Color* pixe
 
 renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Color* palette,
                                            const Image& image) {
+  if (image.lines().empty()) {
+    SDL_Color empty{0, 0, 0, 0};
+    return renderer->textures().create(&empty, renderer::TextureFormat::RedGreenBlueAlpha, {1, 1});
+  }
+
   U16 imageWidth = image.width();
   U16 imageHeight = image.height();
-
-  if (imageWidth <= 0 || imageWidth >= 512 || imageHeight <= 0 || imageHeight >= 512) {
-    return renderer::TextureId::invalidValue();
-  }
 
   std::vector<SDL_Color> buffer;
   buffer.resize(imageWidth * imageHeight);
@@ -43,13 +44,58 @@ renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Col
 
   renderImageToBuffer(image, palette, buffer.data());
 
-  return renderer->textures().create(buffer.data(), {imageWidth, imageHeight});
+  return renderer->textures().create(buffer.data(), renderer::TextureFormat::RedGreenBlueAlpha,
+                                     {imageWidth, imageHeight});
+}
+
+void renderIndicesToBuffer(U8* buffer, const Image& image) {
+  auto imageWidth = image.width();
+  auto imageHeight = image.height();
+
+  for (auto& line : image.lines()) {
+    MemSize y = line.top - image.top();
+
+    if (y >= imageHeight) {
+      continue;
+    }
+
+    MemSize x = line.left - image.left();
+    MemSize pos = y * imageWidth + x;
+    for (auto index : line.indices) {
+      buffer[pos++] = index;
+      if (++x >= imageWidth) {
+        break;
+      }
+    }
+  }
+}
+
+renderer::TextureId createIndexTexture(renderer::Renderer* renderer, const Image& image) {
+  if (image.lines().empty()) {
+    U8 empty = 0;
+    return renderer->textures().create(&empty, renderer::TextureFormat::Red, {1, 1});
+  }
+
+  U16 imageWidth = image.width();
+  U16 imageHeight = image.height();
+
+  std::vector<U8> indices;
+  indices.resize(imageWidth * imageHeight);
+  std::memset(indices.data(), 0, indices.size());
+
+  renderIndicesToBuffer(indices.data(), image);
+
+  return renderer->textures().create(indices.data(), renderer::TextureFormat::Red,
+                                     {imageWidth, imageHeight});
 }
 
 }  // namespace
 
-Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, renderer::SpriteRenderer* renderer)
-  : m_delegate{sceneDelegate}, m_resources{resources}, m_renderer{renderer}, m_palette{} {}
+Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer)
+  : m_delegate{sceneDelegate},
+    m_resources{resources},
+    m_sceneRenderer{sceneRenderer},
+    m_palette{} {}
 
 bool Scene::loadPalette(std::string_view name) {
   auto* resource = m_resources->findResource(ResourceType::Palette, name);
@@ -95,7 +141,7 @@ bool Scene::loadFont(std::string_view name) {
   }
 
   m_font = std::make_unique<Font>();
-  m_font->load(m_renderer->renderer(), *font);
+  m_font->load(m_sceneRenderer->renderer(), *font);
 
   return true;
 }
@@ -136,7 +182,7 @@ void Scene::update(U32 millis) {
   if (m_totalMillis > millisPerFrame) {
     m_totalMillis %= millisPerFrame;
 
-    // advanceToNextFrame();
+    advanceToNextFrame();
   }
 }
 
@@ -152,7 +198,7 @@ void Scene::renderGameScreen() {
   for (auto& propId : m_renderOrder) {
     auto prop = m_props.getData(propId);
     if (prop) {
-      prop->render(m_renderer);
+      prop->render(m_sceneRenderer);
     }
   }
 }
@@ -318,22 +364,32 @@ void Scene::applyPalette(const Palette& palette) {
   for (auto& c : palette.colors()) {
     m_palette[i++] = SDL_Color{c.red, c.green, c.blue, 255};
   }
+
+  m_sceneRenderer->setPalette(reinterpret_cast<const renderer::RGB*>(palette.colors().data()),
+                              palette.firstIndex(), palette.lastIndex());
 }
 
 PropId Scene::insertImageProp(std::string_view name, const Image& image,
                               std::vector<Film::Chunk> chunks) {
   std::vector<renderer::Sprite> sprites;
+  std::vector<renderer::Sprite> indexSprites;
 
-  auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
+  auto texture = createTextureFromImage(m_sceneRenderer->renderer(), m_palette, image);
   if (!texture) {
-    PropId::invalidValue();
+    return PropId::invalidValue();
+  }
+
+  auto indexTexture = createIndexTexture(m_sceneRenderer->renderer(), image);
+  if (!indexTexture) {
+    return PropId::invalidValue();
   }
 
   renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
+  indexSprites.emplace_back(indexTexture, rect);
 
-  auto propId =
-      m_props.create(ResourceType::Image, name, m_delegate, std::move(chunks), std::move(sprites));
+  auto propId = m_props.create(ResourceType::Image, name, m_delegate, std::move(chunks),
+                               std::move(sprites), std::move(indexSprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -343,14 +399,26 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
 PropId Scene::insertAnimationProp(std::string_view name, const Animation& animation,
                                   std::vector<Film::Chunk> chunks) {
   std::vector<renderer::Sprite> sprites;
+  std::vector<renderer::Sprite> indexSprites;
+
   for (auto& image : animation.frames()) {
-    auto texture = createTextureFromImage(m_renderer->renderer(), m_palette, image);
+    auto texture = createTextureFromImage(m_sceneRenderer->renderer(), m_palette, image);
+    if (!texture) {
+      return PropId::invalidValue();
+    }
+
+    auto indexTexture = createIndexTexture(m_sceneRenderer->renderer(), image);
+    if (!indexTexture) {
+      return PropId::invalidValue();
+    }
+
     renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
     sprites.emplace_back(texture, rect);
+    indexSprites.emplace_back(indexTexture, rect);
   }
 
   auto propId = m_props.create(ResourceType::Animation, name, m_delegate, std::move(chunks),
-                               std::move(sprites));
+                               std::move(sprites), std::move(indexSprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -361,6 +429,7 @@ void Scene::processFilm() {
   m_frameCount = m_film->frameCount();
 
   for (auto& block : m_film->blocks()) {
+    spdlog::info("Processing block: {}", block.name);
     switch (block.type) {
       case BlockType::View: {
         processViewBlock(block);

@@ -21,7 +21,7 @@ public:
 protected:
   renderer::Renderer* m_renderer;
 
-  virtual void attachToEngine(renderer::Renderer* renderer);
+  virtual bool attachToEngine(renderer::Renderer* renderer);
   virtual void detachFromEngine();
 
 private:

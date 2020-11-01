@@ -23,6 +23,10 @@ public:
 
   void setSize(const Size& size);
 
+  const Rect& rect() const {
+    return m_rect;
+  }
+
 private:
   friend class SpriteRenderer;
 

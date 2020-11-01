@@ -38,7 +38,7 @@ public:
 
 private:
   bool loadFilm(std::string_view name) {
-    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), &m_spriteRenderer);
+    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), &m_sceneRenderer);
 
     // Apply the default palette.
     if (!scene->loadPalette("standard")) {

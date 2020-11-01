@@ -16,7 +16,7 @@ void GameStage::onRenderDebugInfo() {}
 bool GameStage::onLoad() {
   m_gameScreen = m_renderer->renderTargets().create({g_gameScreenWidth, g_gameScreenHeight});
   if (!m_gameScreen) {
-    spdlog::error("Could not create game screen render target.");
+    spdlog::error("Could not create game screen renderInternal target.");
     return false;
   }
 
@@ -46,14 +46,20 @@ void GameStage::onRender() {
   onRenderDebugInfo();
 }
 
-void GameStage::attachToEngine(renderer::Renderer* renderer) {
-  Stage::attachToEngine(renderer);
+bool GameStage::attachToEngine(renderer::Renderer* renderer) {
+  if (!Stage::attachToEngine(renderer)) {
+    return false;
+  }
 
-  m_spriteRenderer.attachToRenderer(renderer);
+  if (!m_sceneRenderer.attachToRenderer(renderer)) {
+    return false;
+  }
+
+  return true;
 }
 
 void GameStage::detachFromEngine() {
-  m_spriteRenderer.detachFromRenderer();
+  m_sceneRenderer.detachFromRenderer();
 
   Stage::detachFromEngine();
 }

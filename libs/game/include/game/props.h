@@ -14,10 +14,13 @@
 
 namespace game {
 
+class SceneRenderer;
+
 class Prop {
 public:
   Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
-       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
+       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
+       std::vector<renderer::Sprite> indexSprites);
 
   ResourceType resourceType() const {
     return m_resourceType;
@@ -46,7 +49,7 @@ public:
   void setOffset(const renderer::Position& offset);
 
   void sceneTick(I32 sceneFrame);
-  void render(renderer::SpriteRenderer* renderer);
+  void render(SceneRenderer* renderer);
 
 protected:
   void updateState(U32 sceneFrame);
@@ -68,6 +71,7 @@ protected:
   SceneDelegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
   std::vector<renderer::Sprite> m_sprites;
+  std::vector<renderer::Sprite> m_indexSprites;
 
   bool m_visible = false;
   I16 m_currentSpriteIndex = 0;
@@ -88,7 +92,8 @@ private:
 class PropContainer : public renderer::ResourceContainer<Prop> {
 public:
   Identifier create(ResourceType type, std::string_view name, SceneDelegate* delegate,
-                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
+                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
+                    std::vector<renderer::Sprite> indexSprites);
 };
 
 using PropId = PropContainer::Identifier;
