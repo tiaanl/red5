@@ -37,7 +37,7 @@ U32 attributeTypeToOpenGlType(AttributeType type) {
 }
 
 void destroyVertexArrayInternal(U32 name) {
-  GL_CHECK_VOID(glDeleteVertexArrays(1, &name), "Could not delete vertex array.");
+  // GL_CHECK_VOID(glDeleteVertexArrays(1, &name), "Could not delete vertex array.");
 }
 
 }  // namespace

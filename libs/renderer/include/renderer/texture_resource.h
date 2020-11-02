@@ -25,6 +25,7 @@ public:
   ~TextureContainer();
 
   Identifier create(const void* data, TextureFormat format, const Size& size);
+  Identifier createFromRaw(U32 texture, const Size& size);
 
   Identifier create1D(const RGB* data, U32 count);
   void update1D(Identifier texture, const RGB* data, U32 start, U32 end);

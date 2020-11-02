@@ -34,6 +34,7 @@ bool SingleSceneStage::onLoad() {
   }
 
   auto prop = m_scene->props().getData(m_mouseCursor);
+  prop->setVisible(true);
   prop->setSpriteIndex(0);
   prop->setLayer(0);
 

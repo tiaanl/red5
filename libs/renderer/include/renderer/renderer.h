@@ -6,8 +6,8 @@
 
 #include "renderer/dimensions.h"
 #include "renderer/types.h"
-#include "renderer/vertex_buffer_definition.h"
 #include "renderer/uniform_data.h"
+#include "renderer/vertex_buffer_definition.h"
 
 namespace renderer {
 
@@ -45,7 +45,7 @@ public:
   // Rendering.
 
   void clear(F32 red, F32 green, F32 blue, F32 alpha);
-  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program, TextureId texture,
+  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program,
                           const UniformData& uniformData);
 
   // Per frame.

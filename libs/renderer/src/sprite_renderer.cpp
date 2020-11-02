@@ -115,7 +115,7 @@ void SpriteRenderer::buildUniforms(const Sprite& sprite, UniformData* uniforms) 
 
 void SpriteRenderer::renderInternal(const Sprite& sprite, ProgramId program,
                                     const UniformData& uniforms) const {
-  m_renderer->renderVertexBuffer(m_vertexBuffer, program, sprite.m_texture, uniforms);
+  m_renderer->renderVertexBuffer(m_vertexBuffer, program, uniforms);
 }
 
 }  // namespace renderer

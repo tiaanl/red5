@@ -73,7 +73,7 @@ bool createProgramInternal(const char* vertexShaderSource, const char* fragmentS
 }
 
 void destroyProgramInternal(U32 name) {
-  GL_CHECK_VOID(glDeleteProgram(name), "Could not delete program.");
+  // GL_CHECK_VOID(glDeleteProgram(name), "Could not delete program.");
 }
 
 }  // namespace

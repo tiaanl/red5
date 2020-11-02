@@ -37,13 +37,15 @@ in vec2 vs_out_texCoord;
 out vec4 fs_out_fragColor;
 
 uniform sampler2D u_texture;
-uniform sampler2D u_palette;
+uniform sampler1D u_palette;
 
 void main()
 {
-  // float index = texture(u_texture, vs_out_texCoord).r;
-  // vec4 color = texture(u_palette, vec2(index, 0.0f));
-  vec4 color = texture(u_palette, vec2(0.1f, 0.0f));
+  float index = texture(u_texture, vs_out_texCoord).r;
+  vec4 color = texture(u_palette, index, 0.0f);
+  if (index == 0.0f) {
+    color.a = 0.0f;
+  }
   fs_out_fragColor = color;
 }
 )";

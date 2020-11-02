@@ -6,67 +6,45 @@ namespace game {
 
 namespace {
 
-void renderImageToBuffer(const Image& image, SDL_Color* palette, SDL_Color* pixels) {
-  auto imageWidth = image.width();
+U16 imageStride(U16 width) {
+  return (width + 3u) & ~3u;
+}
+
+void renderImageToBuffer(U8* buffer, const Image& image) {
   auto imageHeight = image.height();
 
+  //  spdlog::info("image :: left: {}, top: {}, right: {}, bottom: {}", image.left(), image.top(),
+  //               image.right(), image.bottom());
+
+#if 0
   for (auto& line : image.lines()) {
-    MemSize y = line.top - image.top();
+    U16 y = line.left - image.left();
+    for (int p = 0; p < y; ++p) {
+      printf("   ");
+    }
+    for (U8 ch : line.indices) {
+      printf("%*d ", 2, ch);
+    }
+    printf("\n");
+  }
+#endif  // 0
+
+  for (auto& line : image.lines()) {
+    //    spdlog::info("line :: left: {}, top: {}, size: {}", line.left, line.top,
+    //    line.indices.size());
+
+    U16 y = line.top - image.top();
+    U16 x = line.left - image.left();
 
     if (y >= imageHeight) {
       continue;
     }
 
-    MemSize x = line.left - image.left();
-    MemSize pos = y * imageWidth + x;
-    for (auto index : line.indices) {
-      pixels[pos++] = palette[index];
-      if (++x >= imageWidth) {
-        break;
-      }
-    }
-  }
-}
+    U16 stride = imageStride(image.width());
 
-renderer::TextureId createTextureFromImage(renderer::Renderer* renderer, SDL_Color* palette,
-                                           const Image& image) {
-  if (image.lines().empty()) {
-    SDL_Color empty{0, 0, 0, 0};
-    return renderer->textures().create(&empty, renderer::TextureFormat::RedGreenBlueAlpha, {1, 1});
-  }
-
-  U16 imageWidth = image.width();
-  U16 imageHeight = image.height();
-
-  std::vector<SDL_Color> buffer;
-  buffer.resize(imageWidth * imageHeight);
-  std::memset(buffer.data(), 0, buffer.size() * sizeof(SDL_Color));
-
-  renderImageToBuffer(image, palette, buffer.data());
-
-  return renderer->textures().create(buffer.data(), renderer::TextureFormat::RedGreenBlueAlpha,
-                                     {imageWidth, imageHeight});
-}
-
-void renderIndicesToBuffer(U8* buffer, const Image& image) {
-  auto imageWidth = image.width();
-  auto imageHeight = image.height();
-
-  for (auto& line : image.lines()) {
-    MemSize y = line.top - image.top();
-
-    if (y >= imageHeight) {
-      continue;
-    }
-
-    MemSize x = line.left - image.left();
-    MemSize pos = y * imageWidth + x;
-    for (auto index : line.indices) {
-      buffer[pos++] = index;
-      if (++x >= imageWidth) {
-        break;
-      }
-    }
+    auto start = y * stride + x;
+    // spdlog::info("start: {}", start);
+    std::copy(line.indices.data(), line.indices.data() + line.indices.size(), &buffer[start]);
   }
 }
 
@@ -78,12 +56,13 @@ renderer::TextureId createIndexTexture(renderer::Renderer* renderer, const Image
 
   U16 imageWidth = image.width();
   U16 imageHeight = image.height();
+  U16 stride = imageStride(image.width());
 
   std::vector<U8> indices;
-  indices.resize(imageWidth * imageHeight);
+  indices.resize(stride * imageHeight);
   std::memset(indices.data(), 0, indices.size());
 
-  renderIndicesToBuffer(indices.data(), image);
+  renderImageToBuffer(indices.data(), image);
 
   return renderer->textures().create(indices.data(), renderer::TextureFormat::Red,
                                      {imageWidth, imageHeight});
@@ -372,24 +351,17 @@ void Scene::applyPalette(const Palette& palette) {
 PropId Scene::insertImageProp(std::string_view name, const Image& image,
                               std::vector<Film::Chunk> chunks) {
   std::vector<renderer::Sprite> sprites;
-  std::vector<renderer::Sprite> indexSprites;
 
-  auto texture = createTextureFromImage(m_sceneRenderer->renderer(), m_palette, image);
+  auto texture = createIndexTexture(m_sceneRenderer->renderer(), image);
   if (!texture) {
-    return PropId::invalidValue();
-  }
-
-  auto indexTexture = createIndexTexture(m_sceneRenderer->renderer(), image);
-  if (!indexTexture) {
     return PropId::invalidValue();
   }
 
   renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
-  indexSprites.emplace_back(indexTexture, rect);
 
-  auto propId = m_props.create(ResourceType::Image, name, m_delegate, std::move(chunks),
-                               std::move(sprites), std::move(indexSprites));
+  auto propId =
+      m_props.create(ResourceType::Image, name, m_delegate, std::move(chunks), std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -399,26 +371,19 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
 PropId Scene::insertAnimationProp(std::string_view name, const Animation& animation,
                                   std::vector<Film::Chunk> chunks) {
   std::vector<renderer::Sprite> sprites;
-  std::vector<renderer::Sprite> indexSprites;
 
   for (auto& image : animation.frames()) {
-    auto texture = createTextureFromImage(m_sceneRenderer->renderer(), m_palette, image);
+    auto texture = createIndexTexture(m_sceneRenderer->renderer(), image);
     if (!texture) {
-      return PropId::invalidValue();
-    }
-
-    auto indexTexture = createIndexTexture(m_sceneRenderer->renderer(), image);
-    if (!indexTexture) {
       return PropId::invalidValue();
     }
 
     renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
     sprites.emplace_back(texture, rect);
-    indexSprites.emplace_back(indexTexture, rect);
   }
 
   auto propId = m_props.create(ResourceType::Animation, name, m_delegate, std::move(chunks),
-                               std::move(sprites), std::move(indexSprites));
+                               std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -472,7 +437,6 @@ void Scene::processFilm() {
 }
 
 void Scene::processViewBlock(const Film::Block& block) {
-  spdlog::info("View block: {}", block.name);
   for (auto& chunk : block.chunks) {
     switch (chunk.opCode) {
       case OpCode::Time:
@@ -516,14 +480,24 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 
   // TODO: We need to process the `opCode`s, but for now we just apply the palette.
 
+  for (auto& chunk : block.chunks) {
+    spdlog::info("chunk: {}", opCodeToString(chunk.opCode));
+  }
+
   applyPalette(*palette);
 }
 
 void Scene::processImageBlock(const Film::Block& block) {
+  //  if (block.name != "cursors") {
+  //    return;
+  //  }
   insertImage(block.name, block.chunks);
 }
 
 void Scene::processAnimationBlock(const Film::Block& block) {
+  //  if (block.name != "cursors") {
+  //    return;
+  //  }
   insertAnimation(block.name, block.chunks);
 }
 

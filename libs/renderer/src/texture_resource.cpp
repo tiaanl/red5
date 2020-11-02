@@ -9,7 +9,7 @@ namespace renderer {
 namespace {
 
 void destroyTextureInternal(U32 name) {
-  GL_CHECK_VOID(glDeleteTextures(1, &name), "Could not delete texture.");
+  // GL_CHECK_VOID(glDeleteTextures(1, &name), "Could not delete texture.");
 }
 
 }  // namespace
@@ -31,7 +31,7 @@ TextureContainer::Identifier TextureContainer::create(const void* data, TextureF
 
   GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture), "Could not bind texture.", invalid)
 
-  U32 glFormat = GL_RGBA;
+  U32 glFormat = 0;
   switch (format) {
     case TextureFormat::RedGreenBlueAlpha:
       glFormat = GL_RGBA;
@@ -45,6 +45,7 @@ TextureContainer::Identifier TextureContainer::create(const void* data, TextureF
       glFormat = GL_RED;
       break;
   }
+  assert(glFormat != 0);
 
   GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.width, size.height, 0, glFormat,
                         GL_UNSIGNED_BYTE, data),
@@ -58,6 +59,10 @@ TextureContainer::Identifier TextureContainer::create(const void* data, TextureF
 
   GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0), "Could not unbind texture.", invalid)
 
+  return emplaceData(texture, static_cast<U32>(GL_TEXTURE_2D), size);
+}
+
+TextureContainer::Identifier TextureContainer::createFromRaw(U32 texture, const Size& size) {
   return emplaceData(texture, static_cast<U32>(GL_TEXTURE_2D), size);
 }
 

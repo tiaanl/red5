@@ -101,20 +101,7 @@ void Renderer::clear(F32 red, F32 green, F32 blue, F32 alpha) {
   GL_CHECK_VOID(glClear(GL_COLOR_BUFFER_BIT), "Could not clear.")
 }
 
-void Renderer::beginFrame() {
-  Size windowSize{};
-  SDL_GetWindowSize(m_window, &windowSize.width, &windowSize.height);
-
-  // spdlog::info("Window size: ({}, {})", windowSize.width, windowSize.height);
-
-  GL_CHECK_VOID(glViewport(0, 0, windowSize.width, windowSize.height), "Could not set viewport.")
-}
-
-void Renderer::finishFrame() {
-  SDL_GL_SwapWindow(m_window);
-}
-
-void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program, TextureId texture,
+void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program,
                                   const UniformData& uniformData) {
   auto vertexBufferData = m_vertexBuffers.getData(vertexBuffer);
   auto programData = m_programs.getData(program);
@@ -194,6 +181,19 @@ void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program
   GL_CHECK_VOID(glBindTexture(GL_TEXTURE_1D, 0), "Could not unbind texture.")
   GL_CHECK_VOID(glBindVertexArray(0), "Could not unbind vertex array.")
   GL_CHECK_VOID(glUseProgram(0), "Could not unbind program.")
+}
+
+void Renderer::beginFrame() {
+  Size windowSize{};
+  SDL_GetWindowSize(m_window, &windowSize.width, &windowSize.height);
+
+  // spdlog::info("Window size: ({}, {})", windowSize.width, windowSize.height);
+
+  GL_CHECK_VOID(glViewport(0, 0, windowSize.width, windowSize.height), "Could not set viewport.")
+}
+
+void Renderer::finishFrame() {
+  SDL_GL_SwapWindow(m_window);
 }
 
 }  // namespace renderer

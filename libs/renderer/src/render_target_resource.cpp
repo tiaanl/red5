@@ -9,9 +9,11 @@ namespace renderer {
 namespace {
 
 void destroyRenderTargetInternal(RenderTargetData& data) {
+#if 0
   GL_CHECK_VOID(glDeleteTextures(1, &data.texture), "Could not delete renderInternal target texture.");
   GL_CHECK_VOID(glDeleteBuffers(1, &data.framebuffer),
                 "Could not delete renderInternal target frame buffer.");
+#endif  // 0
 }
 
 }  // namespace
@@ -52,7 +54,8 @@ RenderTargetContainer::Identifier RenderTargetContainer::create(const Size& size
 
   GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0), "Could not unbind frame buffer.", invalid);
 
-  return emplaceData(frameBuffer, texture, size);}
+  return emplaceData(frameBuffer, texture, size);
+}
 
 void RenderTargetContainer::destroy(Identifier id) {
   auto data = getData(id);

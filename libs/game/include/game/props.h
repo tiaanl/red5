@@ -19,8 +19,7 @@ class SceneRenderer;
 class Prop {
 public:
   Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
-       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
-       std::vector<renderer::Sprite> indexSprites);
+       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
 
   ResourceType resourceType() const {
     return m_resourceType;
@@ -29,6 +28,12 @@ public:
   std::string_view name() const {
     return m_name;
   }
+
+  bool isVisible() const {
+    return m_visible;
+  }
+
+  void setVisible(bool visible);
 
   I16 spriteIndex() const {
     return m_currentSpriteIndex;
@@ -71,7 +76,6 @@ protected:
   SceneDelegate* m_delegate;
   std::vector<Film::Chunk> m_chunks;
   std::vector<renderer::Sprite> m_sprites;
-  std::vector<renderer::Sprite> m_indexSprites;
 
   bool m_visible = false;
   I16 m_currentSpriteIndex = 0;
@@ -92,8 +96,7 @@ private:
 class PropContainer : public renderer::ResourceContainer<Prop> {
 public:
   Identifier create(ResourceType type, std::string_view name, SceneDelegate* delegate,
-                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites,
-                    std::vector<renderer::Sprite> indexSprites);
+                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
 };
 
 using PropId = PropContainer::Identifier;

@@ -72,8 +72,6 @@ bool readLine(base::InputStream* stream, std::vector<Line>* lines) {
 Image::~Image() = default;
 
 void Image::read(base::InputStream* stream, MemSize size) {
-  auto startPosition = stream->getPosition();
-
   m_left = stream->readU16();
   m_top = stream->readU16();
   m_right = stream->readU16();
