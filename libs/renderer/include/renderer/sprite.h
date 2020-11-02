@@ -1,6 +1,5 @@
 #pragma once
 
-#include "renderer/dimensions.h"
 #include "renderer/renderer.h"
 #include "renderer/types.h"
 

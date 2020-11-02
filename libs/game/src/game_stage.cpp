@@ -27,8 +27,8 @@ void GameStage::onStageResized(I32 width, I32 height) {
   Stage::onStageResized(width, height);
 
   auto screen = m_renderer->renderTarget();
-  m_gameScreenRect = renderer::fitInto({0, 0, g_gameScreenWidth, g_gameScreenHeight},
-                                       {0, 0, screen->size.width, screen->size.height});
+  m_gameScreenRect = fitInto({0, 0, g_gameScreenWidth, g_gameScreenHeight},
+                             {0, 0, screen->size.width, screen->size.height});
 }
 
 void GameStage::onRender() {

@@ -27,7 +27,7 @@ protected:
   std::shared_ptr<Resources> m_resources;
 
   SceneRenderer m_sceneRenderer;
-  renderer::Rect m_gameScreenRect{0, 0, 0, 0};
+  Rect m_gameScreenRect{0, 0, 0, 0};
 
 private:
   renderer::RenderTargetId m_gameScreen;

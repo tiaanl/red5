@@ -1,6 +1,7 @@
 project(base)
 
 set(base_HEADER_FILES
+    include/base/dimensions.h
     include/base/platform.h
     include/base/streams/file_input_stream.h
     include/base/streams/file_output_stream.h
@@ -10,6 +11,7 @@ set(base_HEADER_FILES
     )
 
 set(base_SOURCE_FILES
+    src/dimensions.cpp
     src/streams/file_input_stream.cpp
     src/streams/file_output_stream.cpp
     src/streams/input_stream.cpp

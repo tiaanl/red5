@@ -47,11 +47,11 @@ public:
 
   void setLayer(I16 layer);
 
-  const renderer::Position& offset() const {
+  const Position& offset() const {
     return m_offset;
   }
 
-  void setOffset(const renderer::Position& offset);
+  void setOffset(const Position& offset);
 
   void sceneTick(I32 sceneFrame);
   void render(SceneRenderer* renderer);
@@ -80,9 +80,9 @@ protected:
   bool m_visible = false;
   I16 m_currentSpriteIndex = 0;
   I16 m_layer = 0;
-  renderer::Position m_offset = {0, 0};
-  renderer::Position m_movePerFrame = {0, 0};
-  renderer::Position m_orientation = {0, 0};
+  Position m_offset = {0, 0};
+  Position m_movePerFrame = {0, 0};
+  Position m_orientation = {0, 0};
 
   struct AnimationState {
     I16 direction = 0;

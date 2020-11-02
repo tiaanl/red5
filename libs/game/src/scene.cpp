@@ -357,7 +357,7 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
     return PropId::invalidValue();
   }
 
-  renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
+  Rect rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
 
   auto propId =
@@ -378,7 +378,7 @@ PropId Scene::insertAnimationProp(std::string_view name, const Animation& animat
       return PropId::invalidValue();
     }
 
-    renderer::Rect rect{image.left(), image.top(), image.width(), image.height()};
+    Rect rect{image.left(), image.top(), image.width(), image.height()};
     sprites.emplace_back(texture, rect);
   }
 

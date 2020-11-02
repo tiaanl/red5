@@ -26,7 +26,7 @@ void Prop::setLayer(I16 layer) {
   m_layer = layer;
 }
 
-void Prop::setOffset(const renderer::Position& offset) {
+void Prop::setOffset(const Position& offset) {
   m_offset = offset;
 }
 

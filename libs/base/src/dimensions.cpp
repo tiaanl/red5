@@ -1,7 +1,3 @@
-#include "renderer/dimensions.h"
-
-namespace renderer {
-
 Rect fitInto(const Rect& source, const Rect& destination) {
   F32 widthScale = static_cast<F32>(destination.size.width) / static_cast<F32>(source.size.width);
   F32 heightScale =
@@ -34,5 +30,3 @@ Rect fitInto(const Rect& source, const Rect& destination) {
 
   return result;
 }
-
-}  // namespace renderer

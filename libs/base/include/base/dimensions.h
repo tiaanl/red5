@@ -1,7 +1,5 @@
 #pragma once
 
-namespace renderer {
-
 struct Position {
   I32 left;
   I32 top;
@@ -36,5 +34,3 @@ struct Rect {
 };
 
 Rect fitInto(const Rect& source, const Rect& destination);
-
-}  // namespace renderer

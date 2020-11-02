@@ -5,7 +5,6 @@ find_package(glm CONFIG REQUIRED)
 
 set(renderer_HEADER_FILES
     include/renderer/color.h
-    include/renderer/dimensions.h
     include/renderer/program_resource.h
     include/renderer/render_target_resource.h
     include/renderer/renderer.h
@@ -20,7 +19,6 @@ set(renderer_HEADER_FILES
     )
 
 set(renderer_SOURCE_FILES
-    src/dimensions.cpp
     src/gl_check.cpp
     src/gl_check.h
     src/program_resource.cpp

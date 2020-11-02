@@ -1,7 +1,6 @@
 #pragma once
 
 #include "color.h"
-#include "renderer/dimensions.h"
 #include "renderer/resource_container.h"
 
 namespace renderer {

@@ -25,7 +25,7 @@ private:
   SDL_Window* m_window;
   SDL_GLContext m_context;
 
-  renderer::Size m_windowSize{0, 0};
+  Size m_windowSize{0, 0};
   std::unique_ptr<Stage> m_currentStage;
 };
 

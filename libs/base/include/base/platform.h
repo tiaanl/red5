@@ -20,3 +20,5 @@ using F64 = double;
 
 using MemSize = std::size_t;
 using PtrDiff = std::ptrdiff_t;
+
+#include "base/dimensions.h"

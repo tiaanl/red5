@@ -4,7 +4,6 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "renderer/dimensions.h"
 #include "renderer/types.h"
 #include "renderer/uniform_data.h"
 #include "renderer/vertex_buffer_definition.h"
