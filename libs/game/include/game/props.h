@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "game/scene_delegate.h"
+#include "game/timeline.h"
 
 namespace game {
 
@@ -18,8 +19,8 @@ class SceneRenderer;
 
 class Prop {
 public:
-  Prop(ResourceType type, std::string_view name, SceneDelegate* delegate,
-       std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
+  Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
+       std::vector<lfd::KeyFrame> keyFrames, std::vector<renderer::Sprite> sprites);
 
   ResourceType resourceType() const {
     return m_resourceType;
@@ -29,54 +30,24 @@ public:
     return m_name;
   }
 
-  bool isVisible() const {
-    return m_visible;
+  const Frame& currentFrame() const {
+    return m_timeline.currentFrame();
   }
-
-  void setVisible(bool visible);
-
-  I16 spriteIndex() const {
-    return m_currentSpriteIndex;
-  }
-
-  void setSpriteIndex(I16 currentFrame);
-
-  I16 layer() const {
-    return m_layer;
-  }
-
-  void setLayer(I16 layer);
-
-  const Position& offset() const {
-    return m_offset;
-  }
-
-  void setOffset(const Position& offset);
 
   void sceneTick(I32 sceneFrame);
   void render(SceneRenderer* renderer);
 
 protected:
-  void updateState(U32 sceneFrame);
-
-  void applyMove(I16 x, I16 y, I16 xx, I16 yy);
-  void applySpeed(I16 x, I16 y, I16 xx, I16 yy);
-  void applyLayer(I16 layer);
-  void applyFrame(I16 frame, I16 x);
-  void applyAnimation(I16 direction, I16 frameRate);
-  void applyEvent(I16 event);
-  void applyWindow(I16 x, I16 y, I16 w, I16 h);
-  void applyShift(I16 x, I16 y, I16 xx, I16 yy);
-  void applyDisplay(I16 visible);
-  void applyOrientation(I16 x, I16 y);
-
   ResourceType m_resourceType;
   std::string m_name;
 
   SceneDelegate* m_delegate;
-  std::vector<Film::Chunk> m_chunks;
+  std::vector<lfd::KeyFrame> m_keyFrames;
   std::vector<renderer::Sprite> m_sprites;
 
+  Timeline m_timeline;
+
+#if 0
   bool m_visible = false;
   I16 m_currentSpriteIndex = 0;
   I16 m_layer = 0;
@@ -88,6 +59,7 @@ protected:
     I16 direction = 0;
     I16 frameRate = 0;
   } m_animation;
+#endif  // 0
 
 private:
   friend class Scene;
@@ -96,7 +68,8 @@ private:
 class PropContainer : public renderer::ResourceContainer<Prop> {
 public:
   Identifier create(ResourceType type, std::string_view name, SceneDelegate* delegate,
-                    std::vector<Film::Chunk> chunks, std::vector<renderer::Sprite> sprites);
+                    U32 frameCount, std::vector<lfd::KeyFrame> keyFrames,
+                    std::vector<renderer::Sprite> sprites);
 };
 
 using PropId = PropContainer::Identifier;

@@ -31,8 +31,8 @@ public:
   bool loadFilm(std::string_view name);
   bool loadFont(std::string_view name);
 
-  PropId insertImage(std::string_view name, std::vector<Film::Chunk> chunks);
-  PropId insertAnimation(std::string_view name, std::vector<Film::Chunk> chunks);
+  PropId insertImage(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
+  PropId insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
 
   void update(U32 millis);
   void renderGameScreen();
@@ -42,15 +42,15 @@ private:
   void applyPalette(const Palette& palette);
 
   PropId insertImageProp(std::string_view name, const Image& image,
-                         std::vector<Film::Chunk> chunks);
+                         std::vector<lfd::KeyFrame> keyFrames);
   PropId insertAnimationProp(std::string_view name, const Animation& animation,
-                             std::vector<Film::Chunk> chunks);
+                             std::vector<lfd::KeyFrame> keyFrames);
 
   void processFilm();
-  void processViewBlock(const Film::Block& block);
-  void processPaletteBlock(const Film::Block& block);
-  void processImageBlock(const Film::Block& block);
-  void processAnimationBlock(const Film::Block& block);
+  void processViewBlock(const lfd::Film::Block& block);
+  void processPaletteBlock(const lfd::Film::Block& block);
+  void processImageBlock(const lfd::Film::Block& block);
+  void processAnimationBlock(const lfd::Film::Block& block);
 
   void advanceToNextFrame();
 
@@ -58,7 +58,7 @@ private:
   Resources* m_resources;
   SceneRenderer* m_sceneRenderer;
 
-  std::unique_ptr<Film> m_film;
+  std::unique_ptr<lfd::Film> m_film;
   std::unique_ptr<Font> m_font;
 
   SDL_Color m_palette[256];

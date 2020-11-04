@@ -97,7 +97,7 @@ bool Scene::loadFilm(std::string_view name) {
   if (!resource) {
     return false;
   }
-  auto film = loadResource<Film>(*resource);
+  auto film = loadResource<lfd::Film>(*resource);
   if (!film) {
     return false;
   }
@@ -125,7 +125,7 @@ bool Scene::loadFont(std::string_view name) {
   return true;
 }
 
-PropId Scene::insertImage(std::string_view name, std::vector<Film::Chunk> chunks) {
+PropId Scene::insertImage(std::string_view name, std::vector<lfd::KeyFrame> keyFrames) {
   auto* resource = m_resources->findResource(ResourceType::Image, name);
   if (!resource) {
     return PropId::invalidValue();
@@ -136,10 +136,10 @@ PropId Scene::insertImage(std::string_view name, std::vector<Film::Chunk> chunks
     return PropId::invalidValue();
   }
 
-  return insertImageProp(name, *image, std::move(chunks));
+  return insertImageProp(name, *image, std::move(keyFrames));
 }
 
-PropId Scene::insertAnimation(std::string_view name, std::vector<Film::Chunk> chunks) {
+PropId Scene::insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> keyFrames) {
   auto* resource = m_resources->findResource(ResourceType::Animation, name);
   if (!resource) {
     return PropId::invalidValue();
@@ -150,7 +150,7 @@ PropId Scene::insertAnimation(std::string_view name, std::vector<Film::Chunk> ch
     return PropId::invalidValue();
   }
 
-  return insertAnimationProp(name, *animation, std::move(chunks));
+  return insertAnimationProp(name, *animation, std::move(keyFrames));
 }
 
 void Scene::update(U32 millis) {
@@ -171,7 +171,7 @@ void Scene::renderGameScreen() {
               Prop* leftData = m_props.getData(left);
               Prop* rightData = m_props.getData(right);
 
-              return rightData->layer() < leftData->layer();
+              return rightData->currentFrame().layer < leftData->currentFrame().layer;
             });
 
   for (auto& propId : m_renderOrder) {
@@ -185,8 +185,10 @@ void Scene::renderGameScreen() {
 void Scene::renderDebugInfo() {
   ImGui::Begin("Playback");
   ImGui::Text("Frame %d of %d", m_currentFrame, m_frameCount);
+  ImGui::SliderInt("Current Frame", &m_currentFrame, 0, m_film->frameCount());
   if (ImGui::Button("Next Frame")) {
     advanceToNextFrame();
+    ++m_currentFrame;
   }
   ImGui::End();
 
@@ -213,112 +215,112 @@ void Scene::renderDebugInfo() {
   for (auto& propId : m_renderOrder) {
     auto* prop = m_props.getData(propId);
     if (prop) {
-      I32 layer = prop->m_layer;
-      I32 currentFrame = prop->m_currentSpriteIndex;
-      I32 direction = prop->m_animation.direction;
+      const auto& frame = prop->currentFrame();
+      bool visible = frame.visible;
+      I32 layer = frame.layer;
+      I32 currentFrame = frame.spriteIndex;
+      I32 offset[2] = {frame.offset.left, frame.offset.top};
 
       auto name = fmt::format("{}##{}", prop->name(), propId.id);
       if (ImGui::TreeNode(name.data())) {
-        ImGui::Checkbox("Visible", &prop->m_visible);
+        ImGui::Checkbox("Visible", &visible);
         ImGui::SliderInt("Layer", &layer, 0, 100);
         ImGui::SliderInt("Current frame", &currentFrame, 0,
                          static_cast<I32>(prop->m_sprites.size()) - 1);
-        ImGui::InputInt2("Offset X", (int*)&prop->m_offset);
-        ImGui::LabelText("Animation", "dir: %d, rate: %d", prop->m_animation.direction,
-                         prop->m_animation.frameRate);
+        ImGui::InputInt2("Offset X", offset);
 
-        if (ImGui::TreeNode("chunks")) {
-          for (auto& chunk : prop->m_chunks) {
-            switch (chunk.opCode) {
-              case OpCode::End:
+        if (ImGui::TreeNode("keyFrames")) {
+          for (auto& keyFrame : prop->m_keyFrames) {
+            switch (keyFrame.opCode) {
+              case lfd::OpCode::End:
                 ImGui::Text("End");
                 break;
 
-              case OpCode::Time:
+              case lfd::OpCode::Time:
                 ImGui::Text("Time");
                 break;
 
-              case OpCode::Move:
+              case lfd::OpCode::Move:
                 ImGui::Text("Move");
                 break;
 
-              case OpCode::Speed:
+              case lfd::OpCode::Speed:
                 ImGui::Text("Speed");
                 break;
 
-              case OpCode::Layer:
+              case lfd::OpCode::Layer:
                 ImGui::Text("Layer");
                 break;
 
-              case OpCode::Frame:
+              case lfd::OpCode::Frame:
                 ImGui::Text("Frame");
                 break;
 
-              case OpCode::Animation:
+              case lfd::OpCode::Animation:
                 ImGui::Text("Animation");
                 break;
 
-              case OpCode::Event:
+              case lfd::OpCode::Event:
                 ImGui::Text("Event");
                 break;
 
-              case OpCode::Region:
+              case lfd::OpCode::Region:
                 ImGui::Text("Region");
                 break;
 
-              case OpCode::Window:
+              case lfd::OpCode::Window:
                 ImGui::Text("Window");
                 break;
 
-              case OpCode::Shift:
+              case lfd::OpCode::Shift:
                 ImGui::Text("Shift");
                 break;
 
-              case OpCode::Display:
+              case lfd::OpCode::Display:
                 ImGui::Text("Display");
                 break;
 
-              case OpCode::Orientation:
+              case lfd::OpCode::Orientation:
                 ImGui::Text("Orientation");
                 break;
 
-              case OpCode::Use:
+              case lfd::OpCode::Use:
                 ImGui::Text("Use");
                 break;
 
-              case OpCode::Unknown11:
+              case lfd::OpCode::Unknown11:
                 ImGui::Text("Unknown11");
                 break;
 
-              case OpCode::Transition:
+              case lfd::OpCode::Transition:
                 ImGui::Text("Transition");
                 break;
 
-              case OpCode::Unknown12:
+              case lfd::OpCode::Unknown12:
                 ImGui::Text("Unknown12");
                 break;
 
-              case OpCode::Loop:
+              case lfd::OpCode::Loop:
                 ImGui::Text("Loop");
                 break;
 
-              case OpCode::Unknown17:
+              case lfd::OpCode::Unknown17:
                 ImGui::Text("Unknown17");
                 break;
 
-              case OpCode::Preload:
+              case lfd::OpCode::Preload:
                 ImGui::Text("Preload");
                 break;
 
-              case OpCode::Sound:
+              case lfd::OpCode::Sound:
                 ImGui::Text("Sound");
                 break;
 
-              case OpCode::Stereo:
+              case lfd::OpCode::Stereo:
                 ImGui::Text("Stereo");
                 break;
             }
-            for (I16 var : chunk.variables) {
+            for (I16 var : keyFrame.variables) {
               ImGui::SameLine();
               ImGui::Text("%d", var);
             }
@@ -329,9 +331,11 @@ void Scene::renderDebugInfo() {
         ImGui::TreePop();
       }
 
+#if 0
       prop->m_layer = layer;
-      prop->m_currentSpriteIndex = currentFrame;
+      prop->m_currentSpriteIndex = frame;
       prop->m_animation.direction = direction;
+#endif  // 0
     }
   }
 
@@ -349,7 +353,7 @@ void Scene::applyPalette(const Palette& palette) {
 }
 
 PropId Scene::insertImageProp(std::string_view name, const Image& image,
-                              std::vector<Film::Chunk> chunks) {
+                              std::vector<lfd::KeyFrame> keyFrames) {
   std::vector<renderer::Sprite> sprites;
 
   auto texture = createIndexTexture(m_sceneRenderer->renderer(), image);
@@ -360,8 +364,8 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
   Rect rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
 
-  auto propId =
-      m_props.create(ResourceType::Image, name, m_delegate, std::move(chunks), std::move(sprites));
+  auto propId = m_props.create(ResourceType::Image, name, m_delegate, m_film->frameCount(),
+                               std::move(keyFrames), std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -369,7 +373,7 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
 }
 
 PropId Scene::insertAnimationProp(std::string_view name, const Animation& animation,
-                                  std::vector<Film::Chunk> chunks) {
+                                  std::vector<lfd::KeyFrame> keyFrames) {
   std::vector<renderer::Sprite> sprites;
 
   for (auto& image : animation.frames()) {
@@ -382,8 +386,8 @@ PropId Scene::insertAnimationProp(std::string_view name, const Animation& animat
     sprites.emplace_back(texture, rect);
   }
 
-  auto propId = m_props.create(ResourceType::Animation, name, m_delegate, std::move(chunks),
-                               std::move(sprites));
+  auto propId = m_props.create(ResourceType::Animation, name, m_delegate, m_film->frameCount(),
+                               std::move(keyFrames), std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
 
@@ -396,27 +400,27 @@ void Scene::processFilm() {
   for (auto& block : m_film->blocks()) {
     spdlog::info("Processing block: {}", block.name);
     switch (block.type) {
-      case BlockType::View: {
+      case lfd::BlockType::View: {
         processViewBlock(block);
         break;
       }
 
-      case BlockType::Pltt: {
+      case lfd::BlockType::Pltt: {
         processPaletteBlock(block);
         break;
       }
 
-      case BlockType::Delt: {
+      case lfd::BlockType::Delt: {
         processImageBlock(block);
         break;
       }
 
-      case BlockType::Anim: {
+      case lfd::BlockType::Anim: {
         processAnimationBlock(block);
         break;
       }
 
-      case BlockType::End:
+      case lfd::BlockType::End:
         break;
 
       default: {
@@ -436,14 +440,14 @@ void Scene::processFilm() {
   }
 }
 
-void Scene::processViewBlock(const Film::Block& block) {
-  for (auto& chunk : block.chunks) {
+void Scene::processViewBlock(const lfd::Film::Block& block) {
+  for (auto& chunk : block.keyFrames) {
     switch (chunk.opCode) {
-      case OpCode::Time:
+      case lfd::OpCode::Time:
         spdlog::info("  - {} :: {}", opCodeToString(chunk.opCode), chunk.variables[0]);
         break;
 
-      case OpCode::Transition:
+      case lfd::OpCode::Transition:
         // 1 == Swap
         // 2 == Clear
         // 3 == Dirty
@@ -466,7 +470,7 @@ void Scene::processViewBlock(const Film::Block& block) {
   }
 }
 
-void Scene::processPaletteBlock(const Film::Block& block) {
+void Scene::processPaletteBlock(const lfd::Film::Block& block) {
   auto* resource = m_resources->findResource(ResourceType::Palette, block.name);
   if (!resource) {
     return;
@@ -480,25 +484,25 @@ void Scene::processPaletteBlock(const Film::Block& block) {
 
   // TODO: We need to process the `opCode`s, but for now we just apply the palette.
 
-  for (auto& chunk : block.chunks) {
+  for (auto& chunk : block.keyFrames) {
     spdlog::info("chunk: {}", opCodeToString(chunk.opCode));
   }
 
   applyPalette(*palette);
 }
 
-void Scene::processImageBlock(const Film::Block& block) {
+void Scene::processImageBlock(const lfd::Film::Block& block) {
   //  if (block.name != "cursors") {
   //    return;
   //  }
-  insertImage(block.name, block.chunks);
+  insertImage(block.name, block.keyFrames);
 }
 
-void Scene::processAnimationBlock(const Film::Block& block) {
+void Scene::processAnimationBlock(const lfd::Film::Block& block) {
   //  if (block.name != "cursors") {
   //    return;
   //  }
-  insertAnimation(block.name, block.chunks);
+  insertAnimation(block.name, block.keyFrames);
 }
 
 void Scene::advanceToNextFrame() {
@@ -510,7 +514,7 @@ void Scene::advanceToNextFrame() {
     return;
   }
 
-  ++m_currentFrame;
+  // ++m_currentFrame;
 
   for (auto& propId : m_renderOrder) {
     auto prop = m_props.getData(propId);

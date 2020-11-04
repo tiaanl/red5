@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         }
 
         case ResourceType::Film: {
-          Film film;
+          lfd::Film film;
           film.read(&stream, entry.data().size());
           break;
         }

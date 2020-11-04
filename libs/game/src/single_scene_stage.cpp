@@ -34,9 +34,9 @@ bool SingleSceneStage::onLoad() {
   }
 
   auto prop = m_scene->props().getData(m_mouseCursor);
-  prop->setVisible(true);
-  prop->setSpriteIndex(0);
-  prop->setLayer(0);
+//  prop->setVisible(true);
+//  prop->setSpriteIndex(0);
+//  prop->setLayer(0);
 
   return true;
 }
@@ -66,7 +66,7 @@ void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
   // spdlog::info("Mouse position: ({}, {})", x, y);
 
   auto prop = m_scene->props().getData(m_mouseCursor);
-  prop->setOffset({x, y});
+  // prop->setOffset({x, y});
 }
 
 void SingleSceneStage::onUpdate(U32 millis) {

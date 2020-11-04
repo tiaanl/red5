@@ -5,31 +5,31 @@
 
 #define TRACE_LOADING 0
 
+namespace lfd {
+
 namespace {
 
-Film::Chunk readChunk(base::InputStream* stream) {
+KeyFrame readKeyFrame(base::InputStream* stream) {
   auto dataSize = stream->readU16();
   auto opCode = static_cast<OpCode>(stream->readU16());
 
   U16 varCount = (dataSize) / 2 - 2;
 
 #if TRACE_LOADING
-  LOG(Info) << "    Chunk :: dataSize: " << dataSize << ", opCode: " << (U16)opCode << " ("
+  LOG(Info) << "    KeyFrame :: dataSize: " << dataSize << ", opCode: " << (U16)opCode << " ("
             << opCodeToString(opCode) << "), varCount: " << varCount;
 #endif
 
-  Film::Chunk newChunk;
-  newChunk.opCode = opCode;
-
+  KeyFrame::Variables variables;
   for (U16 i = 0; i < varCount; ++i) {
     auto variable = stream->readI16();
-    newChunk.variables.push_back(variable);
+    variables.push_back(variable);
 #if TRACE_LOADING
     LOG(Info) << "      var: " << variable;
 #endif
   }
 
-  return newChunk;
+  return KeyFrame{opCode, std::move(variables)};
 }
 
 Film::Block readBlock(base::InputStream* stream) {
@@ -53,19 +53,20 @@ Film::Block readBlock(base::InputStream* stream) {
     return result;
   }
 
-  auto numberOfChunks = stream->readU16();
+  auto numberOfKeyFrames = stream->readU16();
   auto chunksDataSize = stream->readU16();
 
 #if TRACE_LOADING
   LOG(Info) << "  Block :: type: " << blockTypeToString(result.type) << ", name: " << nameStr
             << ", typeIndex: " << result.typeIndex << ", length: " << length
-            << ", numberOfChunks: " << numberOfChunks << ", chunkDataSize: " << chunksDataSize;
+            << ", numberOfKeyFrames: " << numberOfKeyFrames
+            << ", chunkDataSize: " << chunksDataSize;
 #endif
 
   MemSize before = stream->getPosition();
 
-  for (U32 c = 0; c < numberOfChunks; ++c) {
-    auto& chunk = result.chunks.emplace_back(readChunk(stream));
+  for (U32 c = 0; c < numberOfKeyFrames; ++c) {
+    auto& chunk = result.keyFrames.emplace_back(readKeyFrame(stream));
   }
 
   MemSize bytesRead = stream->getPosition() - before;
@@ -75,23 +76,23 @@ Film::Block readBlock(base::InputStream* stream) {
   return result;
 }
 
-void writeChunk(base::OutputStream* stream, const Film::Chunk& chunk) {
-  stream->writeU16(static_cast<U16>(chunk.variables.size() + 2) * sizeof(U16));
-  stream->writeU16(static_cast<U16>(chunk.opCode));
-  for (auto v : chunk.variables) {
+void writeKeyFrame(base::OutputStream* stream, const KeyFrame& keyFrame) {
+  stream->writeU16(static_cast<U16>(keyFrame.variables.size() + 2) * sizeof(U16));
+  stream->writeU16(static_cast<U16>(keyFrame.opCode));
+  for (auto v : keyFrame.variables) {
     stream->writeU16(v);
   }
 }
 
-U16 calculateChunkSize(const Film::Chunk& chunk) {
-  return sizeof(U16) + sizeof(U16) + static_cast<U16>(chunk.variables.size()) * sizeof(U16);
+U16 calculateKeyFrameSize(const KeyFrame& keyFrame) {
+  return sizeof(U16) + sizeof(U16) + static_cast<U16>(keyFrame.variables.size()) * sizeof(U16);
 }
 
 U32 calculateBlockSize(const Film::Block& block) {
   U32 size = 0;
 
-  for (auto& chunk : block.chunks) {
-    size += calculateChunkSize(chunk);
+  for (auto& keyFrame : block.keyFrames) {
+    size += calculateKeyFrameSize(keyFrame);
   }
 
   return size;
@@ -115,95 +116,23 @@ void writeBlock(base::OutputStream* stream, const Film::Block& block) {
   stream->writeU16(block.typeIndex);
 
   // If there are no chunks, then we don't write any data for it.
-  if (block.chunks.empty()) {
+  if (block.keyFrames.empty()) {
     return;
   }
 
-  stream->writeU16(static_cast<U16>(block.chunks.size()));
+  stream->writeU16(static_cast<U16>(block.keyFrames.size()));
   U16 chunksDataSize = 0;
-  for (auto& chunk : block.chunks) {
-    chunksDataSize += calculateChunkSize(chunk);
+  for (auto& keyFrame : block.keyFrames) {
+    chunksDataSize += calculateKeyFrameSize(keyFrame);
   }
   stream->writeU16(chunksDataSize);
 
-  for (auto& chunk : block.chunks) {
-    writeChunk(stream, chunk);
+  for (auto& keyFrame : block.keyFrames) {
+    writeKeyFrame(stream, keyFrame);
   }
 }
 
 }  // namespace
-
-const char* opCodeToString(OpCode opCode) {
-  switch (opCode) {
-    case OpCode::End:
-      return "End";
-
-    case OpCode::Time:
-      return "Time";
-
-    case OpCode::Move:
-      return "Move";
-
-    case OpCode::Speed:
-      return "Speed";
-
-    case OpCode::Layer:
-      return "Layer";
-
-    case OpCode::Frame:
-      return "Frame";
-
-    case OpCode::Animation:
-      return "Animation";
-
-    case OpCode::Event:
-      return "Event";
-
-    case OpCode::Region:
-      return "Region";
-
-    case OpCode::Window:
-      return "Window";
-
-    case OpCode::Shift:
-      return "Shift";
-
-    case OpCode::Display:
-      return "Display";
-
-    case OpCode::Orientation:
-      return "Orientation";
-
-    case OpCode::Use:
-      return "Use";
-
-    case OpCode::Unknown11:
-      return "Unknown11";
-
-    case OpCode::Transition:
-      return "Transition";
-
-    case OpCode::Unknown12:
-      return "Unknown12";
-
-    case OpCode::Loop:
-      return "Loop";
-
-    case OpCode::Unknown17:
-      return "Unknown";
-
-    case OpCode::Preload:
-      return "Preload";
-
-    case OpCode::Sound:
-      return "Sound";
-
-    case OpCode::Stereo:
-      return "Stereo";
-  }
-
-  return "Unknown";
-}
 
 const char* blockTypeToString(BlockType blockType) {
   const char* resourceTypeStr = resourceTypeToString(static_cast<ResourceType>(blockType));
@@ -253,3 +182,5 @@ void Film::write(base::OutputStream* stream) {
     writeBlock(stream, block);
   }
 }
+
+}  // namespace lfd

@@ -1,8 +1,5 @@
 project(renderer)
 
-find_package(glad CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-
 set(renderer_HEADER_FILES
     include/renderer/color.h
     include/renderer/program_resource.h

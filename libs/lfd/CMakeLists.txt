@@ -5,6 +5,7 @@ set(lfd_HEADER_FILES
     include/lfd/film.h
     include/lfd/font.h
     include/lfd/image.h
+    include/lfd/key_frame.h
     include/lfd/palette.h
     include/lfd/resource.h
     include/lfd/resource_file.h
@@ -16,6 +17,7 @@ set(lfd_SOURCE_FILES
     src/film.cpp
     src/font.cpp
     src/image.cpp
+    src/key_frame.cpp
     src/palette.cpp
     src/resource_file.cpp
     src/resource_type.cpp
