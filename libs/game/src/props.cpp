@@ -16,21 +16,25 @@ Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U3
   m_timeline.build(frameCount, m_keyFrames);
 }
 
+const renderer::Sprite& Prop::sprite(I16 index) const {
+  index = std::min<I16>(static_cast<I16>(m_sprites.size()), index);
+  index = std::max<I16>(0, index);
+  return m_sprites[index];
+}
+
+const Rect& Prop::bounds() const {
+  return sprite(currentFrame().spriteIndex).rect();
+}
+
 void Prop::sceneTick(I32 sceneFrame) {
   m_timeline.setCurrentFrame(sceneFrame);
 }
 
-void Prop::render(SceneRenderer* renderer) {
+void Prop::render(SceneRenderer* renderer) const {
   auto frame = currentFrame();
 
   if (frame.visible) {
-    auto spriteIndex = frame.spriteIndex;
-    if (spriteIndex >= m_sprites.size()) {
-      spriteIndex = static_cast<U32>(m_sprites.size()) - 1;
-    } else if (spriteIndex < 0) {
-      spriteIndex = 0;
-    }
-    auto sprite = m_sprites[spriteIndex];
+    auto sprite = this->sprite(frame.spriteIndex);
     sprite.setPosition(sprite.position() + frame.offset);
     renderer->render(sprite);
   }

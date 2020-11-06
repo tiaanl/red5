@@ -67,6 +67,14 @@ void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
 
   auto prop = m_scene->props().getData(m_mouseCursor);
   // prop->setOffset({x, y});
+
+  if (m_scene) {
+    auto propId = m_scene->getPropUnderMouse(x, y);
+    if (propId.isValid()) {
+      auto data = m_scene->prop(propId);
+      spdlog::info("prop under mouse: {}", data->name());
+    }
+  }
 }
 
 void SingleSceneStage::onUpdate(U32 millis) {

@@ -34,10 +34,15 @@ public:
     return m_timeline.currentFrame();
   }
 
+  const renderer::Sprite& sprite(I16 index) const;
+  const Rect& bounds() const;
+
   void sceneTick(I32 sceneFrame);
-  void render(SceneRenderer* renderer);
+  void render(SceneRenderer* renderer) const;
 
 protected:
+  friend class Scene;
+
   ResourceType m_resourceType;
   std::string m_name;
 
@@ -46,23 +51,6 @@ protected:
   std::vector<renderer::Sprite> m_sprites;
 
   Timeline m_timeline;
-
-#if 0
-  bool m_visible = false;
-  I16 m_currentSpriteIndex = 0;
-  I16 m_layer = 0;
-  Position m_offset = {0, 0};
-  Position m_movePerFrame = {0, 0};
-  Position m_orientation = {0, 0};
-
-  struct AnimationState {
-    I16 direction = 0;
-    I16 frameRate = 0;
-  } m_animation;
-#endif  // 0
-
-private:
-  friend class Scene;
 };
 
 class PropContainer : public renderer::ResourceContainer<Prop> {

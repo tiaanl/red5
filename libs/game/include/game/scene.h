@@ -27,12 +27,16 @@ public:
     return m_props;
   }
 
+  Prop* prop(PropId propId);
+
   bool loadPalette(std::string_view name);
   bool loadFilm(std::string_view name);
   bool loadFont(std::string_view name);
 
   PropId insertImage(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
   PropId insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
+
+  PropId getPropUnderMouse(I32 x, I32 y);
 
   void update(U32 millis);
   void renderGameScreen();

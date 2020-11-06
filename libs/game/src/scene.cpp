@@ -76,6 +76,10 @@ Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* 
     m_sceneRenderer{sceneRenderer},
     m_palette{} {}
 
+Prop* Scene::prop(PropId propId) {
+  return m_props.getData(propId);
+}
+
 bool Scene::loadPalette(std::string_view name) {
   auto* resource = m_resources->findResource(ResourceType::Palette, name);
   if (!resource) {
@@ -151,6 +155,21 @@ PropId Scene::insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> 
   }
 
   return insertAnimationProp(name, *animation, std::move(keyFrames));
+}
+
+PropId Scene::getPropUnderMouse(I32 x, I32 y) {
+  for (auto it = m_renderOrder.crbegin(), end = m_renderOrder.crend(); it != end; ++it) {
+    auto propData = m_props.getData(*it);
+    if (propData) {
+      auto& currentFrame = propData->currentFrame();
+      auto& sprite = propData->m_sprites[currentFrame.spriteIndex];
+      if (currentFrame.visible && sprite.rect().contains({x, y})) {
+        return *it;
+      }
+    }
+  }
+
+  return PropId::invalidValue();
 }
 
 void Scene::update(U32 millis) {
