@@ -2,71 +2,48 @@
 
 #include <glad/glad.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "gl_check.h"
 
 namespace renderer {
 
 namespace {
 
-void processClearRenderTarget(Renderer& renderer, const RenderCommand& command) {
-  GL_CHECK_VOID(
-      glClearColor(command.clearRenderTarget.color.red, command.clearRenderTarget.color.green,
-                   command.clearRenderTarget.color.blue, command.clearRenderTarget.color.alpha),
-      "Could not set clear color.")
-  GL_CHECK_VOID(glClear(GL_COLOR_BUFFER_BIT), "Could not clear.")
+const char* g_immediateVertexShaderSource = R"(
+#version 330 core
+
+layout (location = 0) in vec2 vs_in_position;
+layout (location = 1) in vec4 vs_in_color;
+
+out vec4 vs_out_color;
+
+uniform mat4 u_viewMatrix;
+
+void main()
+{
+    gl_Position = u_viewMatrix * vec4(vs_in_position, 0.0f, 1.0f);
+    vs_out_color = vs_in_color;
 }
+)";
 
-void processCopyRenderTarget(Renderer& renderer, const RenderCommand& command) {
-  auto data = command.copyRenderTarget;
+const char* g_immediateFragmentShaderSource = R"(
+#version 330 core
 
-  U32 fromId = 0;
-  if (data.from.isValid()) {
-    auto renderTargetData = renderer.renderTargets().getData(data.from);
-    if (!renderTargetData) {
-      spdlog::warn("From flush target not found.");
-      return;
-    }
+in vec4 vs_out_color;
 
-    fromId = renderTargetData->framebuffer;
-  }
+out vec4 fs_out_fragColor;
 
-  GL_CHECK_VOID(glBindFramebuffer(GL_READ_FRAMEBUFFER, fromId),
-                "Could not bind read frame buffer.");
-
-  U32 toId = 0;
-  if (data.to.isValid()) {
-    auto renderTargetData = renderer.renderTargets().getData(data.to);
-    if (!renderTargetData) {
-      spdlog::warn("To flush target not found.");
-      return;
-    }
-
-    toId = renderTargetData->framebuffer;
-  }
-
-  GL_CHECK_VOID(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, toId), "Could not bind draw frame buffer.");
-
-  GL_CHECK_VOID(glBlitFramebuffer(data.fromRect.position.left, data.fromRect.position.top,  //
-                                  data.fromRect.size.width, data.fromRect.size.height,      //
-                                  data.toRect.position.left, data.toRect.position.top,      //
-                                  data.toRect.size.width, data.toRect.size.height,          //
-                                  GL_COLOR_BUFFER_BIT, GL_NEAREST),
-                "Could not blit frame buffer.");
+void main()
+{
+  fs_out_fragColor = vs_out_color;
 }
+)";
 
-void processRenderVertexBuffer(Renderer& renderer, const RenderCommand& command) {
-  auto& data = command.renderVertexBuffer;
-
-  auto vertexBufferData = renderer.vertexBuffers().getData(data.vertexBuffer);
-  auto programData = renderer.programs().getData(data.program);
-
-  GL_CHECK_VOID(glUseProgram(programData->id), "Could not bind program.")
-  GL_CHECK_VOID(glBindVertexArray(vertexBufferData->id), "Could not bind vertex array.")
-
+void applyUniforms(Renderer& renderer, ProgramData* programData, const UniformData& uniforms) {
   U32 nextTextureUnit = 0;
 
-  // Upload all the uniform data to the GPU.
-  for (const auto& uniform : data.uniformData) {
+  for (const auto& uniform : uniforms) {
     U32 location = glGetUniformLocation(programData->id, uniform.name.data());
     if (!detail::clearGlError("Could not find uniform in program.", __FILE__, __LINE__)) {
       return;
@@ -122,6 +99,64 @@ void processRenderVertexBuffer(Renderer& renderer, const RenderCommand& command)
       }
     };
   }
+}
+
+void processClearRenderTarget(Renderer& renderer, const RenderCommand& command) {
+  GL_CHECK_VOID(
+      glClearColor(command.clearRenderTarget.color.red, command.clearRenderTarget.color.green,
+                   command.clearRenderTarget.color.blue, command.clearRenderTarget.color.alpha),
+      "Could not set clear color.")
+  GL_CHECK_VOID(glClear(GL_COLOR_BUFFER_BIT), "Could not clear.")
+}
+
+void processCopyRenderTarget(Renderer& renderer, const RenderCommand& command) {
+  auto data = command.copyRenderTarget;
+
+  U32 fromId = 0;
+  if (data.from.isValid()) {
+    auto renderTargetData = renderer.renderTargets().getData(data.from);
+    if (!renderTargetData) {
+      spdlog::warn("From flush target not found.");
+      return;
+    }
+
+    fromId = renderTargetData->framebuffer;
+  }
+
+  GL_CHECK_VOID(glBindFramebuffer(GL_READ_FRAMEBUFFER, fromId),
+                "Could not bind read frame buffer.");
+
+  U32 toId = 0;
+  if (data.to.isValid()) {
+    auto renderTargetData = renderer.renderTargets().getData(data.to);
+    if (!renderTargetData) {
+      spdlog::warn("To flush target not found.");
+      return;
+    }
+
+    toId = renderTargetData->framebuffer;
+  }
+
+  GL_CHECK_VOID(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, toId), "Could not bind draw frame buffer.");
+
+  GL_CHECK_VOID(glBlitFramebuffer(data.fromRect.position.left, data.fromRect.position.top,  //
+                                  data.fromRect.size.width, data.fromRect.size.height,      //
+                                  data.toRect.position.left, data.toRect.position.top,      //
+                                  data.toRect.size.width, data.toRect.size.height,          //
+                                  GL_COLOR_BUFFER_BIT, GL_NEAREST),
+                "Could not blit frame buffer.");
+}
+
+void processRenderVertexBuffer(Renderer& renderer, const RenderCommand& command) {
+  auto& data = command.renderVertexBuffer;
+
+  auto vertexBufferData = renderer.vertexBuffers().getData(data.vertexBuffer);
+  auto programData = renderer.programs().getData(data.program);
+
+  GL_CHECK_VOID(glUseProgram(programData->id), "Could not bind program.")
+  GL_CHECK_VOID(glBindVertexArray(vertexBufferData->vertexArrayId), "Could not bind vertex array.")
+
+  applyUniforms(renderer, programData, command.renderVertexBuffer.uniformData);
 
   GL_CHECK_VOID(glDrawArrays(GL_TRIANGLES, 0, 6), "Could not draw arrays.")
 
@@ -144,6 +179,10 @@ bool Renderer::init(SDL_Window* window) {
   SizeI windowSize{};
   SDL_GetWindowSize(m_window, &windowSize.width, &windowSize.height);
   resize(windowSize);
+
+  if (!initImmediateMode()) {
+    return false;
+  }
 
   return true;
 }
@@ -176,13 +215,27 @@ void Renderer::clear(F32 red, F32 green, F32 blue, F32 alpha) {
   m_renderQueue.clearRenderTarget(m_currentRenderTarget, {red, green, blue, alpha});
 }
 
-void Renderer::renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program,
+void Renderer::renderVertexBuffer(VertexArrayId vertexBuffer, ProgramId program,
                                   UniformData uniformData) {
   m_renderQueue.renderVertexBuffer(m_currentRenderTarget, vertexBuffer, program,
                                    std::move(uniformData));
 }
 
+void Renderer::renderImmediate(RenderMode renderMode, ImmediateVertex* vertices, U32 count) {
+  U32 currentSize = static_cast<U32>(m_immediateMode.vertices.size());
+  m_immediateMode.vertices.resize(currentSize + count);
+  std::copy(vertices, vertices + count, &m_immediateMode.vertices[currentSize]);
+
+  m_renderQueue.renderImmediate(m_currentRenderTarget, renderMode, currentSize, count);
+}
+
 void Renderer::flushRenderQueue() {
+  // Upload the immediate mode vertices.
+  // Upload the vertex buffer to the GPU.
+  m_vertexArrays.replace(m_immediateMode.vertexArray, m_immediateMode.vertices.data(),
+                         m_immediateMode.vertices.size() * sizeof(ImmediateVertex));
+  m_immediateMode.vertices.clear();
+
   GL_CHECK_VOID(glEnable(GL_BLEND), "Could not enable blending.");
   GL_CHECK_VOID(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
                 "Could not set blending function.");
@@ -205,6 +258,12 @@ void Renderer::flushRenderQueue() {
         processRenderVertexBuffer(*this, command);
         break;
       }
+
+      case RenderCommandType::RenderImmediate: {
+        switchRenderTarget(command.renderImmediate.renderTarget);
+        renderImmediateCommand(command.renderImmediate);
+        break;
+      }
     }
   }
 
@@ -213,6 +272,29 @@ void Renderer::flushRenderQueue() {
 
 void Renderer::finishFrame() {
   SDL_GL_SwapWindow(m_window);
+}
+
+bool Renderer::initImmediateMode() {
+  auto program = m_programs.create(g_immediateVertexShaderSource, g_immediateFragmentShaderSource);
+  if (!program) {
+    spdlog::error("Could not create immediate mode program.");
+    return false;
+  }
+
+  VertexBufferDefinition def;
+  def.addAttribute(AttributeType::Float32, ComponentCount::Two);   // Position
+  def.addAttribute(AttributeType::Float32, ComponentCount::Four);  // Color
+
+  auto vertexBuffer =
+      m_vertexArrays.create(def, m_immediateMode.vertices.data(), m_immediateMode.vertices.size());
+  if (!vertexBuffer) {
+    return false;
+  }
+
+  m_immediateMode.programId = program;
+  m_immediateMode.vertexArray = vertexBuffer;
+
+  return true;
 }
 
 void Renderer::switchRenderTarget(RenderTargetId renderTarget) {
@@ -235,6 +317,66 @@ void Renderer::switchRenderTarget(RenderTargetId renderTarget) {
 
     m_lastRenderTarget = renderTarget;
   }
+}
+
+void Renderer::renderImmediateCommand(const RenderCommand::RenderImmediate& command) {
+  auto* programData = m_programs.getData(m_immediateMode.programId);
+  if (!programData) {
+    spdlog::warn("Program not found.");
+    return;
+  }
+
+  auto* vertexArrayData = m_vertexArrays.getData(m_immediateMode.vertexArray);
+  if (!vertexArrayData) {
+    spdlog::warn("Vertex array not found.");
+    return;
+  }
+
+  auto* renderTargetData = &m_windowRenderTarget;
+  if (command.renderTarget.isValid()) {
+    renderTargetData = m_renderTargets.getData(command.renderTarget);
+  }
+
+  GL_CHECK_VOID(glUseProgram(programData->id), "Could not bind immediate mode program.");
+
+  SizeI targetSize = renderTargetData->size;
+  auto viewMatrix = glm::ortho(0.0f, static_cast<F32>(targetSize.width),
+                               static_cast<F32>(targetSize.height), 0.0f);
+
+  U32 renderMode = GL_LINES;
+  switch (command.renderMode) {
+    case RenderMode::Lines:
+      renderMode = GL_LINES;
+      break;
+
+    case RenderMode::LineStrip:
+      renderMode = GL_LINE_STRIP;
+      break;
+
+    case RenderMode::LineLoop:
+      renderMode = GL_LINE_LOOP;
+      break;
+
+    case RenderMode::Triangles:
+      renderMode = GL_TRIANGLES;
+      break;
+
+    case RenderMode::TriangleStrip:
+      renderMode = GL_TRIANGLE_STRIP;
+      break;
+  }
+
+  UniformData uniforms;
+  uniforms.set("u_viewMatrix", viewMatrix);
+
+  applyUniforms(*this, programData, uniforms);
+
+  GL_CHECK_VOID(glBindVertexArray(vertexArrayData->vertexArrayId), "Could not bind vertex buffer.");
+  GL_CHECK_VOID(glDrawArrays(renderMode, command.startIndex, command.count),
+                "Could not draw arrays.");
+  GL_CHECK_VOID(glBindVertexArray(0), "Could not unbind vertex buffer.");
+
+  GL_CHECK_VOID(glUseProgram(0), "Could not bind immediate mode program.");
 }
 
 }  // namespace renderer

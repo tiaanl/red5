@@ -10,29 +10,37 @@ enum class RenderCommandType : U32 {
   ClearRenderTarget,
   CopyRenderTarget,
   RenderVertexBuffer,
+  RenderImmediate,
 };
 
 struct RenderCommand {
   RenderCommandType type;
 
-  struct {
+  struct ClearRenderTarget {
     RenderTargetId renderTarget;
     ColorF color = {0.0f, 0.0f, 0.0f, 1.0f};
   } clearRenderTarget;
 
-  struct {
+  struct CopyRenderTarget {
     RenderTargetId from;
     RectI fromRect = {0, 0, 0, 0};
     RenderTargetId to;
     RectI toRect = {0, 0, 0, 0};
   } copyRenderTarget;
 
-  struct {
+  struct RenderVertexBuffer {
     RenderTargetId renderTarget;
-    VertexBufferId vertexBuffer;
+    VertexArrayId vertexBuffer;
     ProgramId program;
     UniformData uniformData;
   } renderVertexBuffer;
+
+  struct RenderImmediate {
+    RenderTargetId renderTarget;
+    RenderMode renderMode;
+    U32 startIndex;
+    U32 count;
+  } renderImmediate;
 
   RenderCommand(RenderCommandType type) : type{type} {}
 };
@@ -44,14 +52,14 @@ public:
   void clearRenderTarget(RenderTargetId renderTarget, const ColorF& color);
   void copyRenderTarget(RenderTargetId from, const RectI& fromRect, RenderTargetId to,
                         const RectI& toRect);
-  void renderVertexBuffer(RenderTargetId renderTarget, VertexBufferId vertexBuffer,
+  void renderVertexBuffer(RenderTargetId renderTarget, VertexArrayId vertexBuffer,
                           ProgramId program, UniformData uniformData);
+  void renderImmediate(RenderTargetId renderTarget, RenderMode renderMode, U32 startIndex,
+                       U32 count);
 
   std::vector<RenderCommand> flush();
 
 private:
-  void switchRenderTarget(Renderer& renderer, RenderTargetId renderTarget);
-
   const RenderTargetData& m_windowRenderTarget;
 
   RenderTargetId m_lastRenderTarget;

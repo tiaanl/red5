@@ -1,4 +1,4 @@
-#include "renderer/vertex_buffer_resource.h"
+#include "renderer/vertex_array_resource.h"
 
 #include <glad/glad.h>
 
@@ -42,23 +42,23 @@ void destroyVertexArrayInternal(U32 name) {
 
 }  // namespace
 
-VertexBufferContainer::~VertexBufferContainer() {
+VertexArrayContainer::~VertexArrayContainer() {
   for (auto& data : m_data) {
-    destroyVertexArrayInternal(data.id);
+    destroyVertexArrayInternal(data.vertexArrayId);
   }
 }
 
-VertexBufferContainer::Identifier VertexBufferContainer::create(const VertexBufferDefinition& def,
+VertexArrayContainer::Identifier VertexArrayContainer::create(const VertexBufferDefinition& def,
                                                                 void* data, MemSize dataSize) {
   auto invalid = Identifier::invalidValue();
 
-  U32 vertexArrayName;
-  GL_CHECK(glGenVertexArrays(1, &vertexArrayName), "Could not generate vertex array.", invalid);
-  GL_CHECK(glBindVertexArray(vertexArrayName), "Could not bind vertex array.", invalid);
+  U32 vertexArrayId;
+  GL_CHECK(glGenVertexArrays(1, &vertexArrayId), "Could not generate vertex array.", invalid);
+  GL_CHECK(glBindVertexArray(vertexArrayId), "Could not bind vertex array.", invalid);
 
-  U32 vertexBufferName;
-  GL_CHECK(glGenBuffers(1, &vertexBufferName), "Could not generate array buffer.", invalid);
-  GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, vertexBufferName), "Could not bind array buffer.",
+  U32 arrayBufferId;
+  GL_CHECK(glGenBuffers(1, &arrayBufferId), "Could not generate array buffer.", invalid);
+  GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, arrayBufferId), "Could not bind array buffer.",
            invalid);
   GL_CHECK(glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW),
            "Could not set array buffer data.", invalid);
@@ -81,14 +81,28 @@ VertexBufferContainer::Identifier VertexBufferContainer::create(const VertexBuff
   GL_CHECK(glBindVertexArray(0), "Could not unbind vertex array.", invalid);
   GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0), "Could not unbind array buffer.", invalid);
 
-  return emplaceData(vertexArrayName);
+  return emplaceData(vertexArrayId, arrayBufferId);
 }
 
-void VertexBufferContainer::destroy(Identifier id) {
+void VertexArrayContainer::replace(Identifier id, const void* data, MemSize dataSize) {
+  auto* vertexArrayData = getData(id);
+  if (!vertexArrayData) {
+    spdlog::error("Vertex buffer not found.");
+    return;
+  }
+
+  GL_CHECK_VOID(glBindBuffer(GL_ARRAY_BUFFER, vertexArrayData->arrayBufferId),
+                "Could not bind vertex buffer.");
+  GL_CHECK_VOID(glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW),
+                "Could not replace array buffer sub data.");
+  GL_CHECK_VOID(glBindBuffer(GL_ARRAY_BUFFER, 0), "Could not unbind vertex buffer.");
+}
+
+void VertexArrayContainer::destroy(Identifier id) {
   auto data = getData(id);
   if (data) {
-    destroyVertexArrayInternal(data->id);
-    data->id = 0;
+    destroyVertexArrayInternal(data->vertexArrayId);
+    data->vertexArrayId = 0;
     removeData(id);
   }
 }

@@ -25,13 +25,21 @@ void RenderQueue::copyRenderTarget(RenderTargetId from, const RectI& fromRect, R
   command.copyRenderTarget.toRect = toRect;
 }
 
-void RenderQueue::renderVertexBuffer(RenderTargetId renderTarget, VertexBufferId vertexBuffer,
+void RenderQueue::renderVertexBuffer(RenderTargetId renderTarget, VertexArrayId vertexBuffer,
                                      ProgramId program, UniformData uniformData) {
   auto& command = m_renderCommands.emplace_back(RenderCommandType::RenderVertexBuffer);
   command.renderVertexBuffer.renderTarget = renderTarget;
   command.renderVertexBuffer.vertexBuffer = vertexBuffer;
   command.renderVertexBuffer.program = program;
   command.renderVertexBuffer.uniformData = std::move(uniformData);
+}
+
+void RenderQueue::renderImmediate(RenderTargetId renderTarget, RenderMode renderMode, U32 startIndex, U32 count) {
+  auto& command = m_renderCommands.emplace_back(RenderCommandType::RenderImmediate);
+  command.renderImmediate.renderTarget = renderTarget;
+  command.renderImmediate.renderMode = renderMode;
+  command.renderImmediate.startIndex = startIndex;
+  command.renderImmediate.count = count;
 }
 
 std::vector<RenderCommand> RenderQueue::flush() {

@@ -29,7 +29,7 @@ protected:
 
 private:
   ProgramId m_program;
-  VertexBufferId m_vertexBuffer;
+  VertexArrayId m_vertexBuffer;
 };
 
 }  // namespace renderer

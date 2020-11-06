@@ -136,7 +136,7 @@ public:
 
 private:
   renderer::ProgramId m_program;
-  renderer::VertexBufferId m_vertexBuffer;
+  renderer::VertexArrayId m_vertexBuffer;
   renderer::TextureId m_texture;
 };
 

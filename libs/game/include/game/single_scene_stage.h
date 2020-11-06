@@ -39,6 +39,8 @@ private:
   std::unique_ptr<Scene> m_scene;
   PropId m_mouseCursor;
 
+  PropId m_propUnderMouse;
+
   std::optional<renderer::ShapeRenderer> m_shapeRenderer;
 };
 

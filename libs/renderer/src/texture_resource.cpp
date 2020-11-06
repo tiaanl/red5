@@ -99,7 +99,7 @@ void TextureContainer::update1D(Identifier texture, const RGB* data, U32 start, 
 
   GL_CHECK_VOID(
       glTexSubImage1D(GL_TEXTURE_1D, 0, start, end - start + 1, GL_RGB, GL_UNSIGNED_BYTE, data),
-      "Could not update texture sub data.")
+      "Could not replace texture sub data.")
 
   GL_CHECK_VOID(glBindTexture(GL_TEXTURE_1D, 0), "Could not unbind texture.")
 }

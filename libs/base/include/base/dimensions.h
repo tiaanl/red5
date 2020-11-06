@@ -34,7 +34,7 @@ struct Rect {
   Position<T> position;
   Size<T> size;
 
-  Rect(I32 left, I32 top, I32 width, I32 height) : position{left, top}, size{width, height} {}
+  Rect(T left, T top, T width, T height) : position{left, top}, size{width, height} {}
   Rect(const Position<T>& position, const Size<T>& size) : position{position}, size{size} {}
 
   bool contains(const Position<T>& p) const {
@@ -49,5 +49,8 @@ struct Rect {
 
 using RectI = Rect<I32>;
 using RectF = Rect<F32>;
+
+RectF from(const RectI& rect);
+RectI from(const RectF& rect);
 
 RectI fitInto(const RectI& source, const RectI& destination);

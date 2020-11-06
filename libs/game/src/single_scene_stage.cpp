@@ -1,5 +1,7 @@
 #include "game/single_scene_stage.h"
 
+#include <renderer/render_shapes.h>
+
 namespace game {
 
 SingleSceneStage::SingleSceneStage(std::shared_ptr<Resources> resources, std::string_view filmName)
@@ -34,9 +36,9 @@ bool SingleSceneStage::onLoad() {
   }
 
   auto prop = m_scene->props().getData(m_mouseCursor);
-//  prop->setVisible(true);
-//  prop->setSpriteIndex(0);
-//  prop->setLayer(0);
+  //  prop->setVisible(true);
+  //  prop->setSpriteIndex(0);
+  //  prop->setLayer(0);
 
   return true;
 }
@@ -69,11 +71,7 @@ void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
   // prop->setOffset({x, y});
 
   if (m_scene) {
-    auto propId = m_scene->getPropUnderMouse(x, y);
-    if (propId.isValid()) {
-      auto data = m_scene->prop(propId);
-      // spdlog::info("prop under mouse: {}", data->name());
-    }
+    m_propUnderMouse = m_scene->getPropUnderMouse(x, y);
   }
 }
 
@@ -86,6 +84,11 @@ void SingleSceneStage::onUpdate(U32 millis) {
 void SingleSceneStage::onRenderGameScreen() {
   if (m_scene) {
     m_scene->renderGameScreen();
+  }
+
+  if (m_propUnderMouse.isValid()) {
+    auto data = m_scene->prop(m_propUnderMouse);
+    renderer::renderRectangle(*m_renderer, from(data->bounds()), {1.0f, 0.0f, 0.0f, 0.5f});
   }
 }
 
@@ -111,8 +114,6 @@ bool SingleSceneStage::attachToEngine(renderer::Renderer* renderer) {
   if (!GameStage::attachToEngine(renderer)) {
     return false;
   }
-
-
 
   return true;
 }

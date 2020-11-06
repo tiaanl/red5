@@ -42,6 +42,10 @@ public:
 
   DataType* getData(Identifier identifier) {
     // TODO: This should return const?
+    if (!identifier.isValid()) {
+      return nullptr;
+    }
+
     return &m_data[identifier.id];
   }
 

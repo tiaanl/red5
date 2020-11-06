@@ -1,3 +1,21 @@
+RectF from(const RectI& rect) {
+  return {
+      static_cast<F32>(rect.position.left),
+      static_cast<F32>(rect.position.top),
+      static_cast<F32>(rect.size.width),
+      static_cast<F32>(rect.size.height),
+  };
+}
+
+RectI from(const RectF& rect) {
+  return {
+      static_cast<I32>(std::round(rect.position.left)),
+      static_cast<I32>(std::round(rect.position.top)),
+      static_cast<I32>(std::round(rect.size.width)),
+      static_cast<I32>(std::round(rect.size.height)),
+  };
+}
+
 RectI fitInto(const RectI& source, const RectI& destination) {
   F32 widthScale = static_cast<F32>(destination.size.width) / static_cast<F32>(source.size.width);
   F32 heightScale =

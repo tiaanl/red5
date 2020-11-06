@@ -34,8 +34,8 @@ public:
     return m_textures;
   }
 
-  VertexBufferContainer& vertexBuffers() {
-    return m_vertexBuffers;
+  VertexArrayContainer& vertexBuffers() {
+    return m_vertexArrays;
   }
 
   ProgramContainer& programs() {
@@ -45,7 +45,8 @@ public:
   // Rendering.
 
   void clear(F32 red, F32 green, F32 blue, F32 alpha);
-  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program, UniformData uniformData);
+  void renderVertexBuffer(VertexArrayId vertexBuffer, ProgramId program, UniformData uniformData);
+  void renderImmediate(RenderMode renderMode, ImmediateVertex* vertices, U32 count);
 
   // Per frame.
 
@@ -53,7 +54,10 @@ public:
   void finishFrame();
 
 private:
+  bool initImmediateMode();
   void switchRenderTarget(RenderTargetId renderTarget);
+
+  void renderImmediateCommand(const RenderCommand::RenderImmediate& command);
 
   SDL_Window* m_window;
 
@@ -63,8 +67,14 @@ private:
 
   RenderTargetContainer m_renderTargets;
   TextureContainer m_textures;
-  VertexBufferContainer m_vertexBuffers;
+  VertexArrayContainer m_vertexArrays;
   ProgramContainer m_programs;
+
+  struct ImmediateMode {
+    ProgramId programId;
+    VertexArrayId vertexArray;
+    std::vector<ImmediateVertex> vertices;
+  } m_immediateMode;
 
   RenderQueue m_renderQueue{m_windowRenderTarget};
 };

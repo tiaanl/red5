@@ -163,7 +163,7 @@ PropId Scene::getPropUnderMouse(I32 x, I32 y) {
     if (propData) {
       auto& currentFrame = propData->currentFrame();
       auto& sprite = propData->m_sprites[currentFrame.spriteIndex];
-      if (currentFrame.visible && sprite.rect().contains({x, y})) {
+      if (currentFrame.visible && (sprite.rect() + currentFrame.offset).contains({x, y})) {
         return *it;
       }
     }
@@ -417,7 +417,7 @@ void Scene::processFilm() {
   m_frameCount = m_film->frameCount();
 
   for (auto& block : m_film->blocks()) {
-    spdlog::info("Processing block: {}", block.name);
+    // spdlog::info("Processing block: {}", block.name);
     switch (block.type) {
       case lfd::BlockType::View: {
         processViewBlock(block);
@@ -463,7 +463,7 @@ void Scene::processViewBlock(const lfd::Film::Block& block) {
   for (auto& chunk : block.keyFrames) {
     switch (chunk.opCode) {
       case lfd::OpCode::Time:
-        spdlog::info("  - {} :: {}", opCodeToString(chunk.opCode), chunk.variables[0]);
+        // spdlog::info("  - {} :: {}", opCodeToString(chunk.opCode), chunk.variables[0]);
         break;
 
       case lfd::OpCode::Transition:
@@ -478,12 +478,12 @@ void Scene::processViewBlock(const lfd::Film::Block& block) {
         // 22 is FadeToBlack
         // 23 is Stop
 
-        spdlog::info("  - {} :: {}, {}", opCodeToString(chunk.opCode), chunk.variables[0],
-                     chunk.variables[1]);
+        // spdlog::info("  - {} :: {}, {}", opCodeToString(chunk.opCode), chunk.variables[0],
+        //              chunk.variables[1]);
         break;
 
       default:
-        spdlog::info("  - {}", opCodeToString(chunk.opCode));
+        // spdlog::info("  - {}", opCodeToString(chunk.opCode));
         break;
     }
   }
@@ -503,9 +503,9 @@ void Scene::processPaletteBlock(const lfd::Film::Block& block) {
 
   // TODO: We need to process the `opCode`s, but for now we just apply the palette.
 
-  for (auto& chunk : block.keyFrames) {
-    spdlog::info("chunk: {}", opCodeToString(chunk.opCode));
-  }
+  // for (auto& chunk : block.keyFrames) {
+  //   spdlog::info("chunk: {}", opCodeToString(chunk.opCode));
+  // }
 
   applyPalette(*palette);
 }

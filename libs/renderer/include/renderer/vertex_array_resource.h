@@ -5,15 +5,17 @@
 
 namespace renderer {
 
-struct VertexBufferData {
-  U32 id;
+struct VertexArrayData {
+  U32 vertexArrayId;
+  U32 arrayBufferId;
 };
 
-class VertexBufferContainer : public ResourceContainer<VertexBufferData> {
+class VertexArrayContainer : public ResourceContainer<VertexArrayData> {
 public:
-  ~VertexBufferContainer();
+  ~VertexArrayContainer();
 
   Identifier create(const VertexBufferDefinition& def, void* data, MemSize dataSize);
+  void replace(Identifier id, const void* data, MemSize dataSize);
   void destroy(Identifier id);
 };
 
