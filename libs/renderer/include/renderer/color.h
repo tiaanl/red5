@@ -15,4 +15,11 @@ struct RGB {
   U8 blue;
 };
 
+struct ColorF {
+  F32 red;
+  F32 green;
+  F32 blue;
+  F32 alpha;
+};
+
 }  // namespace renderer

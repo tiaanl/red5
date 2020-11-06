@@ -7,14 +7,14 @@ namespace renderer {
 struct RenderTargetData {
   U32 framebuffer;
   U32 texture;
-  Size size;
+  SizeI size;
 };
 
 class RenderTargetContainer : public ResourceContainer<RenderTargetData> {
 public:
   ~RenderTargetContainer();
 
-  Identifier create(const Size& size);
+  Identifier create(const SizeI& size);
   void destroy(Identifier id);
 };
 

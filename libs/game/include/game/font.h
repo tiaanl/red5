@@ -9,7 +9,7 @@ class Font {
 public:
   ~Font();
 
-  void renderText(renderer::SpriteRenderer* renderer, const Position& position,
+  void renderText(renderer::SpriteRenderer* renderer, const PositionI& position,
                   std::string_view text);
 
   bool load(renderer::Renderer* renderer, const lfd::Font& font);

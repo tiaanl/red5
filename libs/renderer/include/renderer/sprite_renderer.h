@@ -23,7 +23,7 @@ public:
 protected:
   virtual ProgramId createProgramInternal();
   virtual void buildUniforms(const Sprite& sprite, UniformData* uniforms) const;
-  void renderInternal(const Sprite& sprite, ProgramId program, const UniformData& uniforms) const;
+  void renderInternal(const Sprite& sprite, ProgramId program, UniformData uniforms) const;
 
   Renderer* m_renderer;
 

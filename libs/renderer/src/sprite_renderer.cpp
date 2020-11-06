@@ -57,7 +57,7 @@ SpriteRenderer::~SpriteRenderer() {
 void SpriteRenderer::render(const Sprite& sprite) const {
   UniformData uniforms;
   buildUniforms(sprite, &uniforms);
-  renderInternal(sprite, m_program, uniforms);
+  renderInternal(sprite, m_program, std::move(uniforms));
 }
 
 bool SpriteRenderer::attachToRenderer(Renderer* renderer) {
@@ -114,8 +114,8 @@ void SpriteRenderer::buildUniforms(const Sprite& sprite, UniformData* uniforms) 
 }
 
 void SpriteRenderer::renderInternal(const Sprite& sprite, ProgramId program,
-                                    const UniformData& uniforms) const {
-  m_renderer->renderVertexBuffer(m_vertexBuffer, program, uniforms);
+                                    UniformData uniforms) const {
+  m_renderer->renderVertexBuffer(m_vertexBuffer, program, std::move(uniforms));
 }
 
 }  // namespace renderer

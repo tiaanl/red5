@@ -22,7 +22,7 @@ const renderer::Sprite& Prop::sprite(I16 index) const {
   return m_sprites[index];
 }
 
-const Rect& Prop::bounds() const {
+const RectI& Prop::bounds() const {
   return sprite(currentFrame().spriteIndex).rect();
 }
 

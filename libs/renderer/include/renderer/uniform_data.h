@@ -22,6 +22,14 @@ class UniformData {
 public:
   UniformData();
 
+  auto begin() const {
+    return m_data.cbegin();
+  }
+
+  auto end() const {
+    return m_data.cend();
+  }
+
   void set(std::string_view name, F32 value1);
   void set(std::string_view name, F32 value1, F32 value2);
   void set(std::string_view name, F32 value1, F32 value2, F32 value3);

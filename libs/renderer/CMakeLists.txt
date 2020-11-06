@@ -3,9 +3,11 @@ project(renderer)
 set(renderer_HEADER_FILES
     include/renderer/color.h
     include/renderer/program_resource.h
+    include/renderer/render_queue.h
     include/renderer/render_target_resource.h
     include/renderer/renderer.h
     include/renderer/resource_container.h
+    include/renderer/shape_renderer.h
     include/renderer/sprite.h
     include/renderer/sprite_renderer.h
     include/renderer/texture_resource.h
@@ -19,8 +21,10 @@ set(renderer_SOURCE_FILES
     src/gl_check.cpp
     src/gl_check.h
     src/program_resource.cpp
+    src/render_queue.cpp
     src/render_target_resource.cpp
     src/renderer.cpp
+    src/shape_renderer.cpp
     src/sprite.cpp
     src/sprite_renderer.cpp
     src/texture_resource.cpp

@@ -1,4 +1,4 @@
-Rect fitInto(const Rect& source, const Rect& destination) {
+RectI fitInto(const RectI& source, const RectI& destination) {
   F32 widthScale = static_cast<F32>(destination.size.width) / static_cast<F32>(source.size.width);
   F32 heightScale =
       static_cast<F32>(destination.size.height) / static_cast<F32>(source.size.height);
@@ -18,7 +18,7 @@ Rect fitInto(const Rect& source, const Rect& destination) {
       static_cast<F32>(destination.position.top) +
       (static_cast<F32>(destination.size.height) / 2.0f - static_cast<F32>(newHeight) / 2.0f)));
 
-  Rect result{newLeft, newTop, newWidth, newHeight};
+  RectI result{newLeft, newTop, newWidth, newHeight};
 
 #if 0
   spdlog::info("fitInto (({}, {}), ({}, {})) into (({}, {}), ({}, {})) = (({}, {}), ({}, {}))",

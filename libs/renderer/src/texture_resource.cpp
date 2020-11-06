@@ -23,7 +23,7 @@ TextureContainer::~TextureContainer() {
 }
 
 TextureContainer::Identifier TextureContainer::create(const void* data, TextureFormat format,
-                                                      const Size& size) {
+                                                      const SizeI& size) {
   auto invalid = Identifier::invalidValue();
 
   U32 texture;
@@ -62,7 +62,7 @@ TextureContainer::Identifier TextureContainer::create(const void* data, TextureF
   return emplaceData(texture, static_cast<U32>(GL_TEXTURE_2D), size);
 }
 
-TextureContainer::Identifier TextureContainer::createFromRaw(U32 texture, const Size& size) {
+TextureContainer::Identifier TextureContainer::createFromRaw(U32 texture, const SizeI& size) {
   return emplaceData(texture, static_cast<U32>(GL_TEXTURE_2D), size);
 }
 
@@ -85,7 +85,7 @@ TextureContainer::Identifier TextureContainer::create1D(const RGB* data, U32 cou
 
   GL_CHECK(glBindTexture(GL_TEXTURE_1D, 0), "Could not unbind texture.", invalid)
 
-  return emplaceData(texture, static_cast<U32>(GL_TEXTURE_1D), Size{static_cast<I32>(count), 1});
+  return emplaceData(texture, static_cast<U32>(GL_TEXTURE_1D), SizeI{static_cast<I32>(count), 1});
 }
 
 void TextureContainer::update1D(Identifier texture, const RGB* data, U32 start, U32 end) {

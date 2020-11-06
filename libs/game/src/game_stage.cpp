@@ -42,7 +42,7 @@ void GameStage::onRender() {
   m_renderer->clearRenderTarget();
 
   m_renderer->clear(0.0f, 0.5f, 0.0f, 1.0f);
-  m_renderer->renderRenderTarget(m_gameScreen, m_gameScreenRect);
+  m_renderer->copyRenderTarget(m_gameScreenRect, m_gameScreen, {0, 0, 320, 200});
   onRenderDebugInfo();
 }
 

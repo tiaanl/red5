@@ -72,7 +72,7 @@ void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
     auto propId = m_scene->getPropUnderMouse(x, y);
     if (propId.isValid()) {
       auto data = m_scene->prop(propId);
-      spdlog::info("prop under mouse: {}", data->name());
+      // spdlog::info("prop under mouse: {}", data->name());
     }
   }
 }
@@ -102,8 +102,19 @@ void SingleSceneStage::onSceneReady() {
 void SingleSceneStage::onSceneEvent(I16 event) {
   SceneDelegate::onSceneEvent(event);
 }
+
 void SingleSceneStage::onSceneLastFramePlayed() {
   SceneDelegate::onSceneLastFramePlayed();
+}
+
+bool SingleSceneStage::attachToEngine(renderer::Renderer* renderer) {
+  if (!GameStage::attachToEngine(renderer)) {
+    return false;
+  }
+
+
+
+  return true;
 }
 
 }  // namespace game

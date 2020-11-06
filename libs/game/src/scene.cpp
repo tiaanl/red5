@@ -380,7 +380,7 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
     return PropId::invalidValue();
   }
 
-  Rect rect{image.left(), image.top(), image.width(), image.height()};
+  RectI rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
 
   auto propId = m_props.create(ResourceType::Image, name, m_delegate, m_film->frameCount(),
@@ -401,7 +401,7 @@ PropId Scene::insertAnimationProp(std::string_view name, const Animation& animat
       return PropId::invalidValue();
     }
 
-    Rect rect{image.left(), image.top(), image.width(), image.height()};
+    RectI rect{image.left(), image.top(), image.width(), image.height()};
     sprites.emplace_back(texture, rect);
   }
 

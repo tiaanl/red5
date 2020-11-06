@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/stage.h>
+#include <renderer/shape_renderer.h>
 
 #include "game/game_stage.h"
 #include "game/scene.h"
@@ -18,6 +19,7 @@ public:
   void onMouseMoved(I32 x, I32 y) override;
   void onUpdate(U32 millis) override;
 
+public:
   // Override: GameStage
   void onRenderGameScreen() override;
   void onRenderDebugInfo() override;
@@ -27,11 +29,17 @@ public:
   void onSceneEvent(I16 event) override;
   void onSceneLastFramePlayed() override;
 
+protected:
+  // Override: engine::Stage
+  bool attachToEngine(renderer::Renderer* renderer) override;
+
 private:
   std::string m_filmName;
 
   std::unique_ptr<Scene> m_scene;
   PropId m_mouseCursor;
+
+  std::optional<renderer::ShapeRenderer> m_shapeRenderer;
 };
 
 }  // namespace game

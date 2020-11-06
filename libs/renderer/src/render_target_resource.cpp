@@ -24,7 +24,7 @@ RenderTargetContainer::~RenderTargetContainer() {
   }
 }
 
-RenderTargetContainer::Identifier RenderTargetContainer::create(const Size& size) {
+RenderTargetContainer::Identifier RenderTargetContainer::create(const SizeI& size) {
   auto invalid = Identifier::invalidValue();
 
   U32 frameBuffer;

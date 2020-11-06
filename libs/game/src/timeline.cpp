@@ -5,7 +5,7 @@ namespace game {
 namespace {
 
 struct BuildContext {
-  Position offsetPerFrame = {0, 0};
+  PositionI offsetPerFrame = {0, 0};
   I16 animationDirection = 0;
 };
 

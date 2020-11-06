@@ -4,6 +4,7 @@
 
 #include <glm/mat4x4.hpp>
 
+#include "renderer/render_queue.h"
 #include "renderer/types.h"
 #include "renderer/uniform_data.h"
 #include "renderer/vertex_buffer_definition.h"
@@ -14,14 +15,14 @@ class Renderer {
 public:
   bool init(SDL_Window* window);
 
-  void resize(const Size& size);
+  void resize(const SizeI& size);
 
   // Render target.
 
   RenderTargetData* renderTarget();
   void setRenderTarget(RenderTargetId renderTarget);
   void clearRenderTarget();
-  void renderRenderTarget(RenderTargetId renderTarget, const Rect& destination);
+  void copyRenderTarget(const RectI& toRect, RenderTargetId from, const RectI& fromRect);
 
   // Manage resources.
 
@@ -44,12 +45,11 @@ public:
   // Rendering.
 
   void clear(F32 red, F32 green, F32 blue, F32 alpha);
-  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program,
-                          const UniformData& uniformData);
+  void renderVertexBuffer(VertexBufferId vertexBuffer, ProgramId program, UniformData uniformData);
 
   // Per frame.
 
-  void beginFrame();
+  void flushRenderQueue();
   void finishFrame();
 
 private:
@@ -62,6 +62,8 @@ private:
   TextureContainer m_textures;
   VertexBufferContainer m_vertexBuffers;
   ProgramContainer m_programs;
+
+  RenderQueue m_renderQueue{m_windowRenderTarget};
 };
 
 }  // namespace renderer

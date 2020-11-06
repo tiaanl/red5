@@ -147,11 +147,11 @@ void Engine::run() {
     ImGui_ImplSDL2_NewFrame(m_window);
     ImGui::NewFrame();
 
-    m_renderer.beginFrame();
-
     if (m_currentStage) {
       m_currentStage->onRender();
     }
+
+    m_renderer.flushRenderQueue();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

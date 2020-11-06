@@ -12,10 +12,10 @@ bool isBitSet(U8 byte, U8 bit) {
 
 Font::~Font() = default;
 
-void Font::renderText(renderer::SpriteRenderer* renderer, const Position& position,
+void Font::renderText(renderer::SpriteRenderer* renderer, const PositionI& position,
                       std::string_view text) {
-  Rect s{0, 0, 0, m_height};
-  Rect d{position.left, position.top, 0, m_height};
+  RectI s{0, 0, 0, m_height};
+  RectI d{position.left, position.top, 0, m_height};
 
   for (U8 ch : text) {
     auto& glyph = m_glyphs[ch];

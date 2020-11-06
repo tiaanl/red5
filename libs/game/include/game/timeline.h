@@ -7,9 +7,9 @@ namespace game {
 struct Frame {
   bool visible = false;
   I16 layer = 0;
-  Position offset = {0, 0};
+  PositionI offset = {0, 0};
   I16 spriteIndex = 0;
-  Rect window = {0, 0, 0, 0};
+  RectI window = {0, 0, 0, 0};
   I16 orientation = 0;
 };
 
