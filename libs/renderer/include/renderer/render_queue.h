@@ -47,7 +47,7 @@ public:
   void renderVertexBuffer(RenderTargetId renderTarget, VertexBufferId vertexBuffer,
                           ProgramId program, UniformData uniformData);
 
-  void flush(Renderer& renderer);
+  std::vector<RenderCommand> flush();
 
 private:
   void switchRenderTarget(Renderer& renderer, RenderTargetId renderTarget);

@@ -53,10 +53,13 @@ public:
   void finishFrame();
 
 private:
+  void switchRenderTarget(RenderTargetId renderTarget);
+
   SDL_Window* m_window;
 
   RenderTargetData m_windowRenderTarget;
   RenderTargetId m_currentRenderTarget = RenderTargetId::invalidValue();
+  RenderTargetId m_lastRenderTarget;
 
   RenderTargetContainer m_renderTargets;
   TextureContainer m_textures;

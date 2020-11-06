@@ -19,6 +19,9 @@ const char* openGlErrorToString(U32 error) {
 }
 
 bool clearGlError(std::string_view failureMessage, const char* file, int line) {
+#if 0
+  return true;
+#else
   auto error = glad_glGetError();
   if (error == GL_NO_ERROR) {
     return true;
@@ -27,6 +30,7 @@ bool clearGlError(std::string_view failureMessage, const char* file, int line) {
   spdlog::error("{} ({}) {}:{}", failureMessage, openGlErrorToString(error), file, line);
 
   return false;
+#endif
 }
 
 }  // namespace renderer::detail
