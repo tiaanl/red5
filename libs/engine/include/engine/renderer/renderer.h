@@ -4,10 +4,11 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "render_queue.h"
-#include "types.h"
-#include "uniform_data.h"
-#include "vertex_buffer_definition.h"
+#include "engine/renderer/render_queue.h"
+#include "engine/renderer/types.h"
+#include "engine/renderer/uniform_data.h"
+#include "engine/renderer/vertex.h"
+#include "engine/renderer/vertex_buffer_definition.h"
 
 namespace engine {
 
@@ -46,7 +47,7 @@ public:
 
   void clear(F32 red, F32 green, F32 blue, F32 alpha);
   void renderVertexBuffer(VertexArrayId vertexBuffer, ProgramId program, UniformData uniformData);
-  void renderImmediate(RenderMode renderMode, ImmediateVertex* vertices, U32 count);
+  void renderImmediate(RenderMode renderMode, Vertex* vertices, U32 count);
 
   // Per frame.
 
@@ -73,7 +74,7 @@ private:
   struct ImmediateMode {
     ProgramId programId;
     VertexArrayId vertexArray;
-    std::vector<ImmediateVertex> vertices;
+    std::vector<Vertex> vertices;
   } m_immediateMode;
 
   RenderQueue m_renderQueue{m_windowRenderTarget};

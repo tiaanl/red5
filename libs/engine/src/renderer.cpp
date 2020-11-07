@@ -13,23 +13,27 @@ namespace {
 const char* g_immediateVertexShaderSource = R"(
 #version 330 core
 
-layout (location = 0) in vec2 vs_in_position;
-layout (location = 1) in vec4 vs_in_color;
+layout (location = 0) in vec3 vs_in_position;
+layout (location = 1) in vec2 vs_in_texCoord;
+layout (location = 2) in vec4 vs_in_color;
 
+out vec2 vs_out_texCoord;
 out vec4 vs_out_color;
 
 uniform mat4 u_viewMatrix;
 
 void main()
 {
-    gl_Position = u_viewMatrix * vec4(vs_in_position, 0.0f, 1.0f);
-    vs_out_color = vs_in_color;
+  gl_Position = u_viewMatrix * vec4(vs_in_position, 1.0f);
+  vs_out_texCoord = vs_in_texCoord;
+  vs_out_color = vs_in_color;
 }
 )";
 
 const char* g_immediateFragmentShaderSource = R"(
 #version 330 core
 
+in vec2 vs_out_texCoord;
 in vec4 vs_out_color;
 
 out vec4 fs_out_fragColor;
@@ -221,7 +225,7 @@ void Renderer::renderVertexBuffer(VertexArrayId vertexBuffer, ProgramId program,
                                    std::move(uniformData));
 }
 
-void Renderer::renderImmediate(RenderMode renderMode, ImmediateVertex* vertices, U32 count) {
+void Renderer::renderImmediate(RenderMode renderMode, Vertex* vertices, U32 count) {
   U32 currentSize = static_cast<U32>(m_immediateMode.vertices.size());
   m_immediateMode.vertices.resize(currentSize + count);
   std::copy(vertices, vertices + count, &m_immediateMode.vertices[currentSize]);
@@ -233,7 +237,7 @@ void Renderer::flushRenderQueue() {
   // Upload the immediate mode vertices.
   // Upload the vertex buffer to the GPU.
   m_vertexArrays.replace(m_immediateMode.vertexArray, m_immediateMode.vertices.data(),
-                         m_immediateMode.vertices.size() * sizeof(ImmediateVertex));
+                         m_immediateMode.vertices.size() * sizeof(Vertex));
   m_immediateMode.vertices.clear();
 
   GL_CHECK_VOID(glEnable(GL_BLEND), "Could not enable blending.");
@@ -282,8 +286,9 @@ bool Renderer::initImmediateMode() {
   }
 
   VertexBufferDefinition def;
-  def.addAttribute(AttributeType::Float32, ComponentCount::Two);   // Position
-  def.addAttribute(AttributeType::Float32, ComponentCount::Four);  // Color
+  def.addAttribute(AttributeType::Float32, ComponentCount::Three);  // position
+  def.addAttribute(AttributeType::Float32, ComponentCount::Two);    // texCoords
+  def.addAttribute(AttributeType::Float32, ComponentCount::Four);   // color
 
   auto vertexBuffer =
       m_vertexArrays.create(def, m_immediateMode.vertices.data(), m_immediateMode.vertices.size());

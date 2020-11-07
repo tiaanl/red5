@@ -13,11 +13,6 @@ using VertexArrayId = VertexArrayContainer::Identifier;
 using ProgramId = ProgramContainer::Identifier;
 using RenderTargetId = RenderTargetContainer::Identifier;
 
-struct ImmediateVertex {
-  PositionF position;
-  ColorF color;
-};
-
 enum class RenderMode : U32 {
   Lines,
   LineStrip,

@@ -11,6 +11,7 @@ set(engine_HEADER_FILES
     include/engine/renderer/texture_resource.h
     include/engine/renderer/types.h
     include/engine/renderer/uniform_data.h
+    include/engine/renderer/vertex.h
     include/engine/renderer/vertex_array_resource.h
     include/engine/renderer/vertex_buffer_definition.h
     include/engine/stage.h

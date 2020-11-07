@@ -1,35 +1,66 @@
+#include "engine/utils/render_shapes.h"
+
 #include "engine/renderer/renderer.h"
 
 namespace engine {
 
-void renderRectangle(Renderer& renderer, const RectF& rect, const ColorF& color) {
-  F32 x1 = rect.position.left;
-  F32 y1 = rect.position.top;
-  F32 x2 = rect.position.left + rect.size.width;
-  F32 y2 = rect.position.top + rect.size.height;
-  ImmediateVertex vertices[] = {
-      {{x1, y1}, color},
-      {{x2, y1}, color},
-      {{x1, y2}, color},
-      {{x2, y2}, color},
-  };
+void MeshBuilder::submit(Renderer& renderer) {
+  assert(!m_vertices.empty());  // Submitting empty mesh.
 
-  renderer.renderImmediate(RenderMode::TriangleStrip, vertices, 4);
+  renderer.renderImmediate(RenderMode::TriangleStrip, m_vertices.data(),
+                           static_cast<U32>(m_vertices.size()));
+}
+
+MeshBuilder::MeshBuilder(RenderMode renderMode) : m_renderMode{renderMode} {}
+
+void renderRectangle(Renderer& renderer, const RectF& rect, const ColorF& color) {
+  auto mb = MeshBuilder::create(RenderMode::TriangleStrip);
+  mb.vertex()
+      .position(rect.position.left, rect.position.top)
+      .texCoord(0.0f, 0.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left + rect.size.width, rect.position.top)
+      .texCoord(1.0f, 0.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left, rect.position.top + rect.size.height)
+      .texCoord(0.0f, 1.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left + rect.size.width, rect.position.top + rect.size.height)
+      .texCoord(1.0f, 1.0f)
+      .color(color)
+      .build();
+  mb.submit(renderer);
 }
 
 void renderRectangleOutline(Renderer& renderer, const RectF& rect, const ColorF& color) {
-  F32 x1 = rect.position.left;
-  F32 y1 = rect.position.top;
-  F32 x2 = rect.position.left + rect.size.width;
-  F32 y2 = rect.position.top + rect.size.height;
-  ImmediateVertex vertices[] = {
-      {{x1, y1}, color},
-      {{x2, y1}, color},
-      {{x2, y2}, color},
-      {{x1, y2}, color},
-  };
-
-  renderer.renderImmediate(RenderMode::LineLoop, vertices, 4);
+  auto mb = MeshBuilder::create(RenderMode::TriangleStrip);
+  mb.vertex()
+      .position(rect.position.left, rect.position.top)
+      .texCoord(0.0f, 0.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left + rect.size.width, rect.position.top)
+      .texCoord(1.0f, 0.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left + rect.size.width, rect.position.top + rect.size.height)
+      .texCoord(1.0f, 1.0f)
+      .color(color)
+      .build();
+  mb.vertex()
+      .position(rect.position.left, rect.position.top + rect.size.height)
+      .texCoord(0.0f, 1.0f)
+      .color(color)
+      .build();
+  mb.submit(renderer);
 }
 
 }  // namespace engine
