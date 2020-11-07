@@ -54,14 +54,14 @@ void main()
 
 SceneRenderer::SceneRenderer() = default;
 
-void SceneRenderer::setPalette(const renderer::RGB* colors, U8 startIndex, U8 endIndex) {
+void SceneRenderer::setPalette(const engine::RGB* colors, U8 startIndex, U8 endIndex) {
   m_renderer->textures().update1D(m_paletteTexture, colors, startIndex, endIndex);
 }
 
-bool SceneRenderer::attachToRenderer(renderer::Renderer* renderer) {
-  renderer::SpriteRenderer::attachToRenderer(renderer);
+bool SceneRenderer::attachToRenderer(engine::Renderer* renderer) {
+  engine::SpriteRenderer::attachToRenderer(renderer);
 
-  renderer::RGB colors[256] = {};
+  engine::RGB colors[256] = {};
   m_paletteTexture = m_renderer->textures().create1D(colors, 256);
   if (!m_paletteTexture) {
     return false;
@@ -76,12 +76,12 @@ void SceneRenderer::detachFromRenderer() {
   SpriteRenderer::detachFromRenderer();
 }
 
-renderer::ProgramId SceneRenderer::createProgramInternal() {
+engine::ProgramId SceneRenderer::createProgramInternal() {
   return m_renderer->programs().create(g_vertexShader, g_fragmentShader);
 }
 
-void SceneRenderer::buildUniforms(const renderer::Sprite& sprite,
-                                  renderer::UniformData* uniforms) const {
+void SceneRenderer::buildUniforms(const engine::Sprite& sprite,
+                                  engine::UniformData* uniforms) const {
   SpriteRenderer::buildUniforms(sprite, uniforms);
   uniforms->set("u_palette", m_paletteTexture);
 }

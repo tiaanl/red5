@@ -46,7 +46,7 @@ void GameStage::onRender() {
   onRenderDebugInfo();
 }
 
-bool GameStage::attachToEngine(renderer::Renderer* renderer) {
+bool GameStage::attachToEngine(engine::Renderer* renderer) {
   if (!Stage::attachToEngine(renderer)) {
     return false;
   }

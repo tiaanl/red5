@@ -1,30 +1,29 @@
 #pragma once
 
+#include <engine/renderer/color.h>
+#include <engine/renderer/renderer.h>
+#include <engine/utils/sprite_renderer.h>
 #include <lfd/palette.h>
-#include <renderer/color.h>
-#include <renderer/renderer.h>
-#include <renderer/sprite_renderer.h>
 
 namespace game {
 
-class SceneRenderer : public renderer::SpriteRenderer {
+class SceneRenderer : public engine::SpriteRenderer {
 public:
   SceneRenderer();
 
-  void setPalette(const renderer::RGB* colors, U8 startIndex, U8 endIndex);
+  void setPalette(const engine::RGB* colors, U8 startIndex, U8 endIndex);
 
-  // Override: renderer::SpriteRenderer
-  bool attachToRenderer(renderer::Renderer* renderer) override;
+  // Override: engine::SpriteRenderer
+  bool attachToRenderer(engine::Renderer* renderer) override;
   void detachFromRenderer() override;
 
 protected:
-  // Override: renderer::SpriteRenderer
-  renderer::ProgramId createProgramInternal() override;
-  void buildUniforms(const renderer::Sprite& sprite,
-                     renderer::UniformData* uniforms) const override;
+  // Override: engine::SpriteRenderer
+  engine::ProgramId createProgramInternal() override;
+  void buildUniforms(const engine::Sprite& sprite, engine::UniformData* uniforms) const override;
 
 private:
-  renderer::TextureId m_paletteTexture;
+  engine::TextureId m_paletteTexture;
 };
 
 }  // namespace game

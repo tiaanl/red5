@@ -7,7 +7,7 @@
 namespace game {
 
 Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
-           std::vector<lfd::KeyFrame> keyFrames, std::vector<renderer::Sprite> sprites)
+           std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites)
   : m_resourceType{type},
     m_name{name},
     m_delegate{delegate},
@@ -16,7 +16,7 @@ Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U3
   m_timeline.build(frameCount, m_keyFrames);
 }
 
-const renderer::Sprite& Prop::sprite(I16 index) const {
+const engine::Sprite& Prop::sprite(I16 index) const {
   index = std::min<I16>(static_cast<I16>(m_sprites.size()), index);
   index = std::max<I16>(0, index);
   return m_sprites[index];
@@ -40,9 +40,9 @@ void Prop::render(SceneRenderer* renderer) const {
   }
 }
 
-renderer::ResourceContainer<Prop>::Identifier PropContainer::create(
+engine::ResourceContainer<Prop>::Identifier PropContainer::create(
     ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
-    std::vector<lfd::KeyFrame> keyFrames, std::vector<renderer::Sprite> sprites) {
+    std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites) {
   return emplaceData(type, name, delegate, frameCount, std::move(keyFrames), std::move(sprites));
 }
 

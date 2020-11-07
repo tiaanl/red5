@@ -21,7 +21,7 @@ public:
 
 protected:
   // Override: engine::Stage
-  bool attachToEngine(renderer::Renderer* renderer) override;
+  bool attachToEngine(engine::Renderer* renderer) override;
   void detachFromEngine() override;
 
   std::shared_ptr<Resources> m_resources;
@@ -30,7 +30,7 @@ protected:
   RectI m_gameScreenRect{0, 0, 0, 0};
 
 private:
-  renderer::RenderTargetId m_gameScreen;
+  engine::RenderTargetId m_gameScreen;
 };
 
 }  // namespace game

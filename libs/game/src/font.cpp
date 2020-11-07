@@ -12,7 +12,7 @@ bool isBitSet(U8 byte, U8 bit) {
 
 Font::~Font() = default;
 
-void Font::renderText(renderer::SpriteRenderer* renderer, const PositionI& position,
+void Font::renderText(engine::SpriteRenderer* renderer, const PositionI& position,
                       std::string_view text) {
   RectI s{0, 0, 0, m_height};
   RectI d{position.left, position.top, 0, m_height};
@@ -26,7 +26,7 @@ void Font::renderText(renderer::SpriteRenderer* renderer, const PositionI& posit
     s.size.width = width;
     d.size.width = width;
 
-    renderer::Sprite sprite{texture, d};
+    engine::Sprite sprite{texture, d};
     renderer->render(sprite);
 
     // SDL_RenderCopy(renderer, texture, &s, &d);
@@ -35,7 +35,7 @@ void Font::renderText(renderer::SpriteRenderer* renderer, const PositionI& posit
   }
 }
 
-bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
+bool Font::load(engine::Renderer* renderer, const lfd::Font& font) {
   m_height = font.height();
   m_baseLine = font.baseLine();
 
@@ -64,7 +64,7 @@ bool Font::load(renderer::Renderer* renderer, const lfd::Font& font) {
     }
 
     auto texture = renderer->textures().create(
-        image.data(), renderer::TextureFormat::RedGreenBlueAlpha, {glyph.width, font.height()});
+        image.data(), engine::TextureFormat::RedGreenBlueAlpha, {glyph.width, font.height()});
     m_glyphs[font.startChar() + i].width = glyph.width;
     m_glyphs[font.startChar() + i].texture = texture;
   }

@@ -48,10 +48,10 @@ void renderImageToBuffer(U8* buffer, const Image& image) {
   }
 }
 
-renderer::TextureId createIndexTexture(renderer::Renderer* renderer, const Image& image) {
+engine::TextureId createIndexTexture(engine::Renderer* renderer, const Image& image) {
   if (image.lines().empty()) {
     U8 empty = 0;
-    return renderer->textures().create(&empty, renderer::TextureFormat::Red, {1, 1});
+    return renderer->textures().create(&empty, engine::TextureFormat::Red, {1, 1});
   }
 
   U16 imageWidth = image.width();
@@ -64,7 +64,7 @@ renderer::TextureId createIndexTexture(renderer::Renderer* renderer, const Image
 
   renderImageToBuffer(indices.data(), image);
 
-  return renderer->textures().create(indices.data(), renderer::TextureFormat::Red,
+  return renderer->textures().create(indices.data(), engine::TextureFormat::Red,
                                      {imageWidth, imageHeight});
 }
 
@@ -367,13 +367,13 @@ void Scene::applyPalette(const Palette& palette) {
     m_palette[i++] = SDL_Color{c.red, c.green, c.blue, 255};
   }
 
-  m_sceneRenderer->setPalette(reinterpret_cast<const renderer::RGB*>(palette.colors().data()),
+  m_sceneRenderer->setPalette(reinterpret_cast<const engine::RGB*>(palette.colors().data()),
                               palette.firstIndex(), palette.lastIndex());
 }
 
 PropId Scene::insertImageProp(std::string_view name, const Image& image,
                               std::vector<lfd::KeyFrame> keyFrames) {
-  std::vector<renderer::Sprite> sprites;
+  std::vector<engine::Sprite> sprites;
 
   auto texture = createIndexTexture(m_sceneRenderer->renderer(), image);
   if (!texture) {
@@ -393,7 +393,7 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
 
 PropId Scene::insertAnimationProp(std::string_view name, const Animation& animation,
                                   std::vector<lfd::KeyFrame> keyFrames) {
-  std::vector<renderer::Sprite> sprites;
+  std::vector<engine::Sprite> sprites;
 
   for (auto& image : animation.frames()) {
     auto texture = createIndexTexture(m_sceneRenderer->renderer(), image);

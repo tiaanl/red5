@@ -1,6 +1,6 @@
 #include "game/single_scene_stage.h"
 
-#include <renderer/render_shapes.h>
+#include <engine/utils/render_shapes.h>
 
 namespace game {
 
@@ -89,8 +89,8 @@ void SingleSceneStage::onRenderGameScreen() {
   if (m_propUnderMouse.isValid()) {
     auto data = m_scene->prop(m_propUnderMouse);
     auto& frame = data->currentFrame();
-    renderer::renderRectangle(*m_renderer, from(data->bounds() + frame.offset),
-                              {1.0f, 0.0f, 0.0f, 0.5f});
+    engine::renderRectangle(*m_renderer, from(data->bounds() + frame.offset),
+                            {1.0f, 0.0f, 0.0f, 0.5f});
   }
 }
 
@@ -112,7 +112,7 @@ void SingleSceneStage::onSceneLastFramePlayed() {
   SceneDelegate::onSceneLastFramePlayed();
 }
 
-bool SingleSceneStage::attachToEngine(renderer::Renderer* renderer) {
+bool SingleSceneStage::attachToEngine(engine::Renderer* renderer) {
   if (!GameStage::attachToEngine(renderer)) {
     return false;
   }

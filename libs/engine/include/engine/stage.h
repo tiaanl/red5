@@ -1,8 +1,8 @@
 #pragma once
 
-#include <renderer/sprite_renderer.h>
-
 namespace engine {
+
+class Renderer;
 
 class Stage {
 public:
@@ -15,9 +15,9 @@ public:
   virtual void onRender() = 0;
 
 protected:
-  renderer::Renderer* m_renderer;
+  Renderer* m_renderer;
 
-  virtual bool attachToEngine(renderer::Renderer* renderer);
+  virtual bool attachToEngine(Renderer* renderer);
   virtual void detachFromEngine();
 
 private:

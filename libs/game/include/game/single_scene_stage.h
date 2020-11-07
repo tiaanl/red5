@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/stage.h>
-#include <renderer/shape_renderer.h>
+#include <engine/utils/shape_renderer.h>
 
 #include "game/game_stage.h"
 #include "game/scene.h"
@@ -31,7 +31,7 @@ public:
 
 protected:
   // Override: engine::Stage
-  bool attachToEngine(renderer::Renderer* renderer) override;
+  bool attachToEngine(engine::Renderer* renderer) override;
 
 private:
   std::string m_filmName;
@@ -41,7 +41,7 @@ private:
 
   PropId m_propUnderMouse;
 
-  std::optional<renderer::ShapeRenderer> m_shapeRenderer;
+  std::optional<engine::ShapeRenderer> m_shapeRenderer;
 };
 
 }  // namespace game

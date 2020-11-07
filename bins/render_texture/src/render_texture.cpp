@@ -46,7 +46,7 @@ public:
 #endif  // 0
 
 #if 0
-    renderer::Size size{9, 11};
+    engine::Size size{9, 11};
     U8 data[] = {
         255, 255, 0,   0,   0,   0,   0,   0,   0,    //
         255, 127, 255, 0,   0,   0,   0,   0,   0,    //
@@ -63,7 +63,7 @@ public:
 #endif
 
 #if 0
-    renderer::Size size{8, 8};
+    engine::Size size{8, 8};
     U8 data[] = {
         255, 255, 255, 255, 255, 255, 255, 255,       //
         255, 127, 127, 127, 127, 127, 127, 255,       //
@@ -77,7 +77,7 @@ public:
 #endif
 
 #if 1
-    renderer::Size size{5, 4};
+    SizeI size{5, 4};
     U8 data[] = {
         255, 255, 127, 255, 0,   0, 0, 0,  //
         0,   0,   255, 0,   255, 0, 0, 0,  //
@@ -110,9 +110,9 @@ public:
         0.0f, 0.0f, 0.0f, 0.0f,  //
     };
 
-    renderer::VertexBufferDefinition def;
-    def.addAttribute(renderer::AttributeType::Float32, renderer::ComponentCount::Two);
-    def.addAttribute(renderer::AttributeType::Float32, renderer::ComponentCount::Two);
+    engine::VertexBufferDefinition def;
+    def.addAttribute(engine::AttributeType::Float32, engine::ComponentCount::Two);
+    def.addAttribute(engine::AttributeType::Float32, engine::ComponentCount::Two);
     m_vertexBuffer = m_renderer->vertexBuffers().create(def, vertices, sizeof(vertices));
     if (!m_vertexBuffer) {
       return false;
@@ -129,15 +129,15 @@ public:
   void onUpdate(U32 millis) override {}
 
   void onRender() override {
-    renderer::UniformData uniforms;
+    engine::UniformData uniforms;
     uniforms.set("u_texture", m_texture);
     m_renderer->renderVertexBuffer(m_vertexBuffer, m_program, uniforms);
   }
 
 private:
-  renderer::ProgramId m_program;
-  renderer::VertexArrayId m_vertexBuffer;
-  renderer::TextureId m_texture;
+  engine::ProgramId m_program;
+  engine::VertexArrayId m_vertexBuffer;
+  engine::TextureId m_texture;
 };
 
 int main(int argc, char** argv) {

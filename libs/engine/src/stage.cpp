@@ -4,7 +4,7 @@ namespace engine {
 
 Stage::~Stage() = default;
 
-bool Stage::attachToEngine(renderer::Renderer* renderer) {
+bool Stage::attachToEngine(Renderer* renderer) {
   m_renderer = renderer;
 
   return true;

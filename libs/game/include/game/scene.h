@@ -2,12 +2,12 @@
 
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <engine/utils/sprite_renderer.h>
 #include <lfd/animation.h>
 #include <lfd/film.h>
 #include <lfd/image.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
-#include <renderer/sprite_renderer.h>
 
 #include <vector>
 

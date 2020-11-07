@@ -1,4 +1,4 @@
-#include "../include/lfd/resource_file.h"
+#include "lfd/resource_file.h"
 
 #include <base/streams/file_input_stream.h>
 #include <base/streams/file_output_stream.h>

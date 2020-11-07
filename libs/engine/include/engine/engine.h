@@ -1,10 +1,8 @@
 #pragma once
 
-#include <renderer/renderer.h>
-#include <renderer/sprite_renderer.h>
-
 #include <memory>
 
+#include "engine/renderer/renderer.h"
 #include "engine/stage.h"
 
 namespace engine {
@@ -20,7 +18,7 @@ public:
 private:
   void update(U32 ticks);
 
-  renderer::Renderer m_renderer;
+  Renderer m_renderer;
 
   SDL_Window* m_window;
   SDL_GLContext m_context;
