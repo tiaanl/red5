@@ -88,7 +88,9 @@ void SingleSceneStage::onRenderGameScreen() {
 
   if (m_propUnderMouse.isValid()) {
     auto data = m_scene->prop(m_propUnderMouse);
-    renderer::renderRectangle(*m_renderer, from(data->bounds()), {1.0f, 0.0f, 0.0f, 0.5f});
+    auto& frame = data->currentFrame();
+    renderer::renderRectangle(*m_renderer, from(data->bounds() + frame.offset),
+                              {1.0f, 0.0f, 0.0f, 0.5f});
   }
 }
 
