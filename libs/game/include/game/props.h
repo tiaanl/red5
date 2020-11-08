@@ -35,7 +35,7 @@ public:
   }
 
   const engine::Sprite& sprite(I16 index) const;
-  const RectI& bounds() const;
+  RectI bounds() const;
 
   void sceneTick(I32 sceneFrame);
   void render(SceneRenderer* renderer) const;

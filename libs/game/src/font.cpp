@@ -14,7 +14,7 @@ Font::~Font() = default;
 
 void Font::renderText(engine::SpriteRenderer* renderer, const PositionI& position,
                       std::string_view text) {
-  RectI s{0, 0, 0, m_height};
+  RectI s(0, 0, 0, m_height);
   RectI d{position.left, position.top, 0, m_height};
 
   for (U8 ch : text) {
@@ -64,7 +64,8 @@ bool Font::load(engine::Renderer* renderer, const lfd::Font& font) {
     }
 
     auto texture = renderer->textures().create(
-        image.data(), engine::TextureFormat::RedGreenBlueAlpha, {glyph.width, font.height()});
+        image.data(), engine::TextureFormat::RedGreenBlueAlpha,
+        {static_cast<I32>(glyph.width), static_cast<I32>(font.height())});
     m_glyphs[font.startChar() + i].width = glyph.width;
     m_glyphs[font.startChar() + i].texture = texture;
   }

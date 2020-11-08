@@ -21,5 +21,13 @@ set(base_SOURCE_FILES
 
 base_add_library(base ${base_HEADER_FILES} ${base_SOURCE_FILES})
 target_link_libraries(base PUBLIC spdlog::spdlog)
-
 target_precompile_headers(base PUBLIC include/base/platform.h)
+
+set(base_tests_TEST_FILES
+    tests/dimensions_tests.cpp
+    tests/tests.cpp
+    )
+
+base_add_executable(base_tests ${base_tests_TEST_FILES})
+target_link_libraries(base_tests PRIVATE base)
+target_link_libraries(base_tests PRIVATE Catch2::Catch2)

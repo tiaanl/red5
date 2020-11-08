@@ -22,8 +22,9 @@ const engine::Sprite& Prop::sprite(I16 index) const {
   return m_sprites[index];
 }
 
-const RectI& Prop::bounds() const {
-  return sprite(currentFrame().spriteIndex).rect();
+RectI Prop::bounds() const {
+  const auto& frame = currentFrame();
+  return sprite(frame.spriteIndex).rect() + frame.offset;
 }
 
 void Prop::sceneTick(I32 sceneFrame) {
@@ -35,7 +36,7 @@ void Prop::render(SceneRenderer* renderer) const {
 
   if (frame.visible) {
     auto sprite = this->sprite(frame.spriteIndex);
-    sprite.setPosition(sprite.position() + frame.offset);
+    sprite.setPosition(bounds().position);
     renderer->render(sprite);
   }
 }

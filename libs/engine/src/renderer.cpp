@@ -143,10 +143,12 @@ void processCopyRenderTarget(Renderer& renderer, const RenderCommand& command) {
 
   GL_CHECK_VOID(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, toId), "Could not bind draw frame buffer.");
 
-  GL_CHECK_VOID(glBlitFramebuffer(data.fromRect.position.left, data.fromRect.position.top,  //
-                                  data.fromRect.size.width, data.fromRect.size.height,      //
-                                  data.toRect.position.left, data.toRect.position.top,      //
-                                  data.toRect.size.width, data.toRect.size.height,          //
+  GL_CHECK_VOID(glBlitFramebuffer(data.fromRect.position.left, data.fromRect.position.top,
+                                  data.fromRect.position.left + data.fromRect.size.width,
+                                  data.fromRect.position.top + data.fromRect.size.height,
+                                  data.toRect.position.left, data.toRect.position.top,
+                                  data.toRect.position.left + data.toRect.size.width,
+                                  data.toRect.position.top + data.toRect.size.height,
                                   GL_COLOR_BUFFER_BIT, GL_NEAREST),
                 "Could not blit frame buffer.");
 }
@@ -180,7 +182,7 @@ bool Renderer::init(SDL_Window* window) {
     return false;
   }
 
-  SizeI windowSize{};
+  SizeI windowSize;
   SDL_GetWindowSize(m_window, &windowSize.width, &windowSize.height);
   resize(windowSize);
 
