@@ -1,7 +1,6 @@
 #pragma once
 
 #include <engine/stage.h>
-#include <engine/utils/shape_renderer.h>
 
 #include "game/game_stage.h"
 #include "game/scene.h"
@@ -40,8 +39,6 @@ private:
   PropId m_mouseCursor;
 
   PropId m_propUnderMouse;
-
-  std::optional<engine::ShapeRenderer> m_shapeRenderer;
 };
 
 }  // namespace game

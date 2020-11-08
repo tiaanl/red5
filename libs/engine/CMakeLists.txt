@@ -16,7 +16,6 @@ set(engine_HEADER_FILES
     include/engine/renderer/vertex_buffer_definition.h
     include/engine/stage.h
     include/engine/utils/render_shapes.h
-    include/engine/utils/shape_renderer.h
     include/engine/utils/sprite.h
     include/engine/utils/sprite_renderer.h
     )
@@ -33,7 +32,6 @@ set(engine_SOURCE_FILES
     src/texture_resource.cpp
     src/uniform_data.cpp
     src/utils/render_shapes.cpp
-    src/utils/shape_renderer.cpp
     src/utils/sprite.cpp
     src/utils/sprite_renderer.cpp
     src/vertex_array_resource.cpp
