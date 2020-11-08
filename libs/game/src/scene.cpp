@@ -1,6 +1,8 @@
 #include "game/scene.h"
 
+#if DEBUG_UI > 0
 #include <imgui.h>
+#endif  // DEBUG_UI > 0
 
 namespace game {
 
@@ -209,6 +211,7 @@ void Scene::renderGameScreen() {
   }
 }
 
+#if DEBUG_UI > 0
 void Scene::renderDebugInfo() {
   ImGui::Begin("Playback");
   ImGui::Text("Frame %d of %d", m_currentFrame, m_frameCount);
@@ -366,6 +369,7 @@ void Scene::renderDebugInfo() {
 
   ImGui::End();
 }
+#endif  // DEBUG_UI > 0
 
 void Scene::applyPalette(const Palette& palette) {
   m_sceneRenderer->setPalette(reinterpret_cast<const engine::RGB*>(palette.colors().data()),

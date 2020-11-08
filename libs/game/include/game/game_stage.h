@@ -12,7 +12,9 @@ public:
   explicit GameStage(std::shared_ptr<Resources> resources);
 
   virtual void onRenderGameScreen() = 0;
+#if DEBUG_UI > 0
   virtual void onRenderDebugInfo();
+#endif  // DEBUG_UI > 0
 
   // Override: engine::Stage
   bool onLoad() override;

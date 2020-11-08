@@ -11,7 +11,9 @@ constexpr I32 g_gameScreenHeight = 200;
 
 GameStage::GameStage(std::shared_ptr<Resources> resources) : m_resources{std::move(resources)} {}
 
+#if DEBUG_UI > 0
 void GameStage::onRenderDebugInfo() {}
+#endif  // DEBUG_UI > 0
 
 bool GameStage::onLoad() {
   m_gameScreen = m_renderer->renderTargets().create({g_gameScreenWidth, g_gameScreenHeight});
@@ -45,7 +47,10 @@ void GameStage::onRender() {
 
   m_renderer->clear(0.0f, 0.5f, 0.0f, 1.0f);
   m_renderer->copyRenderTarget(m_gameScreenRect, m_gameScreen, {0, 0, 320, 200});
+
+#if DEBUG_UI > 0
   onRenderDebugInfo();
+#endif  // DEBUG_UI > 0
 }
 
 bool GameStage::attachToEngine(engine::Renderer* renderer) {

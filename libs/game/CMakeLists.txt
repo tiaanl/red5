@@ -28,6 +28,7 @@ set(game_SOURCE_FILES
 
 base_add_library(game ${game_HEADER_FILES} ${game_SOURCE_FILES})
 target_link_libraries(game PUBLIC engine)
+target_precompile_headers(game PUBLIC include/game/precompiled.h)
 
 set(game_TEST_FILES
     tests/playback_controls_tests.cpp

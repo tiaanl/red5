@@ -80,11 +80,13 @@ void SingleSceneStage::onRenderGameScreen() {
 #endif  // 0
 }
 
+#if DEBUG_UI > 0
 void SingleSceneStage::onRenderDebugInfo() {
   if (m_scene) {
     m_scene->renderDebugInfo();
   }
 }
+#endif  // DEBUG_UI > 0
 
 void SingleSceneStage::onSceneReady() {
   SceneDelegate::onSceneReady();

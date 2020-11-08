@@ -1,10 +1,13 @@
 #include "engine/engine.h"
 
 #include <SDL2/SDL.h>
+#include <spdlog/sinks/msvc_sink.h>
+
+#if DEBUG_UI > 0
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
-#include <spdlog/sinks/msvc_sink.h>
+#endif  // DEBUG_UI > 0
 
 namespace engine {
 
@@ -91,6 +94,7 @@ bool Engine::init(std::string_view windowTitle) {
     return false;
   }
 
+#if DEBUG_UI > 0
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -106,6 +110,7 @@ bool Engine::init(std::string_view windowTitle) {
   // Setup Platform/Renderer backends
   ImGui_ImplSDL2_InitForOpenGL(m_window, m_context);
   ImGui_ImplOpenGL3_Init(glslVersion);
+#endif  // DEBUG_UI > 0
 
   return true;
 }
@@ -119,7 +124,9 @@ void Engine::run() {
   while (running) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+#if DEBUG_UI > 0
       ImGui_ImplSDL2_ProcessEvent(&event);
+#endif  // DEBUG_UI > 0
 
       if (event.type == SDL_QUIT) {
         running = false;
@@ -143,9 +150,11 @@ void Engine::run() {
     update(now - lastTicks);
     lastTicks = now;
 
+#if DEBUG_UI > 0
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(m_window);
     ImGui::NewFrame();
+#endif  // DEBUG_UI > 0
 
     if (m_currentStage) {
       m_currentStage->onRender();
@@ -153,15 +162,19 @@ void Engine::run() {
 
     m_renderer.flushRenderQueue();
 
+#if DEBUG_UI > 0
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif  // DEBUG_UI > 0
 
     m_renderer.finishFrame();
   }
 
+#if DEBUG_UI > 0
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
+#endif  // DEBUG_UI > 0
 
   SDL_GL_DeleteContext(m_context);
   SDL_DestroyWindow(m_window);

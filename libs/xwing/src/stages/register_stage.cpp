@@ -43,10 +43,12 @@ bool RegisterStage::onLoad(game::Scene& scene) {
 
   scene.insertImage("nameback", [](game::Prop& prop) {
     prop.currentFrame().visible = true;
+    prop.currentFrame().layer = 1;
   });
 
   scene.insertImage("infoback", [](game::Prop& prop) {
     prop.currentFrame().visible = true;
+    prop.currentFrame().layer = 1;
   });
 
   if (!initRobot(scene)) {

@@ -17,6 +17,8 @@
 #include "game/scene_delegate.h"
 #include "game/scene_renderer.h"
 
+#define DEBUG_UI 0
+
 namespace game {
 
 class Scene {
@@ -64,7 +66,9 @@ public:
 
   void update(U32 millis);
   void renderGameScreen();
+#if DEBUG_UI >= 0
   void renderDebugInfo();
+#endif
 
 private:
   void applyPalette(const Palette& palette);

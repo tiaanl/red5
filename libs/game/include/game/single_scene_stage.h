@@ -20,7 +20,9 @@ public:
 
   // Override: GameStage
   void onRenderGameScreen() override final;
+#if DEBUG_UI > 0
   void onRenderDebugInfo() override final;
+#endif  // DEBUG_UI < 0
 
   // Override: SceneDelegate
   void onSceneReady() override;
