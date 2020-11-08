@@ -30,48 +30,34 @@ bool SingleSceneStage::onLoad() {
   }
 
   // Insert the mouse cursor to the scene.
-  m_mouseCursor = m_scene->insertAnimation("cursors", {});
+  m_mouseCursor = m_scene->insertAnimation("cursors");
   if (!m_mouseCursor) {
     return false;
   }
 
-  auto prop = m_scene->props().getData(m_mouseCursor);
-  //  prop->setVisible(true);
-  //  prop->setSpriteIndex(0);
-  //  prop->setLayer(0);
+  auto* prop = m_scene->props().getData(m_mouseCursor);
+  auto& frame = prop->currentFrame();
+  frame.visible = true;
+  frame.spriteIndex = 0;
+  frame.layer = 0;
+
+  if (!onLoad(*m_scene)) {
+    return false;
+  }
 
   return true;
 }
 
-void SingleSceneStage::onMouseMoved(I32 x, I32 y) {
-  Stage::onMouseMoved(x, y);
+void SingleSceneStage::onMouseMoved(const PositionI& mousePosition) {
+  Stage::onMouseMoved(mousePosition);
 
-#if 0
-  spdlog::info("rect: (({}, {}), ({}, {}))", m_gameScreenRect.position.left,
-               m_gameScreenRect.position.top, m_gameScreenRect.size.width,
-               m_gameScreenRect.size.height);
-#endif  // 0
+  auto gameScreenPosition = windowCoordToSceneCoord(mousePosition);
 
-  F32 mouseX = static_cast<F32>(x) - static_cast<F32>(m_gameScreenRect.position.left);
-  mouseX = std::min(static_cast<F32>(m_gameScreenRect.size.width), mouseX);
-  mouseX = std::max(0.0f, mouseX);
-  mouseX = mouseX / static_cast<F32>(m_gameScreenRect.size.width) * static_cast<F32>(320);
-
-  F32 mouseY = static_cast<F32>(y) - static_cast<F32>(m_gameScreenRect.position.top);
-  mouseY = std::min(static_cast<F32>(m_gameScreenRect.size.height), mouseY);
-  mouseY = std::max(0.0f, mouseY);
-  mouseY = mouseY / static_cast<F32>(m_gameScreenRect.size.height) * static_cast<F32>(200);
-
-  x = static_cast<I32>(std::round(mouseX));
-  y = static_cast<I32>(std::round(mouseY));
-
-  // spdlog::info("Mouse position: ({}, {})", x, y);
-
-  auto prop = m_scene->props().getData(m_mouseCursor);
-  // prop->setOffset({x, y});
+  auto mouseProp = m_scene->props().getData(m_mouseCursor);
+  mouseProp->moveTo(gameScreenPosition);
 
   if (m_scene) {
-    m_propUnderMouse = m_scene->getPropUnderMouse(x, y);
+    setPropUnderMouse(m_scene->propUnderMouse(gameScreenPosition));
   }
 }
 
@@ -86,10 +72,12 @@ void SingleSceneStage::onRenderGameScreen() {
     m_scene->renderGameScreen();
   }
 
+#if 0
   if (m_propUnderMouse.isValid()) {
     auto prop = m_scene->prop(m_propUnderMouse);
-    // engine::renderRectangle(*m_renderer, prop->bounds(), {1.0f, 0.0f, 0.0f, 0.5f});
+    engine::renderRectangle(*m_renderer, prop->bounds(), {1.0f, 0.0f, 0.0f, 0.5f});
   }
+#endif  // 0
 }
 
 void SingleSceneStage::onRenderDebugInfo() {
@@ -110,12 +98,55 @@ void SingleSceneStage::onSceneLastFramePlayed() {
   SceneDelegate::onSceneLastFramePlayed();
 }
 
-bool SingleSceneStage::attachToEngine(engine::Renderer* renderer) {
-  if (!GameStage::attachToEngine(renderer)) {
-    return false;
+bool SingleSceneStage::onLoad(Scene& scene) {
+  return true;
+}
+
+void SingleSceneStage::onPropEnter(PropId propId) {
+#if 0
+  auto prop = m_scene->prop(propId);
+  spdlog::info("enter: {}", prop->name());
+#endif  // 0
+}
+
+void SingleSceneStage::onPropExit(PropId propId) {
+#if 0
+  auto prop = m_scene->prop(propId);
+  spdlog::info("exit: {}", prop->name());
+#endif  // 0
+}
+
+PositionI SingleSceneStage::windowCoordToSceneCoord(const PositionI& windowCoord) {
+  RectF gameScreenRect = m_gameScreenRect;
+  PositionF p = windowCoord;
+
+  F32 mouseX = p.left - gameScreenRect.position.left;
+  mouseX = std::min(gameScreenRect.size.width, mouseX);
+  mouseX = std::max(0.0f, mouseX);
+  mouseX = mouseX / gameScreenRect.size.width * 320.0f;
+
+  F32 mouseY = windowCoord.top - gameScreenRect.position.top;
+  mouseY = std::min(gameScreenRect.size.height, mouseY);
+  mouseY = std::max(0.0f, mouseY);
+  mouseY = mouseY / gameScreenRect.size.height * 200.0f;
+
+  return PositionI{mouseX, mouseY};
+}
+
+void SingleSceneStage::setPropUnderMouse(PropId propId) {
+  if (m_propUnderMouse == propId) {
+    return;
   }
 
-  return true;
+  if (m_propUnderMouse.isValid()) {
+    onPropExit(m_propUnderMouse);
+  }
+
+  m_propUnderMouse = propId;
+
+  if (propId.isValid()) {
+    onPropEnter(propId);
+  }
 }
 
 }  // namespace game

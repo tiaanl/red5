@@ -17,6 +17,7 @@ public:
   // Override: engine::Stage
   bool onLoad() override;
   void onStageResized(I32 width, I32 height) override;
+  void onUpdate(U32 millis) override;
   void onRender() override final;
 
 protected:

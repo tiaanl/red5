@@ -10,10 +10,9 @@ int main(int argc, char* argv[]) {
   }
 
   auto stage =
-      std::make_unique<game::SingleSceneStage>(std::make_shared<game::Resources>(), "logo_f");
+      std::make_unique<game::SingleSceneStage>(std::make_shared<game::Resources>(), "mainmenu");
   stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XWING.LFD)"});
-  stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\XLOGO.LFD)"});
-  stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\LOGO.LFD)"});
+  stage->addResourceFile(ResourceFile{R"(C:\xwing\RESOURCE\MAINMENU.LFD)"});
 
   if (!engine.setStage(std::move(stage))) {
     return 1;

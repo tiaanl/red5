@@ -33,10 +33,34 @@ public:
   bool loadFilm(std::string_view name);
   bool loadFont(std::string_view name);
 
-  PropId insertImage(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
-  PropId insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> keyFrames);
+  PropId insertImage(std::string_view name, std::vector<lfd::KeyFrame> keyFrames = {});
 
-  PropId getPropUnderMouse(I32 x, I32 y);
+  template <typename Func>
+  PropId insertImage(std::string_view name, Func&& func) {
+    auto propId = insertImage(name);
+    if (propId.isValid()) {
+      auto* prop = m_props.getData(propId);
+      func(*prop);
+    }
+
+    return propId;
+  }
+
+  PropId insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> keyFrames = {});
+
+  template <typename Func>
+  PropId insertAnimation(std::string_view name, Func&& func) {
+    auto propId = insertAnimation(name);
+    if (propId.isValid()) {
+      auto* prop = m_props.getData(propId);
+      func(*prop);
+    }
+
+    return propId;
+  }
+
+  PropId propId(std::string_view name);
+  PropId propUnderMouse(const PositionI& position);
 
   void update(U32 millis);
   void renderGameScreen();
@@ -64,8 +88,6 @@ private:
 
   std::unique_ptr<lfd::Film> m_film;
   std::unique_ptr<Font> m_font;
-
-  SDL_Color m_palette[256];
 
   PropContainer m_props;
   std::vector<PropId> m_renderOrder;

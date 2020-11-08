@@ -2,11 +2,13 @@ project(xwing)
 
 set(xwing_HEADER_FILES
     include/xwing/pilot_data.h
+    include/xwing/stages/main_menu_stage.h
     include/xwing/stages/register_stage.h
     )
 
 set(xwing_SOURCE_FILES
     src/pilot_data.cpp
+    src/stages/main_menu_stage.cpp
     src/stages/register_stage.cpp
     )
 

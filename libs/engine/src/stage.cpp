@@ -16,6 +16,6 @@ void Stage::detachFromEngine() {
 
 void Stage::onStageResized(I32 width, I32 height) {}
 
-void Stage::onMouseMoved(I32 x, I32 y) {}
+void Stage::onMouseMoved(const PositionI&) {}
 
 }  // namespace engine

@@ -2,6 +2,8 @@
 
 #include <lfd/film.h>
 
+#include "playback_controls.h"
+
 namespace game {
 
 struct Frame {
@@ -15,19 +17,11 @@ struct Frame {
 
 class Timeline {
 public:
-  Timeline();
-
   void build(U32 frameCount, const std::vector<lfd::KeyFrame>& keyFrames);
 
-  U32 currentFrameIndex() const {
-    return m_currentFrameIndex;
-  }
-
-  void setCurrentFrame(U32 frame);
-  void nextFrame();
-
-  const Frame& currentFrame() const {
-    return frame(m_currentFrameIndex);
+  Frame& frame(U32 frame) {
+    assert(frame < m_frames.size());
+    return m_frames[frame];
   }
 
   const Frame& frame(U32 frame) const {
@@ -36,7 +30,6 @@ public:
   }
 
 private:
-  U32 m_currentFrameIndex;
   std::vector<Frame> m_frames;
 };
 

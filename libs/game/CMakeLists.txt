@@ -3,6 +3,7 @@ project(game)
 set(game_HEADER_FILES
     include/game/font.h
     include/game/game_stage.h
+    include/game/playback_controls.h
     include/game/props.h
     include/game/resources.h
     include/game/scene.h
@@ -15,6 +16,7 @@ set(game_HEADER_FILES
 set(game_SOURCE_FILES
     src/font.cpp
     src/game_stage.cpp
+    src/playback_controls.cpp
     src/props.cpp
     src/resources.cpp
     src/scene.cpp
@@ -28,6 +30,7 @@ base_add_library(game ${game_HEADER_FILES} ${game_SOURCE_FILES})
 target_link_libraries(game PUBLIC engine)
 
 set(game_TEST_FILES
+    tests/playback_controls_tests.cpp
     tests/timeline_tests.cpp
     )
 

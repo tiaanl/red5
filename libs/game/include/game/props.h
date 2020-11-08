@@ -30,14 +30,34 @@ public:
     return m_name;
   }
 
-  const Frame& currentFrame() const {
-    return m_timeline.currentFrame();
+  PlaybackControls& playbackControls() {
+    return m_playbackControls;
   }
 
+  Frame& currentFrame() {
+    return m_timeline.frame(m_playbackControls.currentFrame());
+  }
+
+  const Frame& currentFrame() const {
+    return m_timeline.frame(m_playbackControls.currentFrame());
+  }
+
+  void setAnimate(bool animate);
+
+  const PositionI& offset() const {
+    return m_offset;
+  }
+
+  void moveTo(const PositionI& position);
+
+  PlaybackControls& spritesPlaybackControls() {
+    return m_spritesPlaybackControls;
+  }
   const engine::Sprite& sprite(I16 index) const;
+
   RectI bounds() const;
 
-  void sceneTick(I32 sceneFrame);
+  void sceneTick();
   void render(SceneRenderer* renderer) const;
 
 protected:
@@ -47,9 +67,15 @@ protected:
   std::string m_name;
 
   SceneDelegate* m_delegate;
+  PositionI m_offset;
   std::vector<lfd::KeyFrame> m_keyFrames;
+
+  bool m_animate = true;
+
+  PlaybackControls m_spritesPlaybackControls;
   std::vector<engine::Sprite> m_sprites;
 
+  PlaybackControls m_playbackControls;
   Timeline m_timeline;
 };
 

@@ -134,7 +134,7 @@ void Engine::run() {
         }
       } else if (event.type == SDL_MOUSEMOTION) {
         if (m_currentStage) {
-          m_currentStage->onMouseMoved(event.motion.x, event.motion.y);
+          m_currentStage->onMouseMoved({event.motion.x, event.motion.y});
         }
       }
     }

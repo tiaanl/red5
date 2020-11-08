@@ -71,10 +71,7 @@ engine::TextureId createIndexTexture(engine::Renderer* renderer, const Image& im
 }  // namespace
 
 Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer)
-  : m_delegate{sceneDelegate},
-    m_resources{resources},
-    m_sceneRenderer{sceneRenderer},
-    m_palette{} {}
+  : m_delegate{sceneDelegate}, m_resources{resources}, m_sceneRenderer{sceneRenderer} {}
 
 Prop* Scene::prop(PropId propId) {
   return m_props.getData(propId);
@@ -91,6 +88,7 @@ bool Scene::loadPalette(std::string_view name) {
     return false;
   }
 
+  spdlog::info("Applying palette: {}", name);
   applyPalette(*palette);
 
   return true;
@@ -157,13 +155,23 @@ PropId Scene::insertAnimation(std::string_view name, std::vector<lfd::KeyFrame> 
   return insertAnimationProp(name, *animation, std::move(keyFrames));
 }
 
-PropId Scene::getPropUnderMouse(I32 x, I32 y) {
+PropId Scene::propId(std::string_view name) {
+  for (auto& propId : m_renderOrder) {
+    if (m_props.getData(propId)->name() == name) {
+      return propId;
+    }
+  }
+
+  return PropId::invalidValue();
+}
+
+PropId Scene::propUnderMouse(const PositionI& position) {
   for (auto it = m_renderOrder.crbegin(), end = m_renderOrder.crend(); it != end; ++it) {
     auto propData = m_props.getData(*it);
     if (propData) {
       auto& currentFrame = propData->currentFrame();
       auto& sprite = propData->m_sprites[currentFrame.spriteIndex];
-      if (currentFrame.visible && (sprite.rect() + currentFrame.offset).contains({x, y})) {
+      if (currentFrame.visible && (sprite.rect() + currentFrame.offset).contains(position)) {
         return *it;
       }
     }
@@ -350,11 +358,9 @@ void Scene::renderDebugInfo() {
         ImGui::TreePop();
       }
 
-#if 0
-      prop->m_layer = layer;
-      prop->m_currentSpriteIndex = frame;
-      prop->m_animation.direction = direction;
-#endif  // 0
+      prop->currentFrame().visible = visible;
+      prop->currentFrame().layer = layer;
+      prop->currentFrame().spriteIndex = currentFrame;
     }
   }
 
@@ -362,11 +368,6 @@ void Scene::renderDebugInfo() {
 }
 
 void Scene::applyPalette(const Palette& palette) {
-  U8 i = palette.firstIndex();
-  for (auto& c : palette.colors()) {
-    m_palette[i++] = SDL_Color{c.red, c.green, c.blue, 255};
-  }
-
   m_sceneRenderer->setPalette(reinterpret_cast<const engine::RGB*>(palette.colors().data()),
                               palette.firstIndex(), palette.lastIndex());
 }
@@ -449,14 +450,6 @@ void Scene::processFilm() {
       }
     }
   }
-
-  // Set the current frame for each prop to 0.
-  for (auto& propId : m_renderOrder) {
-    auto* prop = m_props.getData(propId);
-    if (prop) {
-      prop->sceneTick(0);
-    }
-  }
 }
 
 void Scene::processViewBlock(const lfd::Film::Block& block) {
@@ -490,24 +483,7 @@ void Scene::processViewBlock(const lfd::Film::Block& block) {
 }
 
 void Scene::processPaletteBlock(const lfd::Film::Block& block) {
-  auto* resource = m_resources->findResource(ResourceType::Palette, block.name);
-  if (!resource) {
-    return;
-  }
-
-  auto palette = loadResource<Palette>(*resource);
-  if (!palette) {
-    spdlog::warn("Palette not found: {}", block.name);
-    return;
-  }
-
-  // TODO: We need to process the `opCode`s, but for now we just apply the palette.
-
-  // for (auto& chunk : block.keyFrames) {
-  //   spdlog::info("chunk: {}", opCodeToString(chunk.opCode));
-  // }
-
-  applyPalette(*palette);
+  loadPalette(block.name);
 }
 
 void Scene::processImageBlock(const lfd::Film::Block& block) {
@@ -538,7 +514,7 @@ void Scene::advanceToNextFrame() {
   for (auto& propId : m_renderOrder) {
     auto prop = m_props.getData(propId);
     if (prop) {
-      prop->sceneTick(m_currentFrame);
+      prop->sceneTick();
     }
   }
 }

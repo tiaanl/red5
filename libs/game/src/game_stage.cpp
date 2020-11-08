@@ -31,6 +31,8 @@ void GameStage::onStageResized(I32 width, I32 height) {
                              {0, 0, screen->size.width, screen->size.height});
 }
 
+void GameStage::onUpdate(U32 millis) {}
+
 void GameStage::onRender() {
   if (!m_gameScreen.isValid()) {
     return;
@@ -57,7 +59,6 @@ bool GameStage::attachToEngine(engine::Renderer* renderer) {
 
   return true;
 }
-
 void GameStage::detachFromEngine() {
   m_sceneRenderer.detachFromRenderer();
 

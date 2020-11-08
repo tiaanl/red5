@@ -14,14 +14,13 @@ public:
   bool addResourceFile(const ResourceFile& resourceFile);
 
   // Override: engine::Stage
-  bool onLoad() override;
-  void onMouseMoved(I32 x, I32 y) override;
+  bool onLoad() override final;
+  void onMouseMoved(const PositionI& mousePosition) override;
   void onUpdate(U32 millis) override;
 
-public:
   // Override: GameStage
-  void onRenderGameScreen() override;
-  void onRenderDebugInfo() override;
+  void onRenderGameScreen() override final;
+  void onRenderDebugInfo() override final;
 
   // Override: SceneDelegate
   void onSceneReady() override;
@@ -29,13 +28,19 @@ public:
   void onSceneLastFramePlayed() override;
 
 protected:
-  // Override: engine::Stage
-  bool attachToEngine(engine::Renderer* renderer) override;
+  virtual bool onLoad(Scene& scene);
 
-private:
-  std::string m_filmName;
+  virtual void onPropEnter(PropId propId);
+  virtual void onPropExit(PropId propId);
 
   std::unique_ptr<Scene> m_scene;
+
+private:
+  PositionI windowCoordToSceneCoord(const PositionI& windowCoord);
+  void setPropUnderMouse(PropId propId);
+
+  std::string m_filmName;
+
   PropId m_mouseCursor;
 
   PropId m_propUnderMouse;

@@ -6,7 +6,7 @@ namespace {
 
 struct BuildContext {
   PositionI offsetPerFrame = {0, 0};
-  I16 animationDirection = 0;
+  I32 animationDirection = 0;
 };
 
 U32 nextTimeKeyFrame(const std::vector<lfd::KeyFrame>& keyFrames, U32 current) {
@@ -107,10 +107,6 @@ void applyKeyFrame(Frame* frame, BuildContext* buildContext, const lfd::KeyFrame
 
 }  // namespace
 
-Timeline::Timeline() : m_currentFrameIndex{0} {
-  m_frames.resize(1);
-}
-
 void Timeline::build(U32 frameCount, const std::vector<lfd::KeyFrame>& keyFrames) {
   // There will always be at least one frame.
   m_frames.resize(std::max<U32>(1, frameCount));
@@ -155,17 +151,6 @@ void Timeline::build(U32 frameCount, const std::vector<lfd::KeyFrame>& keyFrames
     currentFrame.spriteIndex += buildContext.animationDirection;
 
     m_frames[frameIndex] = currentFrame;
-  }
-}
-
-void Timeline::setCurrentFrame(U32 frame) {
-  m_currentFrameIndex = frame;
-}
-
-void Timeline::nextFrame() {
-  ++m_currentFrameIndex;
-  if (m_currentFrameIndex >= m_frames.size()) {
-    m_currentFrameIndex = static_cast<U32>(m_frames.size()) - 1;
   }
 }
 
