@@ -2,6 +2,7 @@ project(engine)
 
 set(engine_HEADER_FILES
     include/engine/engine.h
+    include/engine/engine_ops.h
     include/engine/renderer/color.h
     include/engine/renderer/program_resource.h
     include/engine/renderer/render_queue.h
@@ -22,20 +23,21 @@ set(engine_HEADER_FILES
 
 set(engine_SOURCE_FILES
     src/engine.cpp
-    src/gl_check.cpp
-    src/gl_check.h
-    src/program_resource.cpp
-    src/render_queue.cpp
-    src/render_target_resource.cpp
-    src/renderer.cpp
+    src/engine_ops.cpp
+    src/renderer/gl_check.cpp
+    src/renderer/gl_check.h
+    src/renderer/program_resource.cpp
+    src/renderer/render_queue.cpp
+    src/renderer/render_target_resource.cpp
+    src/renderer/renderer.cpp
+    src/renderer/texture_resource.cpp
+    src/renderer/uniform_data.cpp
+    src/renderer/vertex_array_resource.cpp
+    src/renderer/vertex_buffer_definition.cpp
     src/stage.cpp
-    src/texture_resource.cpp
-    src/uniform_data.cpp
     src/utils/render_shapes.cpp
     src/utils/sprite.cpp
     src/utils/sprite_renderer.cpp
-    src/vertex_array_resource.cpp
-    src/vertex_buffer_definition.cpp
     )
 
 base_add_library(engine ${engine_HEADER_FILES} ${engine_SOURCE_FILES})

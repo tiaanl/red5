@@ -1,5 +1,7 @@
 #include "xwing/stages/register_stage.h"
 
+#include <xwing/stages/main_menu_stage.h>
+
 namespace xwing {
 
 RegisterStage::RegisterStage(std::shared_ptr<game::Resources> resources)
@@ -77,6 +79,15 @@ void RegisterStage::onPropExit(game::PropId propId) {
     door->spritesPlaybackControls().play(game::PlayDirection::Backward, game::LoopMode::Stop);
   }
 }
+
+void RegisterStage::onPropClicked(game::PropId propId) {
+  SingleSceneStage::onPropClicked(propId);
+
+  if (propId == m_doorId) {
+    m_engineOps->switchStage(std::make_unique<MainMenuStage>(m_resources));
+  }
+}
+
 bool RegisterStage::initRobot(game::Scene& scene) {
   //  0 = body
   //  1 = head front

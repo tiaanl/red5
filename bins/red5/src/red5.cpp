@@ -90,18 +90,11 @@ int main(int argc, char* argv[]) {
 #endif  // 0
 
   auto resources = std::make_shared<game::Resources>();
+  resources->addResourceFile({resourceRoot / "XWING.LFD"});
+  resources->addResourceFile({resourceRoot / "REGISTER.LFD"});
+  resources->addResourceFile({resourceRoot / "MAINMENU.LFD"});
 
-#if 0
-  auto stage = std::make_unique<xwing::RegisterStage>(resources);
-  stage->addResourceFile({resourceRoot / "XWING.LFD"});
-  stage->addResourceFile({resourceRoot / "REGISTER.LFD"});
-#else
-  auto stage = std::make_unique<xwing::MainMenuStage>(resources);
-  stage->addResourceFile({resourceRoot / "XWING.LFD"});
-  stage->addResourceFile({resourceRoot / "MAINMENU.LFD"});
-#endif
-
-  if (!engine.setStage(std::move(stage))) {
+  if (!engine.setStage(std::make_unique<xwing::RegisterStage>(resources))) {
     return 1;
   }
 

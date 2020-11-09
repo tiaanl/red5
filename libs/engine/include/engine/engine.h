@@ -1,11 +1,15 @@
 #pragma once
 
+#include <SDL_events.h>
+
 #include <memory>
 
+#include "engine/engine_ops.h"
 #include "engine/renderer/renderer.h"
-#include "engine/stage.h"
 
 namespace engine {
+
+class Stage;
 
 class Engine {
 public:
@@ -16,7 +20,10 @@ public:
   void run();
 
 private:
+  bool processEvents();
   void update(U32 ticks);
+
+  void mainLoop();
 
   Renderer m_renderer;
 
@@ -25,6 +32,8 @@ private:
 
   SizeI m_windowSize{0, 0};
   std::unique_ptr<Stage> m_currentStage;
+
+  EngineOps m_engineOps;
 };
 
 }  // namespace engine

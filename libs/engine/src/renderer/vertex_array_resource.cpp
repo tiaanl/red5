@@ -98,12 +98,12 @@ void VertexArrayContainer::replace(Identifier id, const void* data, MemSize data
 }
 
 void VertexArrayContainer::destroy(Identifier id) {
-  auto data = getData(id);
-  if (data) {
-    destroyVertexArrayInternal(data->vertexArrayId);
-    data->vertexArrayId = 0;
-    removeData(id);
-  }
+//  auto data = getData(id);
+//  if (data) {
+//    destroyVertexArrayInternal(data->vertexArrayId);
+//    data->vertexArrayId = 0;
+//    removeData(id);
+//  }
 }
 
 }  // namespace engine

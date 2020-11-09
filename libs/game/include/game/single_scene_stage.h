@@ -16,6 +16,8 @@ public:
   // Override: engine::Stage
   bool onLoad() override final;
   void onMouseMoved(const PositionI& mousePosition) override;
+  void onMousePressed(const PositionI& mousePosition, U8 buttons) override;
+  void onMouseReleased(const PositionI& mousePosition, U8 buttons) override;
   void onUpdate(U32 millis) override;
 
   // Override: GameStage
@@ -31,9 +33,9 @@ public:
 
 protected:
   virtual bool onLoad(Scene& scene);
-
   virtual void onPropEnter(PropId propId);
   virtual void onPropExit(PropId propId);
+  virtual void onPropClicked(PropId propId);
 
   std::unique_ptr<Scene> m_scene;
 
@@ -46,6 +48,7 @@ private:
   PropId m_mouseCursor;
 
   PropId m_propUnderMouse;
+  PropId m_propUnderMousePress;
 };
 
 }  // namespace game

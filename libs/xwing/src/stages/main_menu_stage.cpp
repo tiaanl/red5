@@ -39,6 +39,17 @@ void MainMenuStage::onPropExit(game::PropId propId) {
   }
 }
 
+void MainMenuStage::onPropClicked(game::PropId propId) {
+  SingleSceneStage::onPropClicked(propId);
+
+  auto propData = m_scene->prop(propId);
+  if (propData) {
+    if (propData->name() == "pilotdr") {
+      m_engineOps->switchStage(std::make_unique<RegisterStage>(m_resources));
+    }
+  }
+}
+
 bool MainMenuStage::isDoor(std::string_view name) const {
   if (name == "middoor") {
     return true;

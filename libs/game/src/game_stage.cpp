@@ -1,5 +1,7 @@
 #include "game/game_stage.h"
 
+#include <engine/engine.h>
+
 namespace game {
 
 namespace {
@@ -53,8 +55,8 @@ void GameStage::onRender() {
 #endif  // DEBUG_UI > 0
 }
 
-bool GameStage::attachToEngine(engine::Renderer* renderer) {
-  if (!Stage::attachToEngine(renderer)) {
+bool GameStage::attachToEngine(engine::EngineOps* engineOps, engine::Renderer* renderer) {
+  if (!Stage::attachToEngine(engineOps, renderer)) {
     return false;
   }
 

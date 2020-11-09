@@ -61,6 +61,25 @@ void SingleSceneStage::onMouseMoved(const PositionI& mousePosition) {
   }
 }
 
+void SingleSceneStage::onMousePressed(const PositionI& mousePosition, U8 buttons) {
+  Stage::onMousePressed(mousePosition, buttons);
+
+  m_propUnderMousePress = m_propUnderMouse;
+}
+
+void SingleSceneStage::onMouseReleased(const PositionI& mousePosition, U8 buttons) {
+  Stage::onMouseReleased(mousePosition, buttons);
+
+  auto gameScreenPosition = windowCoordToSceneCoord(mousePosition);
+  auto propUnderMouse = m_scene->propUnderMouse(gameScreenPosition);
+
+  if (propUnderMouse == m_propUnderMousePress) {
+    onPropClicked(propUnderMouse);
+  }
+
+  m_propUnderMousePress = PropId::invalidValue();
+}
+
 void SingleSceneStage::onUpdate(U32 millis) {
   if (m_scene) {
     m_scene->update(millis);
@@ -115,6 +134,13 @@ void SingleSceneStage::onPropExit(PropId propId) {
 #if 0
   auto prop = m_scene->prop(propId);
   spdlog::info("exit: {}", prop->name());
+#endif  // 0
+}
+
+void SingleSceneStage::onPropClicked(PropId propId) {
+#if 0
+  auto prop = m_scene->prop(propId);
+  spdlog::info("clicked: {}", prop->name());
 #endif  // 0
 }
 

@@ -3,6 +3,8 @@
 #include <SDL2/SDL.h>
 #include <spdlog/sinks/msvc_sink.h>
 
+#include "engine/stage.h"
+
 #if DEBUG_UI > 0
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -20,7 +22,7 @@ bool Engine::setStage(std::unique_ptr<Stage> stage) {
 
   m_currentStage = std::move(stage);
 
-  if (!m_currentStage->attachToEngine(&m_renderer)) {
+  if (!m_currentStage->attachToEngine(&m_engineOps, &m_renderer)) {
     return false;
   }
 
@@ -118,32 +120,91 @@ bool Engine::init(std::string_view windowTitle) {
 void Engine::run() {
   SDL_ShowWindow(m_window);
 
-  U32 lastTicks = SDL_GetTicks();
-  bool running = true;
+  mainLoop();
 
-  while (running) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
 #if DEBUG_UI > 0
-      ImGui_ImplSDL2_ProcessEvent(&event);
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
 #endif  // DEBUG_UI > 0
 
-      if (event.type == SDL_QUIT) {
-        running = false;
-        break;
-      } else if (event.type == SDL_WINDOWEVENT) {
-        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-          m_windowSize = {event.window.data1, event.window.data2};
-          m_renderer.resize(m_windowSize);
-          if (m_currentStage) {
-            m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
+  SDL_GL_DeleteContext(m_context);
+  SDL_DestroyWindow(m_window);
+  SDL_Quit();
+}
+
+bool Engine::processEvents() {
+  SDL_Event event;
+
+  while (SDL_PollEvent(&event)) {
+#if DEBUG_UI > 0
+    ImGui_ImplSDL2_ProcessEvent(&event);
+#endif  // DEBUG_UI > 0
+
+    switch (event.type) {
+      case SDL_QUIT: {
+        return false;
+      }
+
+      case SDL_WINDOWEVENT: {
+        switch (event.window.event) {
+          case SDL_WINDOWEVENT_RESIZED: {
+            m_windowSize = {event.window.data1, event.window.data2};
+            m_renderer.resize(m_windowSize);
+            if (m_currentStage) {
+              m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
+            }
+            break;
           }
         }
-      } else if (event.type == SDL_MOUSEMOTION) {
+        break;
+      }
+
+      case SDL_MOUSEMOTION: {
         if (m_currentStage) {
           m_currentStage->onMouseMoved({event.motion.x, event.motion.y});
         }
+        break;
       }
+
+      case SDL_MOUSEBUTTONDOWN: {
+        if (m_currentStage) {
+          m_currentStage->onMousePressed({event.button.x, event.button.y}, event.button.button);
+        }
+        break;
+      }
+
+      case SDL_MOUSEBUTTONUP: {
+        if (m_currentStage) {
+          m_currentStage->onMouseReleased({event.button.x, event.button.y}, event.button.button);
+        }
+        break;
+      }
+    }
+  }
+
+  return true;
+}
+
+void Engine::update(U32 ticks) {
+  if (m_currentStage) {
+    m_currentStage->onUpdate(ticks);
+  }
+}
+
+void Engine::mainLoop() {
+  U32 lastTicks = SDL_GetTicks();
+
+  for (;;) {
+    // If the current stage requested a new stage, then we swap in the new stage first.
+    if (m_engineOps.m_switchToStage) {
+      if (!setStage(std::move(m_engineOps.m_switchToStage))) {
+        break;
+      }
+    }
+
+    if (!processEvents()) {
+      break;
     }
 
     auto now = SDL_GetTicks();
@@ -168,22 +229,6 @@ void Engine::run() {
 #endif  // DEBUG_UI > 0
 
     m_renderer.finishFrame();
-  }
-
-#if DEBUG_UI > 0
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplSDL2_Shutdown();
-  ImGui::DestroyContext();
-#endif  // DEBUG_UI > 0
-
-  SDL_GL_DeleteContext(m_context);
-  SDL_DestroyWindow(m_window);
-  SDL_Quit();
-}
-
-void Engine::update(U32 ticks) {
-  if (m_currentStage) {
-    m_currentStage->onUpdate(ticks);
   }
 }
 

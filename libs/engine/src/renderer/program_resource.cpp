@@ -96,11 +96,11 @@ ProgramContainer::Identifier ProgramContainer::create(const char* vertexShaderSo
 }
 
 void ProgramContainer::destroy(Identifier id) {
-  auto data = getData(id);
-  if (data) {
-    destroyProgramInternal(data->id);
-    removeData(id);
-  }
+//  auto data = getData(id);
+//  if (data) {
+//    destroyProgramInternal(data->id);
+//    removeData(id);
+//  }
 }
 
 }  // namespace engine

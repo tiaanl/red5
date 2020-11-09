@@ -12,6 +12,7 @@ protected:
   bool onLoad(game::Scene& scene) override;
   void onPropEnter(game::PropId propId) override;
   void onPropExit(game::PropId propId) override;
+  void onPropClicked(game::PropId propId) override;
 
 private:
   bool isDoor(std::string_view name) const;

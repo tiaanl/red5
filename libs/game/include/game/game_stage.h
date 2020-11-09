@@ -24,7 +24,7 @@ public:
 
 protected:
   // Override: engine::Stage
-  bool attachToEngine(engine::Renderer* renderer) override;
+  bool attachToEngine(engine::EngineOps* engineOps, engine::Renderer* renderer) override;
   void detachFromEngine() override;
 
   std::shared_ptr<Resources> m_resources;
