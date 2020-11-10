@@ -91,9 +91,6 @@ bool SpriteRenderer::attachToRenderer(Renderer* renderer) {
 }
 
 void SpriteRenderer::detachFromRenderer() {
-  m_renderer->programs().destroy(m_program);
-  m_renderer->vertexBuffers().destroy(m_vertexBuffer);
-
   m_renderer = nullptr;
 }
 

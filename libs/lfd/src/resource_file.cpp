@@ -10,7 +10,6 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
 
   // Read ResourceMap header.
   auto type = static_cast<ResourceType>(stream.readU32());
-  assert(type);
 
   U8 name[9] = {};
   stream.read(name, 8);
