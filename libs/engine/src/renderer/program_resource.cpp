@@ -74,13 +74,13 @@ bool createProgramInternal(const char* vertexShaderSource, const char* fragmentS
 }
 
 void destroyProgramInternal(U32 name) {
-  // GL_CHECK_VOID(glDeleteProgram(name), "Could not delete program.");
+  GL_CHECK_VOID(glDeleteProgram(name), "Could not delete program.");
 }
 
 }  // namespace
 
 ProgramContainer::~ProgramContainer() {
-  for (auto& data : m_data) {
+  for (auto& [id, data] : m_data) {
     destroyProgramInternal(data.id);
   }
 }
@@ -96,11 +96,11 @@ ProgramContainer::Identifier ProgramContainer::create(const char* vertexShaderSo
 }
 
 void ProgramContainer::destroy(Identifier id) {
-//  auto data = getData(id);
-//  if (data) {
-//    destroyProgramInternal(data->id);
-//    removeData(id);
-//  }
+  auto data = getData(id);
+  if (data) {
+    destroyProgramInternal(data->id);
+    removeData(id);
+  }
 }
 
 }  // namespace engine

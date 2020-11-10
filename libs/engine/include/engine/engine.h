@@ -6,6 +6,7 @@
 
 #include "engine/engine_ops.h"
 #include "engine/renderer/renderer.h"
+#include "engine/stage.h"
 
 namespace engine {
 

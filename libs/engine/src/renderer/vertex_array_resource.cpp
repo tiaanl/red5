@@ -37,13 +37,13 @@ U32 attributeTypeToOpenGlType(AttributeType type) {
 }
 
 void destroyVertexArrayInternal(U32 name) {
-  // GL_CHECK_VOID(glDeleteVertexArrays(1, &name), "Could not delete vertex array.");
+  GL_CHECK_VOID(glDeleteVertexArrays(1, &name), "Could not delete vertex array.");
 }
 
 }  // namespace
 
 VertexArrayContainer::~VertexArrayContainer() {
-  for (auto& data : m_data) {
+  for (auto& [id, data] : m_data) {
     destroyVertexArrayInternal(data.vertexArrayId);
   }
 }
@@ -98,12 +98,12 @@ void VertexArrayContainer::replace(Identifier id, const void* data, MemSize data
 }
 
 void VertexArrayContainer::destroy(Identifier id) {
-//  auto data = getData(id);
-//  if (data) {
-//    destroyVertexArrayInternal(data->vertexArrayId);
-//    data->vertexArrayId = 0;
-//    removeData(id);
-//  }
+  auto data = getData(id);
+  if (data) {
+    destroyVertexArrayInternal(data->vertexArrayId);
+    data->vertexArrayId = 0;
+    removeData(id);
+  }
 }
 
 }  // namespace engine

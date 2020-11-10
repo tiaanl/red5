@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 template <typename To, typename From>
 To convert(From from);
 

@@ -9,17 +9,15 @@ namespace engine {
 namespace {
 
 void destroyRenderTargetInternal(RenderTargetData& data) {
-#if 0
   GL_CHECK_VOID(glDeleteTextures(1, &data.texture), "Could not delete renderInternal target texture.");
   GL_CHECK_VOID(glDeleteBuffers(1, &data.framebuffer),
                 "Could not delete renderInternal target frame buffer.");
-#endif  // 0
 }
 
 }  // namespace
 
 RenderTargetContainer::~RenderTargetContainer() {
-  for (auto& data : m_data) {
+  for (auto& [id, data] : m_data) {
     destroyRenderTargetInternal(data);
   }
 }

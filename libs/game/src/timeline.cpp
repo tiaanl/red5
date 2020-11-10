@@ -9,6 +9,7 @@ struct BuildContext {
   I32 animationDirection = 0;
 };
 
+#if 0
 U32 nextTimeKeyFrame(const std::vector<lfd::KeyFrame>& keyFrames, U32 current) {
   while (current < keyFrames.size()) {
     auto opCode = keyFrames[current].opCode;
@@ -20,6 +21,7 @@ U32 nextTimeKeyFrame(const std::vector<lfd::KeyFrame>& keyFrames, U32 current) {
 
   return current;
 }
+#endif  // 0
 
 void applyKeyFrame(Frame* frame, BuildContext* buildContext, const lfd::KeyFrame& keyFrame) {
   switch (keyFrame.opCode) {
@@ -134,7 +136,8 @@ void Timeline::build(U32 frameCount, const std::vector<lfd::KeyFrame>& keyFrames
   for (U32 frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
     const auto& keyFrame = keyFrames[keyFrameIndex];
 
-    if (keyFrame.opCode == lfd::OpCode::Time && keyFrame.variables[0] == frameIndex) {
+    if (keyFrame.opCode == lfd::OpCode::Time &&
+        static_cast<U32>(keyFrame.variables[0]) == frameIndex) {
       ++keyFrameIndex;
       for (; keyFrameIndex < keyFrames.size(); ++keyFrameIndex) {
         if (keyFrames[keyFrameIndex].opCode == lfd::OpCode::Time ||

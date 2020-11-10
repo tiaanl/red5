@@ -26,10 +26,10 @@ TEST_CASE("init to zero") {
   CHECK(ri.size.height == 0);
 
   RectF rf;
-  CHECK(ri.position.left == 0.0f);
-  CHECK(ri.position.top == 0.0f);
-  CHECK(ri.size.width == 0.0f);
-  CHECK(ri.size.height == 0.0f);
+  CHECK(rf.position.left == 0.0f);
+  CHECK(rf.position.top == 0.0f);
+  CHECK(rf.size.width == 0.0f);
+  CHECK(rf.size.height == 0.0f);
 }
 
 TEST_CASE("conversions") {

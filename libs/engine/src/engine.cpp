@@ -1,7 +1,10 @@
 #include "engine/engine.h"
 
 #include <SDL2/SDL.h>
+
+#if defined(_WIN32)
 #include <spdlog/sinks/msvc_sink.h>
+#endif
 
 #include "engine/stage.h"
 
@@ -37,7 +40,9 @@ bool Engine::setStage(std::unique_ptr<Stage> stage) {
 }
 
 bool Engine::init(std::string_view windowTitle) {
+#if defined(_WIN32)
   spdlog::default_logger()->sinks().push_back(std::make_shared<spdlog::sinks::windebug_sink_st>());
+#endif
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     spdlog::error("Could not initialize SDL video.");
@@ -45,16 +50,20 @@ bool Engine::init(std::string_view windowTitle) {
   }
 
 #ifdef __APPLE__
+#if DEBUG_UI > 0
   // GL 3.2 Core + GLSL 150
   const char* glslVersion = "#version 150";
+#endif  // DEBUG_UI > 0
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
                       SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);  // Always required on Mac
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #else
+#if DEBUG_UI > 0
   // GL 3.0 + GLSL 130
   const char* glslVersion = "#version 130";
+#endif  // DEBUG_UI > 0
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

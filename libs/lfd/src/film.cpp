@@ -39,9 +39,9 @@ Film::Block readBlock(base::InputStream* stream) {
 
   char nameStr[9] = {};
   stream->read(nameStr, 8);
-  result.name = std::string_view{nameStr, std::min(std::strlen(nameStr), 8ull)};
+  result.name = std::string_view{nameStr, std::min<MemSize>(std::strlen(nameStr), 8)};
 
-  auto length = stream->readU32();
+  stream->readU32();  // length
   result.typeIndex = stream->readU16();
 
   if (result.type == BlockType::End) {
@@ -54,7 +54,7 @@ Film::Block readBlock(base::InputStream* stream) {
   }
 
   auto numberOfKeyFrames = stream->readU16();
-  auto chunksDataSize = stream->readU16();
+  stream->readU16();  // chunksDataSize
 
 #if TRACE_LOADING
   LOG(Info) << "  Block :: type: " << blockTypeToString(result.type) << ", name: " << nameStr
@@ -63,15 +63,9 @@ Film::Block readBlock(base::InputStream* stream) {
             << ", chunkDataSize: " << chunksDataSize;
 #endif
 
-  MemSize before = stream->getPosition();
-
   for (U32 c = 0; c < numberOfKeyFrames; ++c) {
-    auto& chunk = result.keyFrames.emplace_back(readKeyFrame(stream));
+    result.keyFrames.emplace_back(readKeyFrame(stream));
   }
-
-  MemSize bytesRead = stream->getPosition() - before;
-  //  DCHECK(bytesRead == chunksDataSize)
-  //      << "Incorrect amount of bytes read (" << bytesRead << " of " << chunksDataSize << ")";
 
   return result;
 }

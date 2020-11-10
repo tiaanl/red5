@@ -46,30 +46,30 @@ public:
       return nullptr;
     }
 
-    return &m_data[identifier.id];
+    auto it = m_data.find(identifier.id);
+    if (it == std::end(m_data)) {
+      return nullptr;
+    }
+
+    return &it->second;
   }
 
 protected:
   template <typename... Args>
   Identifier emplaceData(Args&&... args) {
-    if (m_openings.empty()) {
-      m_data.emplace_back(DataType{std::forward<Args>(args)...});
-      return Identifier{static_cast<U32>(m_data.size() - 1)};
-    }
+    U32 newId = m_lastId++;
 
-    auto openIndex = m_openings.front();
-    m_openings.pop_front();
+    m_data.emplace(newId, DataType{std::forward<Args>(args)...});
 
-    m_data[openIndex] = DataType{std::forward<Args>(args)...};
-    return Identifier{static_cast<U32>(openIndex)};
+    return {newId};
   }
 
   void removeData(Identifier identifier) {
-    m_openings.push_back(identifier.id);
+    m_data.erase(identifier.id);
   }
 
-  std::vector<DataType> m_data;
-  std::deque<MemSize> m_openings;
+  U32 m_lastId = 1;
+  std::unordered_map<U32, DataType> m_data;
 };
 
 }  // namespace engine

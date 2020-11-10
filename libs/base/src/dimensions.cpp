@@ -1,3 +1,5 @@
+#include <cmath>
+
 RectI fitInto(const RectI& source, const RectI& destination) {
   F32 widthScale = static_cast<F32>(destination.size.width) / static_cast<F32>(source.size.width);
   F32 heightScale =

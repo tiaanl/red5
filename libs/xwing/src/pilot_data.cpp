@@ -1,5 +1,3 @@
-#pragma once
-
 #if 0
 Hex Offset:     Hex Value:      Description:
 02              00              Normal Health

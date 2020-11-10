@@ -9,13 +9,13 @@ namespace engine {
 namespace {
 
 void destroyTextureInternal(U32 name) {
-  // GL_CHECK_VOID(glDeleteTextures(1, &name), "Could not delete texture.");
+  GL_CHECK_VOID(glDeleteTextures(1, &name), "Could not delete texture.");
 }
 
 }  // namespace
 
 TextureContainer::~TextureContainer() {
-  for (auto& data : m_data) {
+  for (auto& [id, data] : m_data) {
     if (data.texture != 0) {
       destroyTextureInternal(data.texture);
     }

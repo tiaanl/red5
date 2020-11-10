@@ -12,7 +12,7 @@ void Font::read(base::InputStream* stream, MemSize size) {
   m_bitsPerLine = stream->readU16();
   m_height = stream->readU16();
   m_baseLine = stream->readU16();
-  auto reserved = stream->readU16();
+  stream->readU16();  // Reserved
 
   m_glyphs.resize(glyphCount);
 

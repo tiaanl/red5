@@ -78,7 +78,11 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+#if defined(_WIN32)
   fs::path resourceRoot{R"(C:\xwing\RESOURCE)"};
+#else
+  fs::path resourceRoot{R"(/home/tilo/xwing/RESOURCE)"};
+#endif
 
 #if 0
   for (auto& dirEntry : std::filesystem::recursive_directory_iterator(resourceRoot)) {
