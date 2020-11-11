@@ -1,9 +1,10 @@
 #include <base/streams/memory_input_stream.h>
 #include <lfd/animation.h>
+#include <lfd/craft.h>
 #include <lfd/film.h>
+#include <lfd/font.h>
 #include <lfd/palette.h>
 #include <lfd/resource_file.h>
-#include <lfd/font.h>
 
 int main(int argc, char* argv[]) {
   auto resourcePath = std::filesystem::path{R"(C:\xwing\RESOURCE)"};
@@ -20,11 +21,16 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
+    if (path.filename() != "SPECIES.LFD") {
+      continue;
+    }
+
     ResourceFile resourceFile = ResourceFile{path};
     auto entries = resourceFile.loadEntries();
 
     for (auto& entry : entries) {
-      // spdlog::info("Entry :: ({}) {}", resourceTypeToString(entry.type()), entry.name());
+      spdlog::info("Entry :: ({}) {} ({} bytes)", resourceTypeToString(entry.type()), entry.name(),
+                   entry.data().size());
 
       base::MemoryInputStream stream{entry.data()};
       auto startPosition = stream.getPosition();
@@ -59,13 +65,21 @@ int main(int argc, char* argv[]) {
           font.read(&stream, entry.data().size());
         }
 
+        case ResourceType::Craft: {
+          lfd::Craft craft;
+          craft.read(&stream, entry.data().size());
+          return 0;
+        }
+
         default: {
-          continue;
+          break;
         }
       }
 
+      auto bytesRead = stream.getPosition() - startPosition;
+
       // Check that the whole stream was consumed.
-      if (stream.getPosition() < entry.data().size()) {
+      if (bytesRead < entry.data().size()) {
         spdlog::warn("Resource contained {} bytes, but only {} bytes were read.",
                      entry.data().size(), stream.getPosition() - startPosition);
       }

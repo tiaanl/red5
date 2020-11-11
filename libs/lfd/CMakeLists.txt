@@ -2,6 +2,7 @@ project(lfd)
 
 set(lfd_HEADER_FILES
     include/lfd/animation.h
+    include/lfd/craft.h
     include/lfd/film.h
     include/lfd/font.h
     include/lfd/image.h
@@ -14,6 +15,7 @@ set(lfd_HEADER_FILES
 
 set(lfd_SOURCE_FILES
     src/animation.cpp
+    src/craft.cpp
     src/film.cpp
     src/font.cpp
     src/image.cpp
