@@ -10,17 +10,21 @@ class ResourceContainer {
 public:
   struct Identifier {
     constexpr static Identifier invalidValue() {
-      return Identifier{std::numeric_limits<U32>::max()};
+      return Identifier{kInvalidValue};
     }
 
-    U32 id = invalidValue().id;
+    U32 id = kInvalidValue;
 
-    Identifier() : id{invalidValue().id} {}
+    Identifier() : id{kInvalidValue} {}
 
     Identifier(U32 id) : id{id} {}
 
     bool isValid() const {
-      return id != invalidValue();
+      return id != kInvalidValue;
+    }
+
+    void reset() {
+      id = kInvalidValue;
     }
 
     friend bool operator==(const Identifier& left, const Identifier& right) {
@@ -32,8 +36,11 @@ public:
     }
 
     bool operator!() const {
-      return id == invalidValue().id;
+      return !isValid();
     }
+
+  private:
+    constexpr static U32 kInvalidValue = std::numeric_limits<U32>::max();
   };
 
   MemSize size() const {

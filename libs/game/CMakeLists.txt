@@ -2,8 +2,8 @@ project(game)
 
 set(game_HEADER_FILES
     include/game/font.h
-    include/game/game_stage_state.h
     include/game/game_stage.h
+    include/game/game_stage_state.h
     include/game/playback_controls.h
     include/game/props.h
     include/game/resources.h
@@ -16,8 +16,8 @@ set(game_HEADER_FILES
 
 set(game_SOURCE_FILES
     src/font.cpp
-    src/game_stage_state.cpp
     src/game_stage.cpp
+    src/game_stage_state.cpp
     src/playback_controls.cpp
     src/props.cpp
     src/resources.cpp

@@ -26,7 +26,6 @@ void MainMenuStage::onPropEnter(game::PropId propId) {
   SingleSceneStage::onPropEnter(propId);
 
   auto* prop = m_scene->prop(propId);
-  spdlog::info("enter: {}", prop->name());
   if (isDoor(prop->name())) {
     prop->spritesPlaybackControls().play(game::PlayDirection::Forward, game::LoopMode::Stop);
   }

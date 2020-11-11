@@ -17,6 +17,8 @@ bool SingleSceneStage::onLoad() {
     return false;
   }
 
+  spdlog::info("Loading film: {}", m_filmName);
+
   m_scene =
       std::make_unique<Scene>(this, &m_gameStageState->resources, &m_gameStageState->sceneRenderer);
 
@@ -24,8 +26,6 @@ bool SingleSceneStage::onLoad() {
   if (!m_scene->loadPalette("standard")) {
     return false;
   }
-
-  spdlog::info("Loading film: {}", m_filmName);
 
   if (!m_scene->loadFilm(m_filmName)) {
     return false;
