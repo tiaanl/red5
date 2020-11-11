@@ -283,7 +283,7 @@ void Renderer::finishFrame() {
 bool Renderer::initImmediateMode() {
   auto program = m_programs.create(g_immediateVertexShaderSource, g_immediateFragmentShaderSource);
   if (!program) {
-    spdlog::error("Could not create immediate mode program.");
+    spdlog::error("Could not init immediate mode program.");
     return false;
   }
 

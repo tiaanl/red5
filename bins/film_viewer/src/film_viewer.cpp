@@ -1,7 +1,29 @@
 #include <SDL.h>
 #include <engine/engine.h>
 #include <game/resources.h>
-#include <game/single_scene_stage.h>
+#include <game/scene_stage.h>
+
+class SceneViewerController : public game::SceneController {
+public:
+  explicit SceneViewerController(std::string_view name, std::vector<std::string> resourceFiles)
+    : m_name{name}, m_resourceFiles{std::move(resourceFiles)} {}
+
+  bool setUpScene(game::Scene& scene, game::Resources& resources) override {
+    for (auto& resourceFile : m_resourceFiles) {
+      resources.addResourceFile({resourceFile});
+    }
+
+    if (!scene.loadPalette("standard")) {
+      return false;
+    }
+
+    return scene.loadFilm(m_name);
+  }
+
+private:
+  std::string m_name;
+  std::vector<std::string> m_resourceFiles;
+};
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
@@ -9,10 +31,20 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  /*
   auto gameStageState = game::GameStageState::create(&engine.renderer());
   gameStageState->resources.addResourceFile({R"(C:\xwing\RESOURCE\MAINMENU.LFD)"});
   engine.setStage(
       game::createGameStage<game::SingleSceneStage>(std::move(gameStageState), "mainmenu"));
+  */
+
+  auto gameStageState = game::GameStageState::create(&engine.renderer());
+
+  std::vector<std::string> resourceFiles = {R"(C:\xwing\RESOURCE\XWING.LFD)",
+                                            R"(C:\xwing\RESOURCE\MAINMENU.LFD)"};
+  auto controller = std::make_unique<SceneViewerController>("mainmenu", std::move(resourceFiles));
+  auto stage = std::make_unique<game::SceneStage>(std::move(gameStageState), std::move(controller));
+  engine.setStage(std::move(stage));
 
   return engine.run() ? 0 : 1;
 }

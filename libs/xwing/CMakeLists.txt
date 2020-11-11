@@ -1,15 +1,15 @@
 project(xwing)
 
 set(xwing_HEADER_FILES
+    include/xwing/controllers/main_menu_scene_controller.h
+    include/xwing/controllers/register_scene_controller.h
     include/xwing/pilot_data.h
-    include/xwing/stages/main_menu_stage.h
-    include/xwing/stages/register_stage.h
     )
 
 set(xwing_SOURCE_FILES
+    src/controllers/main_menu_scene_controller.cpp
+    src/controllers/register_scene_controller.cpp
     src/pilot_data.cpp
-    src/stages/main_menu_stage.cpp
-    src/stages/register_stage.cpp
     )
 
 base_add_library(xwing ${xwing_HEADER_FILES} ${xwing_SOURCE_FILES})

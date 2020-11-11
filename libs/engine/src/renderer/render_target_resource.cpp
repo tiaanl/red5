@@ -26,12 +26,12 @@ RenderTargetContainer::Identifier RenderTargetContainer::create(const SizeI& siz
   auto invalid = Identifier::invalidValue();
 
   U32 frameBuffer;
-  GL_CHECK(glGenFramebuffers(1, &frameBuffer), "Could not create frame buffer.", invalid);
+  GL_CHECK(glGenFramebuffers(1, &frameBuffer), "Could not init frame buffer.", invalid);
   GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer), "Could not bind frame buffer.", invalid);
 
   U32 texture;
 
-  GL_CHECK(glGenTextures(1, &texture), "Could not create color buffer texture.", invalid)
+  GL_CHECK(glGenTextures(1, &texture), "Could not init color buffer texture.", invalid)
   GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture), "Could not bind color buffer texture.", invalid)
   GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, nullptr),

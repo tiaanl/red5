@@ -35,7 +35,7 @@ void main()
 
 class MyStage : public engine::Stage {
 public:
-  bool onLoad() override {
+  bool onAttachedToEngine() override {
 #if 0
     U8 data[] = {
         255, 0,   0,   255,  // red

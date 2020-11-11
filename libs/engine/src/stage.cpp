@@ -18,6 +18,10 @@ bool Stage::attachToEngine(EngineOps* engineOps, Renderer* renderer) {
   m_engineOps = engineOps;
   m_renderer = renderer;
 
+  if (!onAttachedToEngine(renderer)) {
+    return false;
+  }
+
   return true;
 }
 

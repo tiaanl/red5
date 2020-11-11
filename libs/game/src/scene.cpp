@@ -101,6 +101,7 @@ bool Scene::loadFilm(std::string_view name) {
   if (!resource) {
     return false;
   }
+
   auto film = loadResource<lfd::Film>(*resource);
   if (!film) {
     return false;

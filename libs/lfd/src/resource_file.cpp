@@ -7,9 +7,14 @@ std::vector<ResourceEntry> ResourceFile::loadEntries() const {
   spdlog::info("Loading entries from resource file: {}", m_path.string());
 
   base::FileInputStream stream{m_path};
+  // TODO: Check if the file was opened successfully.
 
   // Read ResourceMap header.
   auto type = static_cast<ResourceType>(stream.readU32());
+  if (type != ResourceType::ResourceMap) {
+    spdlog::error("Invalid LFD file. ({})", m_path.string());
+    return {};
+  }
 
   U8 name[9] = {};
   stream.read(name, 8);

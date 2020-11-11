@@ -39,11 +39,8 @@ bool Engine::run() {
   ImGui::DestroyContext();
 #endif  // DEBUG_UI > 0
 
-  spdlog::info("Resetting current stage.");
   // Reset the current stage to allow it to free up resources.
   m_currentStage.reset();
-
-  spdlog::info("Closing engine.");
 
   return true;
 }
@@ -59,7 +56,7 @@ bool Engine::init(std::string_view title) {
   }
 
 #ifdef __APPLE__
-  #if DEBUG_UI > 0
+#if DEBUG_UI > 0
   // GL 3.2 Core + GLSL 150
   const char* glslVersion = "#version 150";
 #endif  // DEBUG_UI > 0
@@ -91,17 +88,17 @@ bool Engine::init(std::string_view title) {
 
   if (!m_window) {
     SDL_Quit();
-    spdlog::critical("Could not create window. ({})", SDL_GetError());
+    spdlog::critical("Could not init window. ({})", SDL_GetError());
     return false;
   }
 
-  SDL_ShowCursor(SDL_DISABLE);
+  // SDL_ShowCursor(SDL_DISABLE);
 
   m_context = SDL_GL_CreateContext(m_window);
   if (!m_context) {
     SDL_DestroyWindow(m_window);
     SDL_Quit();
-    spdlog::critical("Could not create OpenGL context. ({})", SDL_GetError());
+    spdlog::critical("Could not init OpenGL context. ({})", SDL_GetError());
     return false;
   }
 
@@ -144,10 +141,7 @@ bool Engine::swapStage(std::unique_ptr<Stage> newStage) {
   m_currentStage = std::move(newStage);
 
   if (!m_currentStage->attachToEngine(&m_engineOps, &m_renderer.value())) {
-    return false;
-  }
-
-  if (!m_currentStage->onLoad()) {
+    spdlog::error("Could not attach stage to engine.");
     return false;
   }
 

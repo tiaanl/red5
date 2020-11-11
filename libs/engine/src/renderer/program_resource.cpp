@@ -11,7 +11,7 @@ namespace {
 
 bool createShaderInternal(U32 type, const char* source, U32* shader) {
   U32 name = glad_glCreateShader(type);
-  if (!detail::clearGlError("Could not create vertex shader.", __FILE__, __LINE__)) {
+  if (!detail::clearGlError("Could not init vertex shader.", __FILE__, __LINE__)) {
     return false;
   }
 
@@ -52,7 +52,7 @@ bool createProgramInternal(const char* vertexShaderSource, const char* fragmentS
   }
 
   U32 programName = glad_glCreateProgram();
-  if (!detail::clearGlError("Could not create new program.", __FILE__, __LINE__)) {
+  if (!detail::clearGlError("Could not init new program.", __FILE__, __LINE__)) {
     return false;
   }
 

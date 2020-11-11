@@ -15,7 +15,7 @@ public:
 
   virtual ~Stage();
 
-  virtual bool onLoad() = 0;
+  virtual bool onAttachedToEngine(Renderer* renderer) = 0;
 
   virtual void onStageResized(I32 width, I32 height);
 
@@ -28,14 +28,24 @@ public:
   virtual void onRender() = 0;
 
 protected:
-  EngineOps* m_engineOps = nullptr;
-  Renderer* m_renderer = nullptr;
+  Renderer& renderer() {
+    assert(m_renderer);
+    return *m_renderer;
+  }
 
-  virtual bool attachToEngine(EngineOps* engineOps, Renderer* renderer);
-  virtual void detachFromEngine();
+  EngineOps& engineOps() {
+    assert(m_engineOps);
+    return *m_engineOps;
+  }
 
 private:
   friend class Engine;
+
+  bool attachToEngine(EngineOps* engineOps, Renderer* renderer);
+  void detachFromEngine();
+
+  EngineOps* m_engineOps = nullptr;
+  Renderer* m_renderer = nullptr;
 };
 
 }  // namespace engine

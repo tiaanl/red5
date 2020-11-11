@@ -2,29 +2,29 @@ project(game)
 
 set(game_HEADER_FILES
     include/game/font.h
-    include/game/game_stage.h
     include/game/game_stage_state.h
     include/game/playback_controls.h
     include/game/props.h
     include/game/resources.h
     include/game/scene.h
+    include/game/scene_controller.h
     include/game/scene_delegate.h
     include/game/scene_renderer.h
-    include/game/single_scene_stage.h
+    include/game/scene_stage.h
     include/game/timeline.h
     )
 
 set(game_SOURCE_FILES
     src/font.cpp
-    src/game_stage.cpp
     src/game_stage_state.cpp
     src/playback_controls.cpp
     src/props.cpp
     src/resources.cpp
     src/scene.cpp
+    src/scene_controller.cpp
     src/scene_delegate.cpp
     src/scene_renderer.cpp
-    src/single_scene_stage.cpp
+    src/scene_stage.cpp
     src/timeline.cpp
     )
 
