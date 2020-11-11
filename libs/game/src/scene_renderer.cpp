@@ -61,6 +61,8 @@ void SceneRenderer::setPalette(const engine::RGB* colors, U8 startIndex, U8 endI
 bool SceneRenderer::attachToRenderer(engine::Renderer* renderer) {
   engine::SpriteRenderer::attachToRenderer(renderer);
 
+  spdlog::info("Attaching scene renderer to new renderer");
+
   engine::RGB colors[256] = {};
   m_paletteTexture = m_renderer->textures().create1D(colors, 256);
   if (!m_paletteTexture) {
@@ -72,6 +74,8 @@ bool SceneRenderer::attachToRenderer(engine::Renderer* renderer) {
 
 void SceneRenderer::detachFromRenderer() {
   m_renderer->textures().destroy(m_paletteTexture);
+
+  spdlog::info("Detaching scene renderer from renderer");
 
   SpriteRenderer::detachFromRenderer();
 }

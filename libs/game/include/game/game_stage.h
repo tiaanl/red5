@@ -2,14 +2,14 @@
 
 #include <engine/stage.h>
 
+#include "game/game_stage_state.h"
 #include "game/resources.h"
-#include "scene_renderer.h"
 
 namespace game {
 
 class GameStage : public engine::Stage {
 public:
-  explicit GameStage(std::shared_ptr<Resources> resources);
+  explicit GameStage(std::shared_ptr<GameStageState> gameSharedState);
 
   virtual void onRenderGameScreen() = 0;
 #if DEBUG_UI > 0
@@ -23,17 +23,19 @@ public:
   void onRender() override final;
 
 protected:
-  // Override: engine::Stage
-  bool attachToEngine(engine::EngineOps* engineOps, engine::Renderer* renderer) override;
-  void detachFromEngine() override;
+  std::shared_ptr<GameStageState> m_gameStageState;
 
-  std::shared_ptr<Resources> m_resources;
-
-  SceneRenderer m_sceneRenderer;
   RectI m_gameScreenRect{0, 0, 0, 0};
 
 private:
+  engine::Renderer* m_attachedRenderer = nullptr;
   engine::RenderTargetId m_gameScreen;
 };
+
+template <typename StageType, typename... Args>
+std::unique_ptr<GameStage> createGameStage(std::shared_ptr<GameStageState> gameStageState,
+                                           Args&&... args) {
+  return std::make_unique<StageType>(gameStageState, std::forward<Args>(args)...);
+}
 
 }  // namespace game

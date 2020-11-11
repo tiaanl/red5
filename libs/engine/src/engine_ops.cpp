@@ -5,6 +5,7 @@
 namespace engine {
 
 void EngineOps::switchStage(std::unique_ptr<Stage> stage) {
+  assert(!m_switchToStage);
   m_switchToStage = std::move(stage);
 }
 

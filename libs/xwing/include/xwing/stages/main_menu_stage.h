@@ -1,12 +1,12 @@
 #pragma once
 
-#include "register_stage.h"
+#include "game/single_scene_stage.h"
 
 namespace xwing {
 
 class MainMenuStage : public game::SingleSceneStage {
 public:
-  explicit MainMenuStage(std::shared_ptr<game::Resources> resources);
+  explicit MainMenuStage(std::shared_ptr<game::GameStageState> gameStageState);
 
 protected:
   bool onLoad(game::Scene& scene) override;

@@ -7,7 +7,7 @@ namespace xwing {
 
 class RegisterStage : public game::SingleSceneStage {
 public:
-  explicit RegisterStage(std::shared_ptr<game::Resources> resources);
+  explicit RegisterStage(std::shared_ptr<game::GameStageState> gameStageState);
   ~RegisterStage() override;
 
 public:

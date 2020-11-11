@@ -11,7 +11,8 @@ constexpr I32 g_gameScreenHeight = 200;
 
 }  // namespace
 
-GameStage::GameStage(std::shared_ptr<Resources> resources) : m_resources{std::move(resources)} {}
+GameStage::GameStage(std::shared_ptr<GameStageState> gameStageState)
+  : m_gameStageState{std::move(gameStageState)} {}
 
 #if DEBUG_UI > 0
 void GameStage::onRenderDebugInfo() {}
@@ -53,23 +54,6 @@ void GameStage::onRender() {
 #if DEBUG_UI > 0
   onRenderDebugInfo();
 #endif  // DEBUG_UI > 0
-}
-
-bool GameStage::attachToEngine(engine::EngineOps* engineOps, engine::Renderer* renderer) {
-  if (!Stage::attachToEngine(engineOps, renderer)) {
-    return false;
-  }
-
-  if (!m_sceneRenderer.attachToRenderer(renderer)) {
-    return false;
-  }
-
-  return true;
-}
-void GameStage::detachFromEngine() {
-  m_sceneRenderer.detachFromRenderer();
-
-  Stage::detachFromEngine();
 }
 
 }  // namespace game

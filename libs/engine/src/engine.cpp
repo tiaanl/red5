@@ -6,8 +6,6 @@
 #include <spdlog/sinks/msvc_sink.h>
 #endif
 
-#include "engine/stage.h"
-
 #if DEBUG_UI > 0
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -16,30 +14,41 @@
 
 namespace engine {
 
-bool Engine::setStage(std::unique_ptr<Stage> stage) {
-  // spdlog::info("Setting stage");
+Engine::Engine() = default;
 
-  if (m_currentStage) {
-    m_currentStage->detachFromEngine();
-  }
+Engine::~Engine() {
+  m_renderer.reset();
 
-  m_currentStage = std::move(stage);
+  SDL_GL_DeleteContext(m_context);
+  SDL_DestroyWindow(m_window);
+  SDL_Quit();
+}
 
-  if (!m_currentStage->attachToEngine(&m_engineOps, &m_renderer)) {
-    return false;
-  }
+void Engine::setStage(std::unique_ptr<Stage> stage) {
+  m_engineOps.switchStage(std::move(stage));
+}
 
-  if (!m_currentStage->onLoad()) {
-    return false;
-  }
+bool Engine::run() {
+  SDL_ShowWindow(m_window);
 
-  // Trigger an onStageResized so that the stage can configure any size dependent objects.
-  m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
+  mainLoop();
+
+#if DEBUG_UI > 0
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+#endif  // DEBUG_UI > 0
+
+  spdlog::info("Resetting current stage.");
+  // Reset the current stage to allow it to free up resources.
+  m_currentStage.reset();
+
+  spdlog::info("Closing engine.");
 
   return true;
 }
 
-bool Engine::init(std::string_view windowTitle) {
+bool Engine::init(std::string_view title) {
 #if defined(_WIN32)
   spdlog::default_logger()->sinks().push_back(std::make_shared<spdlog::sinks::windebug_sink_st>());
 #endif
@@ -50,7 +59,7 @@ bool Engine::init(std::string_view windowTitle) {
   }
 
 #ifdef __APPLE__
-#if DEBUG_UI > 0
+  #if DEBUG_UI > 0
   // GL 3.2 Core + GLSL 150
   const char* glslVersion = "#version 150";
 #endif  // DEBUG_UI > 0
@@ -77,8 +86,8 @@ bool Engine::init(std::string_view windowTitle) {
   SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL |
                                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
-  m_window = SDL_CreateWindow(windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              1600, 1000, windowFlags);
+  m_window = SDL_CreateWindow(title.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600,
+                              1000, windowFlags);
 
   if (!m_window) {
     SDL_Quit();
@@ -101,7 +110,8 @@ bool Engine::init(std::string_view windowTitle) {
 
   SDL_GetWindowSize(m_window, &m_windowSize.width, &m_windowSize.height);
 
-  if (!m_renderer.init(m_window)) {
+  m_renderer.emplace();
+  if (!m_renderer->init(m_window)) {
     return false;
   }
 
@@ -126,20 +136,66 @@ bool Engine::init(std::string_view windowTitle) {
   return true;
 }
 
-void Engine::run() {
-  SDL_ShowWindow(m_window);
+bool Engine::swapStage(std::unique_ptr<Stage> newStage) {
+  if (m_currentStage) {
+    m_currentStage->detachFromEngine();
+  }
 
-  mainLoop();
+  m_currentStage = std::move(newStage);
+
+  if (!m_currentStage->attachToEngine(&m_engineOps, &m_renderer.value())) {
+    return false;
+  }
+
+  if (!m_currentStage->onLoad()) {
+    return false;
+  }
+
+  // Trigger an onStageResized so that the stage can configure any size dependent objects.
+  m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
+
+  return true;
+}
+
+void Engine::mainLoop() {
+  U32 lastTicks = SDL_GetTicks();
+
+  for (;;) {
+    // If the current stage requested a new stage, then we swap in the new stage first.
+    if (m_engineOps.m_switchToStage) {
+      if (!swapStage(std::move(m_engineOps.m_switchToStage))) {
+        spdlog::error("Could not swap stage.");
+        break;
+      }
+    }
+
+    if (!processEvents()) {
+      break;
+    }
+
+    auto now = SDL_GetTicks();
+    update(now - lastTicks);
+    lastTicks = now;
 
 #if DEBUG_UI > 0
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplSDL2_Shutdown();
-  ImGui::DestroyContext();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(m_window);
+    ImGui::NewFrame();
 #endif  // DEBUG_UI > 0
 
-  SDL_GL_DeleteContext(m_context);
-  SDL_DestroyWindow(m_window);
-  SDL_Quit();
+    if (m_currentStage) {
+      m_currentStage->onRender();
+    }
+
+    m_renderer->flushRenderQueue();
+
+#if DEBUG_UI > 0
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif  // DEBUG_UI > 0
+
+    m_renderer->finishFrame();
+  }
 }
 
 bool Engine::processEvents() {
@@ -159,7 +215,7 @@ bool Engine::processEvents() {
         switch (event.window.event) {
           case SDL_WINDOWEVENT_RESIZED: {
             m_windowSize = {event.window.data1, event.window.data2};
-            m_renderer.resize(m_windowSize);
+            m_renderer->resize(m_windowSize);
             if (m_currentStage) {
               m_currentStage->onStageResized(m_windowSize.width, m_windowSize.height);
             }
@@ -198,46 +254,6 @@ bool Engine::processEvents() {
 void Engine::update(U32 ticks) {
   if (m_currentStage) {
     m_currentStage->onUpdate(ticks);
-  }
-}
-
-void Engine::mainLoop() {
-  U32 lastTicks = SDL_GetTicks();
-
-  for (;;) {
-    // If the current stage requested a new stage, then we swap in the new stage first.
-    if (m_engineOps.m_switchToStage) {
-      if (!setStage(std::move(m_engineOps.m_switchToStage))) {
-        break;
-      }
-    }
-
-    if (!processEvents()) {
-      break;
-    }
-
-    auto now = SDL_GetTicks();
-    update(now - lastTicks);
-    lastTicks = now;
-
-#if DEBUG_UI > 0
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(m_window);
-    ImGui::NewFrame();
-#endif  // DEBUG_UI > 0
-
-    if (m_currentStage) {
-      m_currentStage->onRender();
-    }
-
-    m_renderer.flushRenderQueue();
-
-#if DEBUG_UI > 0
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif  // DEBUG_UI > 0
-
-    m_renderer.finishFrame();
   }
 }
 

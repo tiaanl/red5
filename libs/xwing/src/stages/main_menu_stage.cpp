@@ -1,9 +1,11 @@
 #include "xwing/stages/main_menu_stage.h"
 
+#include "xwing/stages/register_stage.h"
+
 namespace xwing {
 
-MainMenuStage::MainMenuStage(std::shared_ptr<game::Resources> resources)
-  : game::SingleSceneStage(std::move(resources), "mainmenu") {}
+MainMenuStage::MainMenuStage(std::shared_ptr<game::GameStageState> gameStageState)
+  : game::SingleSceneStage(std::move(gameStageState), "mainmenu") {}
 
 bool MainMenuStage::onLoad(game::Scene& scene) {
   if (!SingleSceneStage::onLoad(scene)) {
@@ -45,7 +47,7 @@ void MainMenuStage::onPropClicked(game::PropId propId) {
   auto propData = m_scene->prop(propId);
   if (propData) {
     if (propData->name() == "pilotdr") {
-      m_engineOps->switchStage(std::make_unique<RegisterStage>(m_resources));
+      m_engineOps->switchStage(game::createGameStage<RegisterStage>(m_gameStageState));
     }
   }
 }

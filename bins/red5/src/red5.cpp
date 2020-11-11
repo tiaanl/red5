@@ -9,8 +9,9 @@ namespace fs = std::filesystem;
 
 class CutsceneStage : public game::GameStage, public game::SceneDelegate {
 public:
-  CutsceneStage(std::shared_ptr<game::Resources> resources, std::vector<std::string> films)
-    : game::GameStage{std::move(resources)}, m_films{std::move(films)} {}
+  CutsceneStage(std::shared_ptr<game::GameStageState> gameStageState,
+                std::vector<std::string> films)
+    : game::GameStage{std::move(gameStageState)}, m_films{std::move(films)} {}
 
   bool onLoad() override {
     loadFilm(m_films[m_currentFilmIndex]);
@@ -39,7 +40,8 @@ public:
 
 private:
   bool loadFilm(std::string_view name) {
-    auto scene = std::make_unique<game::Scene>(this, m_resources.get(), &m_sceneRenderer);
+    auto scene = std::make_unique<game::Scene>(this, &m_gameStageState->resources,
+                                               &m_gameStageState->sceneRenderer);
 
     // Apply the default palette.
     if (!scene->loadPalette("standard")) {
@@ -74,7 +76,7 @@ private:
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
-  if (!engine.init("X-Wing")) {
+  if (!engine.init("Red 5")) {
     return 1;
   }
 
@@ -93,14 +95,12 @@ int main(int argc, char* argv[]) {
   }
 #endif  // 0
 
-  auto resources = std::make_shared<game::Resources>();
-  resources->addResourceFile({resourceRoot / "XWING.LFD"});
-  resources->addResourceFile({resourceRoot / "REGISTER.LFD"});
-  resources->addResourceFile({resourceRoot / "MAINMENU.LFD"});
+  auto gameStageState = game::GameStageState::create(&engine.renderer());
+  gameStageState->resources.addResourceFile({resourceRoot / "XWING.LFD"});
+  gameStageState->resources.addResourceFile({resourceRoot / "REGISTER.LFD"});
+  gameStageState->resources.addResourceFile({resourceRoot / "MAINMENU.LFD"});
 
-  if (!engine.setStage(std::make_unique<xwing::RegisterStage>(resources))) {
-    return 1;
-  }
+  engine.setStage(game::createGameStage<xwing::RegisterStage>(std::move(gameStageState)));
 
 #if 0
   // std::vector<std::string> films = {"logo_f", "along", "bat1_f", "bat2_f", "bat3_f", "bat4_f",
@@ -369,7 +369,5 @@ int main(int argc, char* argv[]) {
   engine.setStage(std::make_unique<CutsceneStage>(std::move(films)));
 #endif  // 0
 
-  engine.run();
-
-  return 0;
+  return engine.run() ? 0 : 1;
 }

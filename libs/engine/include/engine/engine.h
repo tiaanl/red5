@@ -3,6 +3,7 @@
 #include <SDL_events.h>
 
 #include <memory>
+#include <optional>
 
 #include "engine/engine_ops.h"
 #include "engine/renderer/renderer.h"
@@ -14,24 +15,33 @@ class Stage;
 
 class Engine {
 public:
-  bool setStage(std::unique_ptr<Stage> stage);
+  Engine();
+  ~Engine();
+
+  void setStage(std::unique_ptr<Stage> stage);
+
+  Renderer& renderer() {
+    assert(m_renderer.has_value());
+    return m_renderer.value();
+  }
 
   // Lifecycle
-  bool init(std::string_view windowTitle);
-  void run();
+  bool run();
+  bool init(std::string_view title);
 
 private:
+  bool swapStage(std::unique_ptr<Stage> newStage);
+
+  void mainLoop();
   bool processEvents();
   void update(U32 ticks);
 
-  void mainLoop();
+  std::optional<Renderer> m_renderer;
 
-  Renderer m_renderer;
+  SDL_Window* m_window = nullptr;
+  SDL_GLContext m_context = nullptr;
 
-  SDL_Window* m_window;
-  SDL_GLContext m_context;
-
-  SizeI m_windowSize{0, 0};
+  SizeI m_windowSize;
   std::unique_ptr<Stage> m_currentStage;
 
   EngineOps m_engineOps;

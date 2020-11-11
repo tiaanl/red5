@@ -1,11 +1,11 @@
 #include "xwing/stages/register_stage.h"
 
-#include <xwing/stages/main_menu_stage.h>
+#include "xwing/stages/main_menu_stage.h"
 
 namespace xwing {
 
-RegisterStage::RegisterStage(std::shared_ptr<game::Resources> resources)
-  : SingleSceneStage{std::move(resources), "pilot"} {}
+RegisterStage::RegisterStage(std::shared_ptr<game::GameStageState> gameStageState)
+  : SingleSceneStage{std::move(gameStageState), "pilot"} {}
 
 RegisterStage::~RegisterStage() = default;
 
@@ -84,7 +84,7 @@ void RegisterStage::onPropClicked(game::PropId propId) {
   SingleSceneStage::onPropClicked(propId);
 
   if (propId == m_doorId) {
-    m_engineOps->switchStage(std::make_unique<MainMenuStage>(m_resources));
+    m_engineOps->switchStage(game::createGameStage<MainMenuStage>(m_gameStageState));
   }
 }
 

@@ -9,7 +9,7 @@ namespace game {
 
 class SingleSceneStage : public GameStage, public SceneDelegate {
 public:
-  SingleSceneStage(std::shared_ptr<Resources> resources, std::string_view filmName);
+  SingleSceneStage(std::shared_ptr<GameStageState> gameStageState, std::string_view filmName);
 
   bool addResourceFile(const ResourceFile& resourceFile);
 

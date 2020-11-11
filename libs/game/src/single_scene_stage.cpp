@@ -4,11 +4,12 @@
 
 namespace game {
 
-SingleSceneStage::SingleSceneStage(std::shared_ptr<Resources> resources, std::string_view filmName)
-  : GameStage{std::move(resources)}, m_filmName{filmName} {}
+SingleSceneStage::SingleSceneStage(std::shared_ptr<GameStageState> gameStageState,
+                                   std::string_view filmName)
+  : GameStage{std::move(gameStageState)}, m_filmName{filmName} {}
 
 bool SingleSceneStage::addResourceFile(const ResourceFile& resourceFile) {
-  return m_resources->addResourceFile(resourceFile);
+  return m_gameStageState->resources.addResourceFile(resourceFile);
 }
 
 bool SingleSceneStage::onLoad() {
@@ -16,7 +17,8 @@ bool SingleSceneStage::onLoad() {
     return false;
   }
 
-  m_scene = std::make_unique<Scene>(this, m_resources.get(), &m_sceneRenderer);
+  m_scene =
+      std::make_unique<Scene>(this, &m_gameStageState->resources, &m_gameStageState->sceneRenderer);
 
   // Apply the default palette.
   if (!m_scene->loadPalette("standard")) {
