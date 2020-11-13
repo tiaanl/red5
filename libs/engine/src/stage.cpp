@@ -4,6 +4,8 @@
 
 namespace engine {
 
+Stage::Stage() = default;
+
 Stage::~Stage() = default;
 
 void Stage::onStageResized(I32 width, I32 height) {}
@@ -24,8 +26,10 @@ bool Stage::attachToEngine(EngineOps* engineOps, Renderer* renderer) {
 
   return true;
 }
-
 void Stage::detachFromEngine() {
+  onDetachFromEngine();
+
+  m_engineOps = nullptr;
   m_renderer = nullptr;
 }
 

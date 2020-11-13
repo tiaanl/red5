@@ -8,7 +8,7 @@ class Renderer;
 
 class Stage {
 public:
-  Stage() = default;
+  Stage();
 
   Stage(const Stage&) = delete;
   Stage& operator=(const Stage&) = delete;
@@ -16,6 +16,7 @@ public:
   virtual ~Stage();
 
   virtual bool onAttachedToEngine(Renderer* renderer) = 0;
+  virtual void onDetachFromEngine() = 0;
 
   virtual void onStageResized(I32 width, I32 height);
 

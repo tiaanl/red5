@@ -10,11 +10,13 @@ namespace game {
 
 class SceneStage : public engine::Stage {
 public:
-  explicit SceneStage(std::shared_ptr<GameStageState> gameStageStage,
+  explicit SceneStage(std::shared_ptr<GameStageState> gameStageState,
                       std::unique_ptr<SceneController> controller);
+  ~SceneStage() override;
 
   // Override: engine::Stage
   bool onAttachedToEngine(engine::Renderer* renderer) override;
+  void onDetachFromEngine() override;
   void onStageResized(I32 width, I32 height) override;
   void onMouseMoved(const PositionI& mousePosition) override;
   void onMousePressed(const PositionI& mousePosition, U8 buttons) override;
