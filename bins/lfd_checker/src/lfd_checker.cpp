@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
         case ResourceType::Font: {
           lfd::Font font;
           font.read(&stream, entry.data().size());
+          break;
         }
 
         case ResourceType::Craft: {

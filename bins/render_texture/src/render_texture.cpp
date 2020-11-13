@@ -35,7 +35,7 @@ void main()
 
 class MyStage : public engine::Stage {
 public:
-  bool onAttachedToEngine() override {
+  bool onAttachedToEngine(engine::Renderer* renderer) override {
 #if 0
     U8 data[] = {
         255, 0,   0,   255,  // red
@@ -95,7 +95,7 @@ public:
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    m_texture = m_renderer->textures().createFromRaw(texture, {2, 2});
+    m_texture = renderer->textures().createFromRaw(texture, {2, 2});
     if (!m_texture.isValid()) {
       return false;
     }
@@ -113,12 +113,12 @@ public:
     engine::VertexBufferDefinition def;
     def.addAttribute(engine::AttributeType::Float32, engine::ComponentCount::Two);
     def.addAttribute(engine::AttributeType::Float32, engine::ComponentCount::Two);
-    m_vertexBuffer = m_renderer->vertexBuffers().create(def, vertices, sizeof(vertices));
+    m_vertexBuffer = renderer->vertexBuffers().create(def, vertices, sizeof(vertices));
     if (!m_vertexBuffer) {
       return false;
     }
 
-    m_program = m_renderer->programs().create(g_vertexShader, g_fragmentShader);
+    m_program = renderer->programs().create(g_vertexShader, g_fragmentShader);
     if (!m_program) {
       return false;
     }
@@ -131,7 +131,7 @@ public:
   void onRender() override {
     engine::UniformData uniforms;
     uniforms.set("u_texture", m_texture);
-    m_renderer->renderVertexBuffer(m_vertexBuffer, m_program, uniforms);
+    renderer().renderVertexBuffer(m_vertexBuffer, m_program, uniforms);
   }
 
 private:

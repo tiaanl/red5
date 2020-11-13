@@ -6,6 +6,8 @@ SceneStage::SceneStage(std::shared_ptr<GameStageState> gameStageState,
                        std::unique_ptr<SceneController> controller)
   : m_gameStageState{std::move(gameStageState)}, m_controller{std::move(controller)} {}
 
+SceneStage::~SceneStage() = default;
+
 bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
   Resources& resources = m_gameStageState->resources;
   m_scene = std::make_unique<Scene>(nullptr, &resources, &m_gameStageState->sceneRenderer);
@@ -14,6 +16,8 @@ bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
 
   return true;
 }
+
+void SceneStage::onDetachFromEngine() {}
 
 void SceneStage::onStageResized(I32 width, I32 height) {
   Stage::onStageResized(width, height);
@@ -72,7 +76,6 @@ void SceneStage::onRender() {
   r.clear(0.0f, 0.5f, 0.0f, 1.0f);
   r.copyRenderTarget(m_gameScreenRect, m_gameStageState->gameScreenRenderTarget, {0, 0, 320, 200});
 }
-
 PositionI SceneStage::windowCoordToSceneCoord(const PositionI& windowCoord) {
   RectF gameScreenRect = m_gameScreenRect;
   PositionF p = windowCoord;
@@ -89,7 +92,6 @@ PositionI SceneStage::windowCoordToSceneCoord(const PositionI& windowCoord) {
 
   return PositionI{mouseX, mouseY};
 }
-
 void SceneStage::setPropUnderMouse(PropId propId) {
   if (m_propUnderMouse == propId) {
     return;

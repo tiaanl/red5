@@ -20,7 +20,7 @@ void Craft::read(base::InputStream* stream, MemSize size) {
   }
 #endif  // 0
 
-  auto componentJumpStart = stream->getPosition();
+  // auto componentJumpStart = stream->getPosition();
 
   auto componentJumps = new I16[componentCount];
 
@@ -68,20 +68,12 @@ void Craft::read(base::InputStream* stream, MemSize size) {
                  stream->readI16());
 
     struct V3 {
-      union {
-        struct {
-          I16 x;
-          I16 y;
-          I16 z;
-        };
-
-        I16 v[3];
-      };
+      I16 v[3];
 
       void read(base::InputStream* stream) {
-        x = stream->readI16();
-        y = stream->readI16();
-        z = stream->readI16();
+        for (I16& i : v) {
+          i = stream->readI16();
+        }
       }
     };
 
@@ -96,7 +88,8 @@ void Craft::read(base::InputStream* stream, MemSize size) {
         }
       }
 
-      spdlog::info("      x: {}, y: {}, z: {}", vertices[v].x, vertices[v].y, vertices[v].z);
+      spdlog::info("      x: {}, y: {}, z: {}", vertices[v].v[0], vertices[v].v[1],
+                   vertices[v].v[2]);
     }
 
     for (auto s = 0; s < shapeCount; ++s) {
@@ -104,7 +97,7 @@ void Craft::read(base::InputStream* stream, MemSize size) {
       normal.read(stream);
       auto shapeSize = stream->readI16();
 
-      spdlog::info("    normal: [{}, {}, {}], shapeSize: {}", normal.x, normal.y, normal.z,
+      spdlog::info("    normal: [{}, {}, {}], shapeSize: {}", normal.v[0], normal.v[1], normal.v[2],
                    shapeSize);
     }
 
