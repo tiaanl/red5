@@ -1,9 +1,7 @@
 #include <engine/engine.h>
-#include <game/scene_stage.h>
+#include <game/scene_manager.h>
 #include <xwing/controllers/main_menu_scene_controller.h>
 #include <xwing/controllers/register_scene_controller.h>
-
-#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -13,6 +11,15 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  game::SceneManager sceneManager{&engine};
+  sceneManager.registerScene("register", {"register"},
+                             game::sceneControllerFactory<xwing::RegisterSceneController>());
+  sceneManager.registerScene("mainmenu", {"mainmenu"},
+                             game::sceneControllerFactory<xwing::MainMenuSceneController>());
+
+  sceneManager.switchToScene("register");
+
+#if 0
   auto gameStageState = game::GameStageState::create(&engine.renderer());
 
 #if 0
@@ -24,6 +31,7 @@ int main(int argc, char* argv[]) {
   auto stage = std::make_unique<game::SceneStage>(std::move(gameStageState), std::move(controller));
 
   engine.setStage(std::move(stage));
+#endif
 
   return engine.run() ? 0 : 1;
 }

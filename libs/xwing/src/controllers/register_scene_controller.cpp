@@ -1,5 +1,7 @@
 #include "xwing/controllers/register_scene_controller.h"
 
+#include <game/scene_manager.h>
+
 namespace xwing {
 
 bool RegisterSceneController::setUpScene(game::Scene& scene, game::Resources& resources) {
@@ -42,7 +44,6 @@ void RegisterSceneController::onPropEnter(game::Scene& scene, game::PropId propI
   SceneController::onPropEnter(scene, propId);
 
   if (propId == m_doorId) {
-    spdlog::info("Opening door");
     auto* door = scene.prop(m_doorId);
     door->spritesPlaybackControls().play(game::PlayDirection::Forward, game::LoopMode::Stop);
   }
@@ -52,7 +53,6 @@ void RegisterSceneController::onPropExit(game::Scene& scene, game::PropId propId
   SceneController::onPropExit(scene, propId);
 
   if (propId == m_doorId) {
-    spdlog::info("Closing door");
     auto* door = scene.prop(m_doorId);
     door->spritesPlaybackControls().play(game::PlayDirection::Backward, game::LoopMode::Stop);
   }
@@ -61,8 +61,13 @@ void RegisterSceneController::onPropExit(game::Scene& scene, game::PropId propId
 void RegisterSceneController::onPropClicked(game::Scene& scene, game::PropId propId) {
   SceneController::onPropClicked(scene, propId);
 
-  // TODO: Switch to main menu scene.
+  if (propId == m_doorId) {
+    sceneManager().switchToScene("mainmenu");
+  }
 }
+
+RegisterSceneController::RegisterSceneController(game::SceneManager* sceneManager)
+  : SceneController{sceneManager} {}
 
 void RegisterSceneController::onUpdate(game::Scene& scene, U32 millis) {
   SceneController::onUpdate(scene, millis);

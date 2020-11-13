@@ -1,5 +1,7 @@
 #include "xwing/controllers/main_menu_scene_controller.h"
 
+#include <game/scene_manager.h>
+
 namespace xwing {
 
 namespace {
@@ -33,6 +35,9 @@ bool isDoor(std::string_view name) {
 }
 
 }  // namespace
+
+MainMenuSceneController::MainMenuSceneController(game::SceneManager* sceneManager)
+  : SceneController{sceneManager} {}
 
 bool MainMenuSceneController::setUpScene(game::Scene& scene, game::Resources& resources) {
   resources.addResourceFile({R"(C:\XWING\RESOURCE\XWING.LFD)"});
@@ -80,11 +85,10 @@ void MainMenuSceneController::onPropClicked(game::Scene& scene, game::PropId pro
   auto propData = scene.prop(propId);
   if (propData) {
     if (propData->name() == "pilotdr") {
-      // TODO: Switch to register scene.
+      sceneManager().switchToScene("register");
     }
   }
 }
-
 void MainMenuSceneController::onUpdate(game::Scene& scene, U32 millis) {
   SceneController::onUpdate(scene, millis);
 }

@@ -6,6 +6,8 @@ namespace xwing {
 
 class MainMenuSceneController : public game::SceneController {
 public:
+  explicit MainMenuSceneController(game::SceneManager* sceneManager);
+
   // Override: game::SceneController
   bool setUpScene(game::Scene& scene, game::Resources& resources) override;
   void onPropEnter(game::Scene& scene, game::PropId propId) override;

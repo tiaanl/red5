@@ -5,8 +5,12 @@
 
 namespace game {
 
+class SceneManager;
+
 class SceneController {
 public:
+  explicit SceneController(SceneManager* sceneManager);
+
   virtual bool setUpScene(Scene& scene, Resources& resources) = 0;
 
   virtual void onPropEnter(Scene& scene, PropId propId);
@@ -14,6 +18,12 @@ public:
   virtual void onPropClicked(Scene& scene, PropId propId);
 
   virtual void onUpdate(Scene& scene, U32 millis);
+
+protected:
+  SceneManager& sceneManager();
+
+private:
+  SceneManager* m_sceneManager;
 };
 
 }  // namespace game
