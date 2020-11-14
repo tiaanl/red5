@@ -17,6 +17,7 @@ enum class LoopMode {
 
 class PlaybackControls {
 public:
+  PlaybackControls();
   PlaybackControls(I32 firstFrame, I32 frameCount);
 
   I32 firstFrame() const {

@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "game/scene_delegate.h"
+#include "game/scene_listener.h"
 #include "game/timeline.h"
 
 namespace game {
@@ -19,7 +19,7 @@ class SceneRenderer;
 
 class Prop {
 public:
-  Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
+  Prop(ResourceType type, std::string_view name, U32 frameCount,
        std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites);
 
   ResourceType resourceType() const {
@@ -57,7 +57,7 @@ public:
 
   RectI bounds() const;
 
-  void sceneTick();
+  void sceneTick(I32 sceneFrame);
   void render(SceneRenderer* renderer) const;
 
 protected:
@@ -66,7 +66,6 @@ protected:
   ResourceType m_resourceType;
   std::string m_name;
 
-  SceneDelegate* m_delegate;
   PositionI m_offset;
   std::vector<lfd::KeyFrame> m_keyFrames;
 
@@ -81,9 +80,8 @@ protected:
 
 class PropContainer : public engine::ResourceContainer<Prop> {
 public:
-  Identifier create(ResourceType type, std::string_view name, SceneDelegate* delegate,
-                    U32 frameCount, std::vector<lfd::KeyFrame> keyFrames,
-                    std::vector<engine::Sprite> sprites);
+  Identifier create(ResourceType type, std::string_view name, U32 frameCount,
+                    std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites);
 };
 
 using PropId = PropContainer::Identifier;

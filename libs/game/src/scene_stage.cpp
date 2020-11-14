@@ -1,18 +1,26 @@
 #include "game/scene_stage.h"
 
+#include <game/scene_manager.h>
+
 namespace game {
 
-SceneStage::SceneStage(std::shared_ptr<GameStageState> gameStageState,
+SceneStage::SceneStage(SceneManager* sceneManager, std::shared_ptr<GameStageState> gameStageState,
                        std::unique_ptr<SceneController> controller, std::string_view filmName)
-  : m_gameStageState{std::move(gameStageState)},
+  : m_sceneManager{sceneManager},
+    m_gameStageState{std::move(gameStageState)},
     m_controller{std::move(controller)},
     m_filmName{filmName} {}
 
 SceneStage::~SceneStage() = default;
 
+void SceneStage::setAutoPlay(std::optional<std::string_view> nextStage) {
+  m_autoPlay = true;
+  m_nextScene = nextStage;
+}
+
 bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
   Resources& resources = m_gameStageState->resources;
-  m_scene = std::make_unique<Scene>(nullptr, &resources, &m_gameStageState->sceneRenderer);
+  m_scene = std::make_unique<Scene>(this, &resources, &m_gameStageState->sceneRenderer);
 
   if (!m_scene->loadPalette("standard")) {
     return false;
@@ -22,8 +30,12 @@ bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
     return false;
   }
 
-  if (!m_controller->setUpScene(*m_scene)) {
+  if (m_controller && !m_controller->setUpScene(*m_scene)) {
     return false;
+  }
+
+  if (m_autoPlay) {
+    m_scene->playbackControls().play(PlayDirection::Forward, LoopMode::Stop);
   }
 
   return true;
@@ -70,6 +82,7 @@ void SceneStage::onUpdate(U32 millis) {
   if (m_controller) {
     m_controller->onUpdate(*m_scene, millis);
   }
+
   if (m_scene) {
     m_scene->update(millis);
   }
@@ -88,6 +101,21 @@ void SceneStage::onRender() {
   r.clear(0.0f, 0.5f, 0.0f, 1.0f);
   r.copyRenderTarget(m_gameScreenRect, m_gameStageState->gameScreenRenderTarget, {0, 0, 320, 200});
 }
+
+void SceneStage::onSceneEvent(I16 event) {}
+
+void SceneStage::onSceneLastFramePlayed() {
+  if (m_autoPlay) {
+    m_scene->playbackControls().pause();
+  }
+
+  if (m_autoPlay && m_nextScene.has_value()) {
+    spdlog::info("Switching to scene: {}", m_nextScene.value());
+
+    m_sceneManager->switchToScene(m_nextScene.value());
+  }
+}
+
 PositionI SceneStage::windowCoordToSceneCoord(const PositionI& windowCoord) {
   RectF gameScreenRect = m_gameScreenRect;
   PositionF p = windowCoord;
@@ -104,6 +132,7 @@ PositionI SceneStage::windowCoordToSceneCoord(const PositionI& windowCoord) {
 
   return PositionI{mouseX, mouseY};
 }
+
 void SceneStage::setPropUnderMouse(PropId propId) {
   if (m_propUnderMouse == propId) {
     return;

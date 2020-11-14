@@ -6,11 +6,10 @@
 
 namespace game {
 
-Prop::Prop(ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
+Prop::Prop(ResourceType type, std::string_view name, U32 frameCount,
            std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites)
   : m_resourceType{type},
     m_name{name},
-    m_delegate{delegate},
     m_keyFrames{std::move(keyFrames)},
     m_spritesPlaybackControls{0, static_cast<I32>(sprites.size())},
     m_sprites{std::move(sprites)},
@@ -38,9 +37,9 @@ RectI Prop::bounds() const {
   return sprite(spriteIndex).rect() + frame.offset + m_offset;
 }
 
-void Prop::sceneTick() {
+void Prop::sceneTick(I32 sceneFrame) {
   if (m_animate) {
-    m_playbackControls.nextFrame();
+    m_playbackControls.jumpToFrame(sceneFrame);
   } else {
     m_spritesPlaybackControls.nextFrame();
   }
@@ -60,9 +59,9 @@ void Prop::render(SceneRenderer* renderer) const {
 }
 
 engine::ResourceContainer<Prop>::Identifier PropContainer::create(
-    ResourceType type, std::string_view name, SceneDelegate* delegate, U32 frameCount,
-    std::vector<lfd::KeyFrame> keyFrames, std::vector<engine::Sprite> sprites) {
-  return emplaceData(type, name, delegate, frameCount, std::move(keyFrames), std::move(sprites));
+    ResourceType type, std::string_view name, U32 frameCount, std::vector<lfd::KeyFrame> keyFrames,
+    std::vector<engine::Sprite> sprites) {
+  return emplaceData(type, name, frameCount, std::move(keyFrames), std::move(sprites));
 }
 
 }  // namespace game

@@ -37,9 +37,19 @@ void SceneManager::switchToScene(const std::string& name) {
 }
 
 std::unique_ptr<engine::Stage> SceneManager::createStage(const SceneDescription& sceneDescription) {
-  auto controller = sceneDescription.sceneControllerFactory->create(this);
-  return std::make_unique<game::SceneStage>(m_gameStageState, std::move(controller),
-                                            sceneDescription.filmName);
+  std::unique_ptr<SceneController> controller;
+  if (sceneDescription.sceneControllerFactory) {
+    controller = sceneDescription.sceneControllerFactory->create(this);
+  }
+
+  auto stage = std::make_unique<game::SceneStage>(this, m_gameStageState, std::move(controller),
+                                                  sceneDescription.filmName);
+
+  if (sceneDescription.autoPlay) {
+    stage->setAutoPlay(sceneDescription.nextScene);
+  }
+
+  return stage;
 }
 
 }  // namespace game

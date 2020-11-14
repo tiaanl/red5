@@ -18,13 +18,19 @@ I32 direction(PlayDirection playDirection) {
 
 }  // namespace
 
+PlaybackControls::PlaybackControls()
+  : m_firstFrame{0},
+    m_frameCount{1},
+    m_currentFrame{0},
+    m_direction{0},
+    m_loopMode{LoopMode::Stop} {}
+
 PlaybackControls::PlaybackControls(I32 firstFrame, I32 frameCount)
   : m_firstFrame{firstFrame},
     m_frameCount{std::max<I32>(frameCount, 1)},
     m_currentFrame{firstFrame},
     m_direction{0},
-    m_loopMode{LoopMode::Stop} {
-}
+    m_loopMode{LoopMode::Stop} {}
 
 void PlaybackControls::setFrameRange(I32 firstFrame, I32 frameCount) {
   m_firstFrame = firstFrame;

@@ -14,7 +14,7 @@
 #include "game/font.h"
 #include "game/props.h"
 #include "game/resources.h"
-#include "game/scene_delegate.h"
+#include "game/scene_listener.h"
 #include "game/scene_renderer.h"
 
 #define DEBUG_UI 0
@@ -23,7 +23,7 @@ namespace game {
 
 class Scene {
 public:
-  Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer);
+  Scene(SceneListener* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer);
 
   PropContainer& props() {
     return m_props;
@@ -64,6 +64,10 @@ public:
   PropId propId(std::string_view name);
   PropId propUnderMouse(const PositionI& position);
 
+  PlaybackControls& playbackControls() {
+    return m_playbackControls;
+  }
+
   void update(U32 millis);
   void renderGameScreen();
 #if DEBUG_UI >= 0
@@ -86,7 +90,7 @@ private:
 
   void advanceToNextFrame();
 
-  SceneDelegate* m_delegate;
+  SceneListener* m_delegate;
   Resources* m_resources;
   SceneRenderer* m_sceneRenderer;
 
@@ -97,8 +101,7 @@ private:
   std::vector<PropId> m_renderOrder;
 
   U32 m_totalMillis = 0;
-  I32 m_currentFrame = 0;
-  U16 m_frameCount = 0;
+  PlaybackControls m_playbackControls;
 
   // Debug stuff:
   ResourceType m_selectedResourceType{};

@@ -10,7 +10,7 @@ set(game_HEADER_FILES
     include/game/scene_builder.h
     include/game/scene_controller.h
     include/game/scene_controller_factory.h
-    include/game/scene_delegate.h
+    include/game/scene_listener.h
     include/game/scene_description.h
     include/game/scene_manager.h
     include/game/scene_renderer.h
@@ -26,7 +26,6 @@ set(game_SOURCE_FILES
     src/resources.cpp
     src/scene.cpp
     src/scene_controller.cpp
-    src/scene_delegate.cpp
     src/scene_manager.cpp
     src/scene_renderer.cpp
     src/scene_stage.cpp

@@ -8,11 +8,15 @@
 
 namespace game {
 
-class SceneStage : public engine::Stage {
+class SceneManager;
+
+class SceneStage : public engine::Stage, public SceneListener {
 public:
-  explicit SceneStage(std::shared_ptr<GameStageState> gameStageState,
+  explicit SceneStage(SceneManager* sceneManager, std::shared_ptr<GameStageState> gameStageState,
                       std::unique_ptr<SceneController> controller, std::string_view filmName);
   ~SceneStage() override;
+
+  void setAutoPlay(std::optional<std::string_view> nextScene = {});
 
   // Override: engine::Stage
   bool onAttachedToEngine(engine::Renderer* renderer) override;
@@ -24,13 +28,21 @@ public:
   void onUpdate(U32 millis) override;
   void onRender() override;
 
+  // Override: SceneListener
+  void onSceneEvent(I16 event) override;
+  void onSceneLastFramePlayed() override;
+
 private:
   PositionI windowCoordToSceneCoord(const PositionI& windowCoord);
   void setPropUnderMouse(PropId propId);
 
+  SceneManager* m_sceneManager;
   std::shared_ptr<GameStageState> m_gameStageState;
   std::unique_ptr<SceneController> m_controller;
   std::string m_filmName;
+
+  bool m_autoPlay = false;
+  std::optional<std::string> m_nextScene;
 
   RectI m_gameScreenRect;
   std::unique_ptr<Scene> m_scene;

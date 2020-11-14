@@ -72,7 +72,7 @@ engine::TextureId createIndexTexture(engine::Renderer* renderer, const Image& im
 
 }  // namespace
 
-Scene::Scene(SceneDelegate* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer)
+Scene::Scene(SceneListener* sceneDelegate, Resources* resources, SceneRenderer* sceneRenderer)
   : m_delegate{sceneDelegate}, m_resources{resources}, m_sceneRenderer{sceneRenderer} {}
 
 Prop* Scene::prop(PropId propId) {
@@ -184,7 +184,8 @@ PropId Scene::propUnderMouse(const PositionI& position) {
 }
 
 void Scene::update(U32 millis) {
-  static const U32 millisPerFrame = 1000 / 8;
+  // static const U32 millisPerFrame = 1000 / 8;
+  static const U32 millisPerFrame = 50;
 
   m_totalMillis += millis;
 
@@ -389,7 +390,7 @@ PropId Scene::insertImageProp(std::string_view name, const Image& image,
   RectI rect{image.left(), image.top(), image.width(), image.height()};
   sprites.emplace_back(texture, rect);
 
-  auto propId = m_props.create(ResourceType::Image, name, m_delegate, m_film->frameCount(),
+  auto propId = m_props.create(ResourceType::Image, name, m_film->frameCount(),
                                std::move(keyFrames), std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
@@ -411,7 +412,7 @@ PropId Scene::insertAnimationProp(std::string_view name, const Animation& animat
     sprites.emplace_back(texture, rect);
   }
 
-  auto propId = m_props.create(ResourceType::Animation, name, m_delegate, m_film->frameCount(),
+  auto propId = m_props.create(ResourceType::Animation, name, m_film->frameCount(),
                                std::move(keyFrames), std::move(sprites));
 
   m_renderOrder.emplace_back(propId);
@@ -420,7 +421,7 @@ PropId Scene::insertAnimationProp(std::string_view name, const Animation& animat
 }
 
 void Scene::processFilm() {
-  m_frameCount = m_film->frameCount();
+  m_playbackControls.setFrameRange(0, m_film->frameCount());
 
   for (auto& block : m_film->blocks()) {
     // spdlog::info("Processing block: {}", block.name);
@@ -506,20 +507,16 @@ void Scene::processAnimationBlock(const lfd::Film::Block& block) {
 }
 
 void Scene::advanceToNextFrame() {
-  if (m_currentFrame >= m_frameCount) {
-    if (m_delegate) {
-      m_delegate->onSceneLastFramePlayed();
-    }
+  m_playbackControls.nextFrame();
 
-    return;
+  if (m_playbackControls.currentFrame() >= (m_playbackControls.frameCount() - 1) && m_delegate) {
+    m_delegate->onSceneLastFramePlayed();
   }
-
-  // ++m_currentFrame;
 
   for (auto& propId : m_renderOrder) {
     auto prop = m_props.getData(propId);
     if (prop) {
-      prop->sceneTick();
+      prop->sceneTick(m_playbackControls.currentFrame());
     }
   }
 }
