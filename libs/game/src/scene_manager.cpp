@@ -25,7 +25,7 @@ void SceneManager::switchToScene(const std::string& name) {
 
   if (!m_gameStageState) {
     m_gameStageState = game::GameStageState::create(m_resourceRoot, &m_engine->renderer());
-    m_gameStageState->resources.addResourceFile("xwing");
+    m_gameStageState->resources.addResourceFile("XWING");
   }
 
   // Load in the required resources.

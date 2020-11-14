@@ -13,7 +13,7 @@ KeyFrame readKeyFrame(base::InputStream* stream) {
   auto dataSize = stream->readU16();
   auto opCode = static_cast<OpCode>(stream->readU16());
 
-  U16 varCount = (dataSize) / 2 - 2;
+  U16 varCount = dataSize / 2 - 2;
 
 #if TRACE_LOADING
   LOG(Info) << "    KeyFrame :: dataSize: " << dataSize << ", opCode: " << (U16)opCode << " ("

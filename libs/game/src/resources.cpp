@@ -34,7 +34,6 @@ ResourceEntry* Resources::findResource(ResourceType type, std::string_view name)
 fs::path Resources::pathToResourceFile(std::string_view resourceFileName) {
   std::string fileName{resourceFileName};
   fileName.append(".LFD");
-  spdlog::info("fileName: {}", fileName);
   return m_resourceRoot / fileName;
 }
 

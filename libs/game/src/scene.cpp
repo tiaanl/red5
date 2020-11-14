@@ -90,7 +90,10 @@ bool Scene::loadPalette(std::string_view name) {
     return false;
   }
 
+#if 0
   spdlog::info("Applying palette: {}", name);
+#endif
+
   applyPalette(*palette);
 
   return true;

@@ -26,20 +26,20 @@ U32 nextTimeKeyFrame(const std::vector<lfd::KeyFrame>& keyFrames, U32 current) {
 void applyKeyFrame(Frame* frame, BuildContext* buildContext, const lfd::KeyFrame& keyFrame) {
   switch (keyFrame.opCode) {
     case lfd::OpCode::Move: {
-      assert(keyFrame.variables.size() == 4);
+      //      assert(keyFrame.variables.size() == 4);
       frame->offset.left = keyFrame.variables[0];
       frame->offset.top = keyFrame.variables[1];
-      assert(keyFrame.variables[2] == 0);
-      assert(keyFrame.variables[3] == 0);
+      //      assert(keyFrame.variables[2] == 0);
+      //      assert(keyFrame.variables[3] == 0);
       break;
     }
 
     case lfd::OpCode::Speed: {
-      assert(keyFrame.variables.size() == 4);
+      //      assert(keyFrame.variables.size() == 4);
       buildContext->offsetPerFrame.left = keyFrame.variables[0];
       buildContext->offsetPerFrame.top = keyFrame.variables[1];
-      assert(keyFrame.variables[2] == 0);
-      assert(keyFrame.variables[3] == 0);
+      //      assert(keyFrame.variables[2] == 0);
+      //      assert(keyFrame.variables[3] == 0);
       break;
     }
 
@@ -50,21 +50,26 @@ void applyKeyFrame(Frame* frame, BuildContext* buildContext, const lfd::KeyFrame
     }
 
     case lfd::OpCode::Frame: {
-      assert(keyFrame.variables.size() == 2);
+      // assert(keyFrame.variables.size() == 2);
       frame->spriteIndex = keyFrame.variables[0];
       assert(keyFrame.variables[1] == 0);
       break;
     }
 
     case lfd::OpCode::Animation: {
-      assert(keyFrame.variables.size() == 2);
+      //      assert(keyFrame.variables.size() == 2);
       buildContext->animationDirection = keyFrame.variables[0];
-      assert(keyFrame.variables[1] == 0);
+      //      assert(keyFrame.variables[1] == 0);
       break;
     }
 
     case lfd::OpCode::Event: {
       // We skip events in timeline building.
+      break;
+    }
+
+    case lfd::OpCode::Region: {
+      // TODO: Implement
       break;
     }
 
@@ -95,7 +100,7 @@ void applyKeyFrame(Frame* frame, BuildContext* buildContext, const lfd::KeyFrame
     case lfd::OpCode::Orientation: {
       assert(keyFrame.variables.size() == 2);
       frame->orientation = keyFrame.variables[0];
-      assert(keyFrame.variables[1] == 0);
+      // assert(keyFrame.variables[1] == 0);
       break;
     }
 
@@ -128,7 +133,8 @@ void Timeline::build(U32 frameCount, const std::vector<lfd::KeyFrame>& keyFrames
   U32 keyFrameIndex = 0;
 #endif  // 0
 
-  assert(keyFrames[keyFrameIndex].opCode == lfd::OpCode::Time);
+  assert(keyFrames[keyFrameIndex].opCode == lfd::OpCode::Time ||
+         keyFrames[keyFrameIndex].opCode == lfd::OpCode::End);
 
   BuildContext buildContext;
   Frame currentFrame;

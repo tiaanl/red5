@@ -26,7 +26,7 @@ void Prop::moveTo(const PositionI& position) {
 }
 
 const engine::Sprite& Prop::sprite(I16 index) const {
-  index = std::min<I16>(static_cast<I16>(m_sprites.size()), index);
+  index = std::min<I16>(static_cast<I16>(m_sprites.size() - 1), index);
   index = std::max<I16>(0, index);
   return m_sprites[index];
 }

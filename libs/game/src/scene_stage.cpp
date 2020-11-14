@@ -110,8 +110,6 @@ void SceneStage::onSceneLastFramePlayed() {
   }
 
   if (m_autoPlay && m_nextScene.has_value()) {
-    spdlog::info("Switching to scene: {}", m_nextScene.value());
-
     m_sceneManager->switchToScene(m_nextScene.value());
   }
 }
