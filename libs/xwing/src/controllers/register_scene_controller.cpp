@@ -5,14 +5,6 @@
 namespace xwing {
 
 bool RegisterSceneController::setUpScene(game::Scene& scene) {
-  if (!scene.loadPalette("standard")) {
-    return false;
-  }
-
-  if (!scene.loadFilm("pilot")) {
-    return false;
-  }
-
   m_doorId = scene.propId("door");
   if (!m_doorId) {
     return false;

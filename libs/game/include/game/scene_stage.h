@@ -11,7 +11,7 @@ namespace game {
 class SceneStage : public engine::Stage {
 public:
   explicit SceneStage(std::shared_ptr<GameStageState> gameStageState,
-                      std::unique_ptr<SceneController> controller);
+                      std::unique_ptr<SceneController> controller, std::string_view filmName);
   ~SceneStage() override;
 
   // Override: engine::Stage
@@ -30,6 +30,7 @@ private:
 
   std::shared_ptr<GameStageState> m_gameStageState;
   std::unique_ptr<SceneController> m_controller;
+  std::string m_filmName;
 
   RectI m_gameScreenRect;
   std::unique_ptr<Scene> m_scene;

@@ -40,14 +40,6 @@ MainMenuSceneController::MainMenuSceneController(game::SceneManager* sceneManage
   : SceneController{sceneManager} {}
 
 bool MainMenuSceneController::setUpScene(game::Scene& scene) {
-  if (!scene.loadPalette("standard")) {
-    return false;
-  }
-
-  if (!scene.loadFilm("mainmenu")) {
-    return false;
-  }
-
   scene.prop(scene.propId("middoor"))->setAnimate(false);
   scene.prop(scene.propId("lhdoor"))->setAnimate(false);
   scene.prop(scene.propId("toddoor"))->setAnimate(false);

@@ -12,7 +12,7 @@ class SceneBuilder {
   NO_COPY(SceneBuilder);
 
 public:
-  SceneBuilder() = default;
+  explicit SceneBuilder(std::string_view filmName) : m_filmName{filmName} {}
 
   SceneBuilder& resourceFile(std::string_view resourceFile) {
     m_resourceFiles.emplace_back(resourceFile);
@@ -36,13 +36,15 @@ public:
 
   SceneDescription build() {
     SceneDescription result;
-    result.setResourceFiles(std::move(m_resourceFiles));
-    result.setSceneControllerFactory(std::move(m_sceneControllerFactory));
+    result.filmName = std::move(m_filmName);
+    result.resourceFiles = std::move(m_resourceFiles);
+    result.sceneControllerFactory = std::move(m_sceneControllerFactory);
 
     return result;
   }
 
 private:
+  std::string m_filmName;
   std::vector<std::string> m_resourceFiles;
   std::unique_ptr<SceneControllerFactory> m_sceneControllerFactory;
 };

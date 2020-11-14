@@ -29,7 +29,7 @@ void SceneManager::switchToScene(const std::string& name) {
   }
 
   // Load in the required resources.
-  for (const auto& resourceFile : sceneDescription.resourceFiles()) {
+  for (const auto& resourceFile : sceneDescription.resourceFiles) {
     m_gameStageState->resources.addResourceFile({resourceFile});
   }
 
@@ -37,8 +37,9 @@ void SceneManager::switchToScene(const std::string& name) {
 }
 
 std::unique_ptr<engine::Stage> SceneManager::createStage(const SceneDescription& sceneDescription) {
-  auto controller = sceneDescription.sceneControllerFactory()->create(this);
-  return std::make_unique<game::SceneStage>(m_gameStageState, std::move(controller));
+  auto controller = sceneDescription.sceneControllerFactory->create(this);
+  return std::make_unique<game::SceneStage>(m_gameStageState, std::move(controller),
+                                            sceneDescription.filmName);
 }
 
 }  // namespace game

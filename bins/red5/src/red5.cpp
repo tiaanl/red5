@@ -6,8 +6,8 @@
 
 namespace fs = std::filesystem;
 
-game::SceneBuilder scene() {
-  return game::SceneBuilder();
+game::SceneBuilder scene(std::string_view filmName) {
+  return game::SceneBuilder(filmName);
 }
 
 int main(int argc, char* argv[]) {
@@ -18,13 +18,15 @@ int main(int argc, char* argv[]) {
 
   game::SceneManager sceneManager{R"(C:\XWING\RESOURCE)", &engine};
 
-  sceneManager.registerScene(
-      "register",
-      scene().resourceFile("REGISTER").sceneController<xwing::RegisterSceneController>().build());
+  sceneManager.registerScene("register", scene("pilot")
+                                             .resourceFile("REGISTER")
+                                             .sceneController<xwing::RegisterSceneController>()
+                                             .build());
 
-  sceneManager.registerScene(
-      "mainmenu",
-      scene().resourceFile("MAINMENU").sceneController<xwing::MainMenuSceneController>().build());
+  sceneManager.registerScene("mainmenu", scene("mainmenu")
+                                             .resourceFile("MAINMENU")
+                                             .sceneController<xwing::MainMenuSceneController>()
+                                             .build());
 
   sceneManager.switchToScene("register");
 

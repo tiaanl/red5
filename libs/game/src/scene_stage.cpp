@@ -3,14 +3,24 @@
 namespace game {
 
 SceneStage::SceneStage(std::shared_ptr<GameStageState> gameStageState,
-                       std::unique_ptr<SceneController> controller)
-  : m_gameStageState{std::move(gameStageState)}, m_controller{std::move(controller)} {}
+                       std::unique_ptr<SceneController> controller, std::string_view filmName)
+  : m_gameStageState{std::move(gameStageState)},
+    m_controller{std::move(controller)},
+    m_filmName{filmName} {}
 
 SceneStage::~SceneStage() = default;
 
 bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
   Resources& resources = m_gameStageState->resources;
   m_scene = std::make_unique<Scene>(nullptr, &resources, &m_gameStageState->sceneRenderer);
+
+  if (!m_scene->loadPalette("standard")) {
+    return false;
+  }
+
+  if (!m_scene->loadFilm(m_filmName)) {
+    return false;
+  }
 
   if (!m_controller->setUpScene(*m_scene)) {
     return false;
