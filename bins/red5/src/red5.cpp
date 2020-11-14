@@ -1,9 +1,14 @@
 #include <engine/engine.h>
+#include <game/scene_builder.h>
 #include <game/scene_manager.h>
 #include <xwing/controllers/main_menu_scene_controller.h>
 #include <xwing/controllers/register_scene_controller.h>
 
 namespace fs = std::filesystem;
+
+game::SceneBuilder scene() {
+  return game::SceneBuilder();
+}
 
 int main(int argc, char* argv[]) {
   engine::Engine engine;
@@ -12,10 +17,23 @@ int main(int argc, char* argv[]) {
   }
 
   game::SceneManager sceneManager{&engine};
+
+  sceneManager.registerScene("register", scene()
+                                             .resourceFile(R"(C:\XWING\RESOURCE\REGISTER.LFD)")
+                                             .sceneController<xwing::RegisterSceneController>()
+                                             .build());
+
+  sceneManager.registerScene("mainmenu", scene()
+                                             .resourceFile(R"(C:\XWING\RESOURCE\MAINMENU.LFD)")
+                                             .sceneController<xwing::MainMenuSceneController>()
+                                             .build());
+
+#if 0
   sceneManager.registerScene("register", {"register"},
                              game::sceneControllerFactory<xwing::RegisterSceneController>());
   sceneManager.registerScene("mainmenu", {"mainmenu"},
                              game::sceneControllerFactory<xwing::MainMenuSceneController>());
+#endif  // 0
 
   sceneManager.switchToScene("register");
 

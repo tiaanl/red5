@@ -39,10 +39,7 @@ bool isDoor(std::string_view name) {
 MainMenuSceneController::MainMenuSceneController(game::SceneManager* sceneManager)
   : SceneController{sceneManager} {}
 
-bool MainMenuSceneController::setUpScene(game::Scene& scene, game::Resources& resources) {
-  resources.addResourceFile({R"(C:\XWING\RESOURCE\XWING.LFD)"});
-  resources.addResourceFile({R"(C:\XWING\RESOURCE\MAINMENU.LFD)"});
-
+bool MainMenuSceneController::setUpScene(game::Scene& scene) {
   if (!scene.loadPalette("standard")) {
     return false;
   }
@@ -58,7 +55,7 @@ bool MainMenuSceneController::setUpScene(game::Scene& scene, game::Resources& re
   scene.prop(scene.propId("lwr-rhdr"))->setAnimate(false);
   scene.prop(scene.propId("pilotdr"))->setAnimate(false);
 
-  return false;
+  return true;
 }
 
 void MainMenuSceneController::onPropEnter(game::Scene& scene, game::PropId propId) {

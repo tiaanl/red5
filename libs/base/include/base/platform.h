@@ -21,4 +21,15 @@ using F64 = double;
 using MemSize = std::size_t;
 using PtrDiff = std::ptrdiff_t;
 
+#define COPY_WITH(ClassName, X)                                                                    \
+  ClassName(const ClassName&) = X;                                                                 \
+  ClassName& operator=(const ClassName&) = X
+
+#define MOVE_WITH(ClassName, X)                                                                    \
+  ClassName(ClassName&&) = X;                                                                      \
+  ClassName& operator=(ClassName&&) = X
+
+#define NO_COPY(ClassName) COPY_WITH(ClassName, delete)
+#define DEFAULT_MOVE(ClassName) MOVE_WITH(ClassName, default)
+
 #include "base/dimensions.h"

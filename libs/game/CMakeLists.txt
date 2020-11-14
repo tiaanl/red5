@@ -7,8 +7,11 @@ set(game_HEADER_FILES
     include/game/props.h
     include/game/resources.h
     include/game/scene.h
+    include/game/scene_builder.h
     include/game/scene_controller.h
+    include/game/scene_controller_factory.h
     include/game/scene_delegate.h
+    include/game/scene_description.h
     include/game/scene_manager.h
     include/game/scene_renderer.h
     include/game/scene_stage.h

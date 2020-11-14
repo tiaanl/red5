@@ -8,7 +8,7 @@ public:
   explicit SceneViewerController(std::string_view name, std::vector<std::string> resourceFiles)
     : m_name{name}, m_resourceFiles{std::move(resourceFiles)} {}
 
-  bool setUpScene(game::Scene& scene, game::Resources& resources) override {
+  bool setUpScene(game::Scene& scene) override {
     for (auto& resourceFile : m_resourceFiles) {
       resources.addResourceFile({resourceFile});
     }

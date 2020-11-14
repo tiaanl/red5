@@ -12,7 +12,9 @@ bool SceneStage::onAttachedToEngine(engine::Renderer* renderer) {
   Resources& resources = m_gameStageState->resources;
   m_scene = std::make_unique<Scene>(nullptr, &resources, &m_gameStageState->sceneRenderer);
 
-  m_controller->setUpScene(*m_scene, resources);
+  if (!m_controller->setUpScene(*m_scene)) {
+    return false;
+  }
 
   return true;
 }

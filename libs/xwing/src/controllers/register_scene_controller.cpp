@@ -4,10 +4,7 @@
 
 namespace xwing {
 
-bool RegisterSceneController::setUpScene(game::Scene& scene, game::Resources& resources) {
-  resources.addResourceFile({R"(C:\XWING\RESOURCE\XWING.LFD)"});
-  resources.addResourceFile({R"(C:\XWING\RESOURCE\REGISTER.LFD)"});
-
+bool RegisterSceneController::setUpScene(game::Scene& scene) {
   if (!scene.loadPalette("standard")) {
     return false;
   }

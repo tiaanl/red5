@@ -11,7 +11,7 @@ class SceneController {
 public:
   explicit SceneController(SceneManager* sceneManager);
 
-  virtual bool setUpScene(Scene& scene, Resources& resources) = 0;
+  virtual bool setUpScene(Scene& scene) = 0;
 
   virtual void onPropEnter(Scene& scene, PropId propId);
   virtual void onPropExit(Scene& scene, PropId propId);

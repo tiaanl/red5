@@ -7,10 +7,8 @@ namespace game {
 
 SceneManager::SceneManager(engine::Engine* engine) : m_engine{engine} {}
 
-void SceneManager::registerScene(std::string_view name, std::vector<std::string> resourceFiles,
-                                 std::unique_ptr<SceneControllerFactory> sceneControllerFactory) {
-  RegisteredScene registeredScene{std::move(resourceFiles), std::move(sceneControllerFactory)};
-  m_scenes.emplace(name, std::move(registeredScene));
+void SceneManager::registerScene(std::string_view name, SceneDescription sceneDescription) {
+  m_scenes.emplace(name, std::move(sceneDescription));
 }
 
 void SceneManager::switchToScene(const std::string& name) {
@@ -20,17 +18,26 @@ void SceneManager::switchToScene(const std::string& name) {
     return;
   }
 
-  RegisteredScene& registeredScene = result->second;
+  auto& sceneDescription = result->second;
 
   spdlog::info("Switching to scene: {}", name);
 
   if (!m_gameStageState) {
     m_gameStageState = game::GameStageState::create(&m_engine->renderer());
+    m_gameStageState->resources.addResourceFile({R"(C:\XWING\RESOURCE\XWING.LFD)"});
   }
 
-  auto controller = registeredScene.sceneControllerFactory->create(this);
-  auto stage = std::make_unique<game::SceneStage>(m_gameStageState, std::move(controller));
-  m_engine->setStage(std::move(stage));
+  // Load in the required resources.
+  for (const auto& resourceFile : sceneDescription.resourceFiles()) {
+    m_gameStageState->resources.addResourceFile({resourceFile});
+  }
+
+  m_engine->setStage(createStage(sceneDescription));
+}
+
+std::unique_ptr<engine::Stage> SceneManager::createStage(const SceneDescription& sceneDescription) {
+  auto controller = sceneDescription.sceneControllerFactory()->create(this);
+  return std::make_unique<game::SceneStage>(m_gameStageState, std::move(controller));
 }
 
 }  // namespace game
