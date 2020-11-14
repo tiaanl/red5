@@ -3,8 +3,9 @@
 namespace game {
 
 // static
-std::shared_ptr<GameStageState> GameStageState::create(engine::Renderer* renderer) {
-  std::shared_ptr<GameStageState> result(new GameStageState{renderer});
+std::shared_ptr<GameStageState> GameStageState::create(fs::path resourceRoot,
+                                                       engine::Renderer* renderer) {
+  std::shared_ptr<GameStageState> result(new GameStageState{std::move(resourceRoot), renderer});
 
   result->sceneRenderer.attachToRenderer(renderer);
   result->gameScreenRenderTarget = renderer->renderTargets().create({320, 200});
@@ -18,6 +19,7 @@ GameStageState::~GameStageState() {
   sceneRenderer.detachFromRenderer();
 }
 
-GameStageState::GameStageState(engine::Renderer* renderer) : m_renderer{renderer} {}
+GameStageState::GameStageState(fs::path resourceRoot, engine::Renderer* renderer)
+  : resources{std::move(resourceRoot)}, m_renderer{renderer} {}
 
 }  // namespace game

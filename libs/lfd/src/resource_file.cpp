@@ -4,6 +4,11 @@
 #include <base/streams/file_output_stream.h>
 
 std::vector<ResourceEntry> ResourceFile::loadEntries() const {
+  if (!std::filesystem::exists(m_path)) {
+    spdlog::error("Resource file not found: {}", m_path.string());
+    return {};
+  }
+
   spdlog::info("Loading entries from resource file: {}", m_path.string());
 
   base::FileInputStream stream{m_path};

@@ -16,40 +16,17 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  game::SceneManager sceneManager{&engine};
+  game::SceneManager sceneManager{R"(C:\XWING\RESOURCE)", &engine};
 
-  sceneManager.registerScene("register", scene()
-                                             .resourceFile(R"(C:\XWING\RESOURCE\REGISTER.LFD)")
-                                             .sceneController<xwing::RegisterSceneController>()
-                                             .build());
+  sceneManager.registerScene(
+      "register",
+      scene().resourceFile("REGISTER").sceneController<xwing::RegisterSceneController>().build());
 
-  sceneManager.registerScene("mainmenu", scene()
-                                             .resourceFile(R"(C:\XWING\RESOURCE\MAINMENU.LFD)")
-                                             .sceneController<xwing::MainMenuSceneController>()
-                                             .build());
-
-#if 0
-  sceneManager.registerScene("register", {"register"},
-                             game::sceneControllerFactory<xwing::RegisterSceneController>());
-  sceneManager.registerScene("mainmenu", {"mainmenu"},
-                             game::sceneControllerFactory<xwing::MainMenuSceneController>());
-#endif  // 0
+  sceneManager.registerScene(
+      "mainmenu",
+      scene().resourceFile("MAINMENU").sceneController<xwing::MainMenuSceneController>().build());
 
   sceneManager.switchToScene("register");
-
-#if 0
-  auto gameStageState = game::GameStageState::create(&engine.renderer());
-
-#if 0
-  auto controller = std::make_unique<xwing::RegisterSceneController>();
-#else
-  auto controller = std::make_unique<xwing::MainMenuSceneController>();
-#endif
-
-  auto stage = std::make_unique<game::SceneStage>(std::move(gameStageState), std::move(controller));
-
-  engine.setStage(std::move(stage));
-#endif
 
   return engine.run() ? 0 : 1;
 }

@@ -2,10 +2,12 @@
 
 namespace game {
 
-Resources::Resources() = default;
+Resources::Resources(fs::path resourceRoot) : m_resourceRoot{std::move(resourceRoot)} {}
 
-bool Resources::addResourceFile(const ResourceFile& resourceFile) {
-  auto entries = resourceFile.loadEntries();
+bool Resources::addResourceFile(std::string_view resourceFileName) {
+  auto path = pathToResourceFile(resourceFileName);
+
+  auto entries = ResourceFile{path}.loadEntries();
 
   for (auto& entry : entries) {
     // spdlog::info("entry: {} ({})", entry.name(), resourceTypeToString(entry.type()));
@@ -27,6 +29,13 @@ ResourceEntry* Resources::findResource(ResourceType type, std::string_view name)
   }
 
   return &*it;
+}
+
+fs::path Resources::pathToResourceFile(std::string_view resourceFileName) {
+  std::string fileName{resourceFileName};
+  fileName.append(".LFD");
+  spdlog::info("fileName: {}", fileName);
+  return m_resourceRoot / fileName;
 }
 
 }  // namespace game

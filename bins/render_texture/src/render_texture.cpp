@@ -126,6 +126,8 @@ public:
     return true;
   }
 
+  void onDetachFromEngine() override {}
+
   void onUpdate(U32 millis) override {}
 
   void onRender() override {
@@ -146,11 +148,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (!engine.setStage(std::make_unique<MyStage>())) {
-    return 1;
-  }
+  engine.setStage(std::make_unique<MyStage>());
 
-  engine.run();
-
-  return 0;
+  return engine.run() ? 0 : 1;
 }

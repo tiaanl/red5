@@ -16,12 +16,21 @@ public:
 
   SceneBuilder& resourceFile(std::string_view resourceFile) {
     m_resourceFiles.emplace_back(resourceFile);
+
     return *this;
   }
 
   template <typename SceneControllerType>
   SceneBuilder& sceneController() {
     m_sceneControllerFactory = sceneControllerFactory<SceneControllerType>();
+
+    return *this;
+  }
+
+  SceneBuilder& sceneController(FunctionSceneControllerFactory::FunctionType factoryFunction) {
+    m_sceneControllerFactory =
+        std::make_unique<FunctionSceneControllerFactory>(std::move(factoryFunction));
+
     return *this;
   }
 
@@ -29,6 +38,7 @@ public:
     SceneDescription result;
     result.setResourceFiles(std::move(m_resourceFiles));
     result.setSceneControllerFactory(std::move(m_sceneControllerFactory));
+
     return result;
   }
 
